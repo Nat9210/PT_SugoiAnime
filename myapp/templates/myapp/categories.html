@@ -10,7 +10,7 @@
                 <div class="breadcrumb__links">
                     <a href="{% url 'index' %}"><i class="fa fa-home"></i> Inicio</a>
                     <a href="{% url 'categories' %}">Categorías</a>
-                    <span>Los más buscados</span>
+                    <span>Catálogo</span>
                 </div>
             </div>
         </div>
@@ -28,118 +28,31 @@
                         <div class="row">
                             <div class="col-lg-8 col-md-8 col-sm-6">
                                 <div class="section-title">
-                                    <h4>Los más buscados</h4>
-                                </div>
-                            </div>
-                            <div class="col-lg-4 col-md-4 col-sm-6">
-                                <div class="product__page__filter">
-                                    <p>Ordenar por:</p>
-                                    <select>
-                                        <option value="">A-Z</option>
-                                        <option value="">1-10</option>
-                                        <option value="">10-50</option>
-                                    </select>
+                                    <h4>Catálogo completo</h4>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div class="row">
+                        {% for contenido in contenidos %}
                         <div class="col-lg-4 col-md-6 col-sm-6">
                             <div class="product__item">
-                                <div class="product__item__pic set-bg" data-setbg="{% static 'myapp/img/popular/popular-1.jpg' %}">
-                                    <div class="ep">18 / 18</div>
-                                    <div class="comment"><i class="fa fa-comments"></i> 11</div>
-                                    <div class="view"><i class="fa fa-eye"></i> 9141</div>
+                                <div class="product__item__pic set-bg" data-setbg="{% if contenido.imagen_portada %}{{ contenido.imagen_portada.url }}{% else %}{% static 'myapp/img/default-cover.jpg' %}{% endif %}">
+                                    <div class="ep">{{ contenido.duracion|default_if_none:'?' }} min</div>
                                 </div>
                                 <div class="product__item__text">
-                                    <ul>
-                                        <li>Active</li>
-                                        <li>Movie</li>
+                                    <!-- Etiquetas de clasificación ocultas -->
+                                    <ul style="display:none;">
+                                        <li>{{ contenido.get_tipo_display }}</li>
+                                        {% for cat in contenido.categorias.all %}<li>{{ cat.nombre }}</li>{% endfor %}
                                     </ul>
-                                    <h5><a href="#">Sen to Chihiro no Kamikakushi</a></h5>
+                                    <h5><a href="{% url 'anime_details' contenido.id %}">{{ contenido.titulo }}</a></h5>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-lg-4 col-md-6 col-sm-6">
-                            <div class="product__item">
-                                <div class="product__item__pic set-bg" data-setbg="{% static 'myapp/img/popular/popular-2.jpg' %}">
-                                    <div class="ep">18 / 18</div>
-                                    <div class="comment"><i class="fa fa-comments"></i> 11</div>
-                                    <div class="view"><i class="fa fa-eye"></i> 9141</div>
-                                </div>
-                                <div class="product__item__text">
-                                    <ul>
-                                        <li>Active</li>
-                                        <li>Movie</li>
-                                    </ul>
-                                    <h5><a href="#">Kizumonogatari III: Reiket su-hen</a></h5>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-4 col-md-6 col-sm-6">
-                            <div class="product__item">
-                                <div class="product__item__pic set-bg" data-setbg="{% static 'myapp/img/popular/popular-3.jpg' %}">
-                                    <div class="ep">18 / 18</div>
-                                    <div class="comment"><i class="fa fa-comments"></i> 11</div>
-                                    <div class="view"><i class="fa fa-eye"></i> 9141</div>
-                                </div>
-                                <div class="product__item__text">
-                                    <ul>
-                                        <li>Active</li>
-                                        <li>Movie</li>
-                                    </ul>
-                                    <h5><a href="#">Shirogane Tamashii hen Kouhan sen</a></h5>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-4 col-md-6 col-sm-6">
-                            <div class="product__item">
-                                <div class="product__item__pic set-bg" data-setbg="{% static 'myapp/img/popular/popular-4.jpg' %}">
-                                    <div class="ep">18 / 18</div>
-                                    <div class="comment"><i class="fa fa-comments"></i> 11</div>
-                                    <div class="view"><i class="fa fa-eye"></i> 9141</div>
-                                </div>
-                                <div class="product__item__text">
-                                    <ul>
-                                        <li>Active</li>
-                                        <li>Movie</li>
-                                    </ul>
-                                    <h5><a href="#">Rurouni Kenshin: Meiji Kenkaku Romantan</a></h5>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-4 col-md-6 col-sm-6">
-                            <div class="product__item">
-                                <div class="product__item__pic set-bg" data-setbg="{% static 'myapp/img/popular/popular-5.jpg' %}">
-                                    <div class="ep">18 / 18</div>
-                                    <div class="comment"><i class="fa fa-comments"></i> 11</div>
-                                    <div class="view"><i class="fa fa-eye"></i> 9141</div>
-                                </div>
-                                <div class="product__item__text">
-                                    <ul>
-                                        <li>Active</li>
-                                        <li>Movie</li>
-                                    </ul>
-                                    <h5><a href="#">Mushishi Zoku Shou 2nd Season</a></h5>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-4 col-md-6 col-sm-6">
-                            <div class="product__item">
-                                <div class="product__item__pic set-bg" data-setbg="{% static 'myapp/img/popular/popular-6.jpg' %}">
-                                    <div class="ep">18 / 18</div>
-                                    <div class="comment"><i class="fa fa-comments"></i> 11</div>
-                                    <div class="view"><i class="fa fa-eye"></i> 9141</div>
-                                </div>
-                                <div class="product__item__text">
-                                    <ul>
-                                        <li>Active</li>
-                                        <li>Movie</li>
-                                    </ul>
-                                    <h5><a href="#">Monogatari Series: Second Season</a></h5>
-                                </div>
-                            </div>
-                        </div>
+                        {% empty %}
+                        <div class="col-12"><p class="text-center">No hay contenido disponible.</p></div>
+                        {% endfor %}
                     </div>
                 </div>
                 <div class="product__pagination">
@@ -252,7 +165,6 @@
             <span><i class="fa fa-eye"></i> 19.141 Viewes</span>
         </div>
     </div>
-</div>
 </div>
 </div>
 </div>

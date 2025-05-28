@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.models import User
-from .models import Contenido, Perfil
+from .models import Contenido, Perfil, Episodio
 
 class ContenidoForm(forms.ModelForm):
     class Meta:
@@ -28,3 +28,8 @@ class PerfilUpdateForm(forms.ModelForm):
             'tipo': forms.HiddenInput(),
             'avatar': forms.ClearableFileInput(attrs={'class': 'form-control-file'}),
         }
+
+class EpisodioForm(forms.ModelForm):
+    class Meta:
+        model = Episodio
+        fields = ['temporada', 'numero_episodio', 'titulo', 'descripcion', 'duracion', 'video_url']

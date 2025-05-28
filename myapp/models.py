@@ -36,7 +36,7 @@ class Contenido(models.Model):
     duracion = models.PositiveIntegerField(help_text="Duración en minutos", null=True, blank=True)
     idioma = models.CharField(max_length=50, blank=True)
     imagen_portada = models.ImageField(upload_to='portadas/', null=True, blank=True)
-    video_url = models.URLField(null=True, blank=True)
+    video_url = models.URLField(max_length=1000, null=True, blank=True)
 
     categorias = models.ManyToManyField(Categoria, through='ContenidoCategoria', related_name='contenidos')
 
@@ -55,7 +55,8 @@ class Episodio(models.Model):
     numero_episodio = models.PositiveIntegerField()
     titulo = models.CharField(max_length=255)
     duracion = models.PositiveIntegerField(help_text="Duración en minutos")
-    video_url = models.URLField()
+    video_url = models.URLField(max_length=1000)
+    descripcion = models.TextField(blank=True)
 
     def __str__(self):
         return f"T{self.temporada}E{self.numero_episodio} - {self.titulo}"

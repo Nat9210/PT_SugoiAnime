@@ -28,6 +28,9 @@
                 <td>
                     <a href="{% url 'contenido_update' contenido.pk %}" class="btn btn-primary btn-sm">Editar</a>
                     <a href="{% url 'contenido_delete' contenido.pk %}" class="btn btn-danger btn-sm">Eliminar</a>
+                    {% if contenido.tipo == 'serie' %}
+                        <a href="{% url 'contenido_gestion_episodios' contenido.pk %}" class="btn btn-info btn-sm">Episodios</a>
+                    {% endif %}
                 </td>
             </tr>
             {% empty %}
