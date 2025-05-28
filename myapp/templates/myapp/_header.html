@@ -1,0 +1,123 @@
+{% load static %}
+{% block content %}
+
+<!-- Header fragment para incluir en base.html y otras plantillas -->
+<header class="header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-6 col-lg-2">
+                <div class="header__logo">
+                    <a href="{% url 'index' %}">
+                        <img src="{% static 'myapp/img/4.png' %}" alt="Logo SugoiAnime">
+                    </a>
+                </div>
+            </div>
+            <div class="col-6 d-lg-none text-end">
+                <button id="menu-toggle" class="navbar-toggler" type="button" aria-label="Toggle navigation" style="background:none;border:none;color:#fff;font-size:2rem;">
+                    ☰
+                </button>
+            </div>
+            <div class="col-lg-8">
+                <nav class="header__menu" id="mainMenu">
+                    <ul class="flex-lg-row flex-column">
+                        <li class="active"><a href="{% url 'index' %}">Inicio</a></li>
+                        <li class="menu-item-has-children">
+                            <a href="{% url 'categories' %}">Categorias <span class="arrow_carrot-down"></span></a>
+                            <ul class="dropdown">
+                                <li><a href="{% url 'categories' %}">Categorias</a></li>
+                                <li><a href="#">Series</a></li>
+                                <li><a href="#">Películas</a></li>
+                            </ul>
+                        </li>
+                        <!--<li><a href="{% url 'blog' %}">Our Blog</a></li>-->
+                        <li class="header__account d-none"><a href="#">Cuenta <span class="arrow_carrot-down"></span></a></li>
+                    </ul>
+                    <!-- Buscador y perfil en móvil -->
+                    <div class="d-lg-none mt-3" id="mobile-extras" style="display:none;">
+                        <a href="#" class="search-switch mb-2 d-block"><span class="icon_search"></span> Buscar</a>
+                        <div class="header__profile-dropdown mt-2">
+                            {% if request.user.is_authenticated %}
+                                {% with perfil=request.user.perfiles.first %}
+                                    <img src="{% if perfil and perfil.avatar %}{{ perfil.avatar.url }}{% else %}{% static 'myapp/img/default-avatar.png' %}{% endif %}" class="header-avatar" alt="Avatar">
+                                {% endwith %}
+                            {% else %}
+                                <a href="#" class="header-profile-icon"><span class="icon_profile"></span></a>
+                            {% endif %}
+                            <ul class="header-dropdown-menu">
+                                {% if request.user.is_authenticated %}
+                                    <li><a href="{% url 'perfil' %}">Perfil</a></li>
+                                    {% if request.user.is_staff %}
+                                    <li><a href="{% url 'contenido_list' %}">Gestión de Contenido</a></li>
+                                    {% endif %}
+                                    <li><a href="{% url 'logout' %}">Cerrar sesión</a></li>
+                                {% else %}
+                                    <li><a href="{% url 'login' %}">Acceder</a></li>
+                                    <li><a href="{% url 'signup' %}">Crear cuenta</a></li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </div>
+                </nav>
+            </div>
+            <div class="col-lg-2 d-none d-lg-block">
+                <div class="header__right">
+                    <a href="#" class="search-switch"><span class="icon_search"></span></a>
+                    <div class="header__profile-dropdown">
+                        {% if request.user.is_authenticated %}
+                            {% with perfil=request.user.perfiles.first %}
+                                <img src="{% if perfil and perfil.avatar %}{{ perfil.avatar.url }}{% else %}{% static 'myapp/img/default-avatar.png' %}{% endif %}" class="header-avatar" alt="Avatar">
+                            {% endwith %}
+                        {% else %}
+                            <a href="#" class="header-profile-icon"><span class="icon_profile"></span></a>
+                        {% endif %}
+                        <ul class="header-dropdown-menu">
+                            {% if request.user.is_authenticated %}
+                                <li><a href="{% url 'perfil' %}">Perfil</a></li>
+                                {% if request.user.is_staff %}
+                                <li><a href="{% url 'contenido_list' %}">Gestión de Contenido</a></li>
+                                {% endif %}
+                                <li><a href="{% url 'logout' %}">Cerrar sesión</a></li>
+                            {% else %}
+                                <li><a href="{% url 'login' %}">Acceder</a></li>
+                                <li><a href="{% url 'signup' %}">Crear cuenta</a></li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+    // Menú hamburguesa funcional y responsivo
+    function updateMenuDisplay() {
+        var menu = document.getElementById('mainMenu');
+        var extras = document.getElementById('mobile-extras');
+        if(window.innerWidth >= 992) {
+            menu.style.display = 'flex';
+            if(extras) extras.style.display = 'none';
+        } else {
+            if(menu.classList.contains('show')) {
+                menu.style.display = 'block';
+                if(extras) extras.style.display = 'block';
+            } else {
+                menu.style.display = 'none';
+                if(extras) extras.style.display = 'none';
+            }
+        }
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+        var menu = document.getElementById('mainMenu');
+        var toggle = document.getElementById('menu-toggle');
+        if(toggle) {
+            toggle.addEventListener('click', function() {
+                menu.classList.toggle('show');
+                updateMenuDisplay();
+            });
+        }
+        updateMenuDisplay();
+    });
+    window.addEventListener('resize', updateMenuDisplay);
+    </script>
+</header>
+
+{% endblock %}

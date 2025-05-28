@@ -1,0 +1,72 @@
+{% extends 'myapp/base.html' %}
+{% load static %}
+{% block title %}Iniciar Sesión | SugoiAnime{% endblock %}
+{% block header %}{% endblock %}
+{% block content %}
+<!-- Normal Breadcrumb Begin -->
+<section class="normal-breadcrumb set-bg" data-setbg="{% static 'myapp/img/breadcrumb-4.jpg' %}">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12 text-center">
+                <div class="normal__breadcrumb__text">
+                    <img src="{% static 'myapp/img/4.png' %}" alt="Jujutsu Kaisen" width="300" height="200">
+                    <!--<h2>Acceder</h2>-->
+                    <p>Accede a tu cuenta de usuario</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- Normal Breadcrumb End -->
+
+<!-- Login Section Begin -->
+<section class="login spad">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="login__form">
+                    <h3>Acceder</h3>
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="input__item">
+                            <input type="text" name="username" placeholder="Nombre de usuario o email">
+                            <span class="icon_profile"></span>
+                        </div>
+                        <div class="input__item">
+                            <input type="password" name="password" placeholder="Contraseña">
+                            <span class="icon_lock"></span>
+                        </div>
+                        <button type="submit" class="site-btn">Acceder</button>
+                        {% if error %}<p class="text-purple">{{ error }}</p>{% endif %}
+                    </form>
+                    <a href="{% url 'password_reset' %}" class="forget_pass">Olvidaste tu contraseña?</a>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="login__register">
+                    <h3>Aún no tienes cuenta?</h3>
+                    <a href="{% url 'signup' %}" class="primary-btn">Registrate aqui</a>
+                </div>
+            </div>
+        </div>
+        <!--<div class="login__social">
+            <div class="row d-flex justify-content-center">
+                <div class="col-lg-6">
+                    <div class="login__social__links">
+                        <span>o</span>
+                        <ul>
+                            <li><a href="#" class="facebook"><i class="fa fa-facebook"></i> Acceder con
+                            Facebook</a></li>
+                            <li><a href="#" class="google"><i class="fa fa-google"></i> Acceder con Google</a></li>
+                            <li><a href="#" class="twitter"><i class="fa fa-twitter"></i> Sign in With Twitter</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>-->
+    </div>
+</section>
+<!-- Login Section End -->
+{% endblock %}
+{% block footer %}{% include 'myapp/_footer_simple.html' %}{% endblock %}

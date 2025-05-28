@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>{% block title %}SugoiAnime{% endblock %}</title>
+    {% load static %}
+    <!-- FontAwesome 6 CDN como primer CSS para evitar conflictos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Mulish:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- CSS Styles -->
+    <link rel="stylesheet" href="{% static 'myapp/css/bootstrap.min.css' %}" type="text/css">
+    <link rel="stylesheet" href="{% static 'myapp/css/elegant-icons.css' %}" type="text/css">
+    <link rel="stylesheet" href="{% static 'myapp/css/plyr.css' %}" type="text/css">
+    <link rel="stylesheet" href="{% static 'myapp/css/nice-select.css' %}" type="text/css">
+    <link rel="stylesheet" href="{% static 'myapp/css/owl.carousel.min.css' %}" type="text/css">
+    <link rel="stylesheet" href="{% static 'myapp/css/slicknav.min.css' %}" type="text/css">
+    <link rel="stylesheet" href="{% static 'myapp/css/style.css' %}" type="text/css">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <!-- Header Section Begin -->
+    {% block header %}
+    {% include 'myapp/_header.html' %}
+    {% endblock %}
+    <!-- Header Section End -->
+
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer Section Begin -->
+    {% block footer %}
+    {% include 'myapp/_footer.html' %}
+    {% endblock %}
+    <!-- Footer Section End -->
+
+    <!-- JS Plugins -->
+    <script src="{% static 'myapp/js/jquery-3.3.1.min.js' %}"></script>
+    <script src="{% static 'myapp/js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'myapp/js/player.js' %}"></script>
+    <script src="{% static 'myapp/js/jquery.nice-select.min.js' %}"></script>
+    <script src="{% static 'myapp/js/mixitup.min.js' %}"></script>
+    <script src="{% static 'myapp/js/jquery.slicknav.js' %}"></script>
+    <script src="{% static 'myapp/js/owl.carousel.min.js' %}"></script>
+    <script src="{% static 'myapp/js/main.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

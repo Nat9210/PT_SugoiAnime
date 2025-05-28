@@ -1,0 +1,21 @@
+{% load static %}
+<footer class="footer">
+    <div class="page-up">
+        <a href="#" id="scrollToTopButton"><span class="arrow_carrot-up"></span></a>
+    </div>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-8 col-lg-6 d-flex flex-column align-items-center">
+                <div class="footer__logo text-center w-100 mb-2">
+                    <a href="{% url 'index' %}"><img src="{% static 'myapp/img/3.png' %}" alt="" style="max-width:180px; height:auto;"></a>
+                </div>
+                <div class="footer__social mt-3 text-center d-flex gap-3 justify-content-center">
+                    <a href="#"><i class="fa-brands fa-facebook" style="font-size:16px;"></i></a>
+                    <a href="#"><i class="fa-brands fa-x-twitter" style="font-size:16px;"></i></a>
+                    <a href="#"><i class="fa-brands fa-instagram" style="font-size:16px;"></i></a>
+                    <a href="#"><i class="fa-brands fa-pinterest" style="font-size:16px;"></i></a>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>

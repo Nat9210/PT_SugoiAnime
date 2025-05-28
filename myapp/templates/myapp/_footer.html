@@ -1,0 +1,36 @@
+{% load static %}
+{% block content %}
+
+<!-- Footer fragment para incluir en base.html y otras plantillas -->
+<footer class="footer">
+    <div class="page-up">
+        <a href="#" id="scrollToTopButton"><span class="arrow_carrot-up"></span></a>
+    </div>
+    <div class="container">
+        <div class="row text-center text-lg-start align-items-center gy-3">
+            <div class="col-12 col-lg-3 mb-3 mb-lg-0">
+                <div class="footer__logo">
+                    <a href="{% url 'index' %}"><img src="{% static 'myapp/img/3.png' %}" alt=""></a>
+                </div>
+            </div>
+            <div class="col-12 col-lg-6 mb-3 mb-lg-0">
+                <div class="footer__nav">
+                    <ul class="list-unstyled mb-0">
+                        <p class="footer-final">Haz llegado al final de pagína</p>
+                        <li><a href="{% url 'categories' %}">Ver todo</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-12 col-lg-3">
+                <div class="footer__social d-flex justify-content-center justify-content-lg-end gap-3">
+                    <a href="#"><i class="fa-brands fa-facebook"></i></a>
+                    <a href="#"><i class="fa-brands fa-x-twitter"></i></a>
+                    <a href="#"><i class="fa-brands fa-instagram"></i></a>
+                    <a href="#"><i class="fa-brands fa-pinterest"></i></a>
+                </div>                
+            </div>
+        </div>
+    </div>
+</footer>
+
+{% endblock %}

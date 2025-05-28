@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+
+# Entorno virtual
+venv/
+ENV/
+.env
+
+# Django
+*.log
+db.sqlite3
+media/
+staticfiles/
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# VSCode
+.vscode/
+
+# Otros
+*.sqlite3
+*.bak
+*.swp

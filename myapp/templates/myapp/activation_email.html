@@ -1,0 +1,35 @@
+{% autoescape off %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Activa tu cuenta | SugoiAnime</title>
+    <style>
+        body { font-family: 'Oswald', Arial, sans-serif; background: #181824; color: #fff; margin: 0; padding: 0; }
+        .mail-container { max-width: 480px; margin: 40px auto; background: #23233a; border-radius: 10px; box-shadow: 0 2px 12px #0002; padding: 32px 24px; text-align: center; }
+        .mail-logo { margin-bottom: 18px; }
+        .mail-logo img { max-width: 120px; }
+        .mail-title { color: #8c52ff; font-size: 1.5em; margin-bottom: 10px; }
+        .mail-btn { display: inline-block; margin: 24px 0 0 0; background: #8c52ff; color: #fff; padding: 12px 32px; border-radius: 4px; text-decoration: none; font-weight: bold; }
+        .mail-btn:hover { background: #6a3fd8; }
+        .mail-footer { color: #b7b7b7; font-size: 0.95em; margin-top: 32px; }
+    </style>
+</head>
+<body>
+    <div class="mail-container">
+        <div class="mail-logo">
+            <img src="https://i.ibb.co/6bQw1kF/3.png" alt="SugoiAnime Logo">
+        </div>
+        <div class="mail-title">¡Bienvenido/a a SugoiAnime!</div>
+        <p>Hola {{ user.username }},<br><br>
+        Gracias por registrarte en SugoiAnime.<br>
+        Por favor activa tu cuenta haciendo clic en el siguiente botón:</p>
+        <a href="{{ activation_link }}" class="mail-btn">Activar cuenta</a>
+        <div class="mail-footer">
+            Si no creaste esta cuenta, ignora este correo.<br>
+            ¡Gracias!
+        </div>
+    </div>
+</body>
+</html>
+{% endautoescape %}

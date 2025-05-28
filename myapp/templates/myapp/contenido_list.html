@@ -1,0 +1,39 @@
+{% extends 'myapp/base.html' %}
+{% block title %}Gestión de Contenido{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <h2 class="titulo-gestor">Gestión de Contenido</h2>
+    <a href="{% url 'contenido_create' %}" class="btn btn-success mb-3">Crear nuevo contenido</a>
+    <table class="table table-striped table-dark">
+        <thead>
+            <tr>
+                <th>Portada</th>
+                <th>Título</th>
+                <th>Tipo</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for contenido in contenidos %}
+            <tr>
+                <td>
+                    {% if contenido.imagen_portada %}
+                        <img src="{{ contenido.imagen_portada.url }}" alt="Portada" class="img-max-200" style="max-height:80px;">
+                    {% else %}
+                        <span class="text-muted">Sin portada</span>
+                    {% endif %}
+                </td>
+                <td>{{ contenido.titulo }}</td>
+                <td>{{ contenido.get_tipo_display }}</td>
+                <td>
+                    <a href="{% url 'contenido_update' contenido.pk %}" class="btn btn-primary btn-sm">Editar</a>
+                    <a href="{% url 'contenido_delete' contenido.pk %}" class="btn btn-danger btn-sm">Eliminar</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4">No hay contenido registrado.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
