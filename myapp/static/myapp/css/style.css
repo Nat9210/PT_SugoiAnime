@@ -2696,7 +2696,7 @@ ol {
 	.blog__details__comment__item__text a {
 		margin-right: 6px;
 	}
-	.login__social__links ul li a i {
+	.login__social__links ul li a {
 		left: 20px;
 	}
 	.login__form .forget_pass {
@@ -2867,4 +2867,63 @@ ol {
         min-width: 100px;
         width: 100%;
     }
+}
+
+select, select.form-control {
+    background-color: #222 !important;
+    color: #fff !important;
+    border: 1px solid #8c52ff !important;
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    box-shadow: none !important;
+}
+select option {
+    background-color: #222 !important;
+    color: #fff !important;
+}
+
+.titulo-gestor, .titulo-gestor-mb, .perfil-bienvenida h3, .perfil-main h3, .perfil-main h2 {
+    color: var(--main-purple) !important;
+    font-weight: 700;
+}
+
+.form-label.label-bold-white, label, legend, h5, h4, h6 {
+    color: #fff !important;
+    font-weight: 600;
+}
+
+input, textarea, .form-control {
+    background-color: #222 !important;
+    color: #fff !important;
+    border: 1px solid #444 !important;
+}
+
+.form-group label, .form-group legend {
+    color: #fff !important;
+}
+
+.perfil-bienvenida h5, .perfil-bienvenida label, .perfil-bienvenida legend {
+    color: #fff !important;
+    font-weight: 600;
+}
+
+/* Forzar color en selects incluso en Chrome/Edge */
+select:focus, select:active {
+    background-color: #222 !important;
+    color: #fff !important;
+}
+
+/* Mejora visibilidad descripción en anime-watching */
+.anime__episode__desc p {
+  color: #fff !important;
+  font-size: 1.1rem;
+  background: rgba(140,82,255,0.10);
+  border-left: 4px solid var(--main-purple);
+  padding: 10px 16px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
+.anime__episode__desc strong {
+  color: var(--main-purple) !important;
 }

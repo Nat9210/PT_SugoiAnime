@@ -56,7 +56,7 @@ class Episodio(models.Model):
     titulo = models.CharField(max_length=255)
     duracion = models.PositiveIntegerField(help_text="Duración en minutos")
     video_url = models.URLField(max_length=1000)
-    descripcion = models.TextField(blank=True)
+    descripcion = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return f"T{self.temporada}E{self.numero_episodio} - {self.titulo}"

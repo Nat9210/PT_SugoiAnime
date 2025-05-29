@@ -3,6 +3,11 @@ from django.contrib.auth.models import User
 from .models import Contenido, Perfil, Episodio
 
 class ContenidoForm(forms.ModelForm):
+    tipo = forms.ChoiceField(
+        choices=Contenido.TIPO_CHOICES,
+        widget=forms.RadioSelect,
+        label='Tipo'
+    )
     class Meta:
         model = Contenido
         fields = ['titulo', 'tipo', 'descripcion', 'año', 'duracion', 'idioma', 'imagen_portada', 'video_url', 'categorias']

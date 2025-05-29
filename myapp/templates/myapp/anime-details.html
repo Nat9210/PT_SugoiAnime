@@ -36,73 +36,105 @@
     <div class="container">
         <div class="anime__details__content">
             <div class="row">
-                <div class="col-lg-3">
-                    <div class="anime__details__pic set-bg" data-setbg="{% if contenido.imagen_portada %}{{ contenido.imagen_portada.url }}{% else %}{% static 'myapp/img/default-cover.jpg' %}{% endif %}">
-                        <!-- Aquí podrías agregar vistas/comentarios reales si los tienes -->
+                <!-- Miniatura a la izquierda -->
+                <div class="col-lg-3 d-flex flex-column align-items-center">
+                    <div class="anime__details__pic set-bg mb-3 w-100" style="min-height: 320px; background-size: cover; background-position: center; border-radius: 8px;"
+                        data-setbg="{% if contenido.imagen_portada %}{{ contenido.imagen_portada.url }}{% else %}{% static 'myapp/img/default-cover.jpg' %}{% endif %}">
+                        <img src="{% if contenido.imagen_portada %}{{ contenido.imagen_portada.url }}{% else %}{% static 'myapp/img/default-cover.jpg' %}{% endif %}" alt="Portada" class="img-fluid rounded w-100" style="object-fit:cover; min-height: 320px; max-height: 350px;">
+                    </div>
+                    <div class="d-flex flex-wrap gap-2 justify-content-center mb-2 anime-action-buttons">
+                        <button class="btn btn-action btn-success" title="Me gusta"><i class="fa fa-thumbs-up"></i></button>
+                        <button class="btn btn-action btn-danger" title="No me gusta"><i class="fa fa-thumbs-down"></i></button>
+                        <button class="btn btn-action btn-warning text-white" title="Favorito"><i class="fa fa-star"></i> Favorito</button>
+                        {% if contenido.video_url %}
+                            <a href="{{ contenido.video_url }}" target="_blank" class="btn btn-action btn-primary" title="Ver ahora"><i class="fa fa-play"></i> Ver ahora</a>
+                        {% endif %}
                     </div>
                 </div>
-                <div class="col-lg-9">
+                <!-- Descripción y detalles en el centro -->
+                <div class="col-lg-6">
                     <div class="anime__details__text">
-                        <div class="anime__details__title">
+                        <div class="anime__details__title mb-2">
                             <h3>{{ contenido.titulo }}</h3>
                         </div>
-                        <p>{{ contenido.descripcion }}</p>
-                        <div class="anime__details__widget">
-                            <div class="row">
-                                <div class="col-lg-6 col-md-6">
-                                    <ul>
-                                        <li><span>Tipo:</span> {{ contenido.get_tipo_display }}</li>
-                                        <li><span>Año:</span> {{ contenido.año }}</li>
-                                        <li><span>Duración:</span> {{ contenido.duracion }} min</li>
-                                        <li><span>Idioma:</span> {{ contenido.idioma }}</li>
-                                        <li><span>Categorías:</span> {% for cat in contenido.categorias.all %}{{ cat.nombre }}{% if not forloop.last %}, {% endif %}{% endfor %}</li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="anime__details__actions mb-3">
-                            <button class="btn btn-success me-2"><i class="fa fa-thumbs-up"></i></button>
-                            <button class="btn btn-danger me-2"><i class="fa fa-thumbs-down"></i></button>
-                            <button class="btn btn-warning me-2"><i class="fa fa-star"></i> Favorito</button>
-                            {% if contenido.video_url %}
-                                <a href="{{ contenido.video_url }}" target="_blank" class="btn btn-primary"><i class="fa fa-play"></i> Ver ahora</a>
-                            {% endif %}
+                        <p class="mb-3">{{ contenido.descripcion }}</p>
+                        <div class="anime__details__widget mb-3">
+                            <ul class="list-unstyled">
+                                <li><span>Tipo:</span> {{ contenido.get_tipo_display }}</li>
+                                <li><span>Año:</span> {{ contenido.año }}</li>
+                                <li><span>Duración:</span> {{ contenido.duracion }} min</li>
+                                <li><span>Idioma:</span> {{ contenido.idioma }}</li>
+                                <li><span>Categorías:</span> {% for cat in contenido.categorias.all %}{{ cat.nombre }}{% if not forloop.last %}, {% endif %}{% endfor %}</li>
+                            </ul>
                         </div>
                         {% if contenido.video_url %}
                         <div class="anime__details__video mt-4">
-                            <iframe width="100%" height="400" src="{{ contenido.video_url }}" frameborder="0" allowfullscreen></iframe>
-                        </div>
-                        {% endif %}
-                        {% if contenido.tipo == 'serie' and contenido.episodio_set.exists %}
-                        <div class="anime__details__episodes mt-4">
-                            <h4>Episodios</h4>
-                            <div class="row">
-                                {% for episodio in contenido.episodio_set.all %}
-                                <div class="col-md-4 mb-3">
-                                    <div class="card bg-dark text-white h-100">
-                                        {% if episodio.video_url %}
-                                        <a href="{% url 'anime_watching' episodio.id %}" target="_blank">
-                                            <video class="card-img-top" controls poster="{% if contenido.imagen_portada %}{{ contenido.imagen_portada.url }}{% else %}{% static 'myapp/img/default-cover.jpg' %}{% endif %}" style="max-height:140px;width:100%;object-fit:cover;">
-                                                <source src="{{ episodio.video_url }}" type="video/mp4">
-                                                Tu navegador no soporta la reproducción de video.
-                                            </video>
-                                        </a>
-                                        {% endif %}
-                                        <div class="card-body">
-                                            <h5 class="card-title">{{ episodio.titulo }}</h5>
-                                            <p class="card-text">Duración: {{ episodio.duracion }} min</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                {% endfor %}
-                            </div>
+                            <iframe width="100%" height="300" src="{{ contenido.video_url }}" frameborder="0" allowfullscreen></iframe>
                         </div>
                         {% endif %}
                     </div>
+                </div>
+                <!-- Lista de episodios a la derecha -->
+                <div class="col-lg-3">
+                    {% if contenido.tipo == 'serie' and contenido.episodio_set.exists %}
+                    <div class="anime__details__episodes bg-dark p-3 rounded mt-2">
+                        <h5 class="text-purple">Episodios</h5>
+                        <div class="d-flex flex-column gap-3">
+                            {% for episodio in contenido.episodio_set.all %}
+                            <div class="text-center">
+                                <div class="mini-player-wrapper mb-1">
+                                    <video id="mini-player-{{ episodio.id }}" class="mini-player rounded shadow-sm" style="width: 100%; max-width: 140px; max-height: 80px; object-fit: cover; background: #181828;" poster="{% if contenido.imagen_portada %}{{ contenido.imagen_portada.url }}{% else %}{% static 'myapp/img/default-cover.jpg' %}{% endif %}" preload="none">
+                                        <source src="{{ episodio.video_url }}" type="video/mp4">
+                                    </video>
+                                </div>
+                                <div class="fw-bold small text-white">Ep {{ episodio.numero_episodio }} - {{ episodio.titulo }}</div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
     </div>
 </section>
 <!-- Anime Section End -->
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Inicializar todos los mini reproductores Plyr
+        document.querySelectorAll('.mini-player').forEach(function(video) {
+            new Plyr(video, {
+                controls: ['play', 'progress', 'current-time', 'mute', 'pip'],
+                seekTime: 10,
+                ratio: '16:9',
+                i18n: {
+                    play: 'Reproducir',
+                    pause: 'Pausar',
+                    mute: 'Silenciar',
+                    unmute: 'Activar sonido',
+                    pip: 'Imagen en imagen',
+                },
+                tooltips: { controls: true, seek: false },
+                hideControls: false,
+                resetOnEnd: false,
+                disableContextMenu: true,
+            });
+        });
+    });
+</script>
+<style>
+.mini-player-wrapper { position: relative; }
+.mini-player { border: 2px solid var(--main-purple, #8c52ff); transition: box-shadow 0.2s, border-color 0.2s; cursor: pointer; background: #181828; }
+.mini-player:hover { box-shadow: 0 0 0 4px #8c52ff44; border-color: #fff; }
+@media (max-width: 991px) {
+    .anime__details__episodes .mini-player { max-width: 100px; max-height: 60px; }
+}
+@media (max-width: 767px) {
+    .anime__details__episodes .mini-player { max-width: 80px; max-height: 48px; }
+}
+</style>
 {% endblock %}

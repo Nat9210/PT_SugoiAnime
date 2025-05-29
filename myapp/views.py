@@ -8,7 +8,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 from .forms import ContenidoForm, UserUpdateForm, PerfilUpdateForm, EpisodioForm
-from .models import Contenido, Categoria, Episodio, ContenidoCategoria, Perfil
+from .models import Contenido, Categoria, Episodio, ContenidoCategoria, Perfil, HistorialReproduccion
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from django.template.loader import render_to_string
@@ -282,7 +282,20 @@ def password_reset_confirm(request, uidb64, token):
 
 def anime_details(request, contenido_id):
     contenido = Contenido.objects.get(pk=contenido_id)
-    return render(request, 'myapp/anime-details.html', {'contenido': contenido})
+    user = request.user
+    perfil = user.perfiles.first() if user.is_authenticated else None
+    if perfil:
+        episodios_vistos = list(
+            HistorialReproduccion.objects.filter(perfil=perfil, contenido=contenido)
+            .exclude(episodio=None)
+            .values_list('episodio_id', flat=True)
+        )
+    else:
+        episodios_vistos = []
+    return render(request, 'myapp/anime-details.html', {
+        'contenido': contenido,
+        'episodios_vistos': episodios_vistos
+    })
 
 @login_required
 def contenido_gestion_episodios(request, contenido_id):
@@ -332,4 +345,27 @@ def episodio_delete(request, episodio_id):
 @login_required
 def anime_watching(request, episodio_id):
     episodio = Episodio.objects.select_related('serie').get(pk=episodio_id)
-    return render(request, 'myapp/anime-watching.html', {'episodio': episodio, 'contenido': episodio.serie})
+    contenido = episodio.serie
+    user = request.user
+    perfil = user.perfiles.first()  # Se asume un perfil por usuario
+    if perfil:
+        # Marcar como visto (si no existe ya un registro para este episodio y perfil)
+        HistorialReproduccion.objects.get_or_create(
+            perfil=perfil,
+            contenido=contenido,
+            episodio=episodio,
+            defaults={'tiempo_reproducido': 0}
+        )
+        # Obtener todos los episodios vistos de esta serie por este perfil
+        episodios_vistos = list(
+            HistorialReproduccion.objects.filter(perfil=perfil, contenido=contenido)
+            .exclude(episodio=None)
+            .values_list('episodio_id', flat=True)
+        )
+    else:
+        episodios_vistos = []
+    return render(request, 'myapp/anime-watching.html', {
+        'episodio': episodio,
+        'contenido': contenido,
+        'episodios_vistos': episodios_vistos
+    })
