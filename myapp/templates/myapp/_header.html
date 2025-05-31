@@ -22,11 +22,12 @@
                     <ul class="flex-lg-row flex-column">
                         <li class="active"><a href="{% url 'index' %}">Inicio</a></li>
                         <li class="menu-item-has-children">
-                            <a href="{% url 'categories' %}">Categorias <span class="arrow_carrot-down"></span></a>
-                            <ul class="dropdown">
-                                <li><a href="{% url 'categories' %}">Categorias</a></li>
-                                <li><a href="#">Series</a></li>
-                                <li><a href="#">Películas</a></li>
+                            <a href="{% url 'categories' %}">Categorías <span class="arrow_carrot-down"></span></a>
+                            <ul class="dropdown dropdown-categorias-multicol">
+                                <li><a href="{% url 'categories' %}">Catálogo completo</a></li>
+                                {% for categoria in categorias_menu %}
+                                    <li><a href="{% url 'categories' %}?cat={{ categoria.id }}">{{ categoria.nombre }}</a></li>
+                                {% endfor %}
                             </ul>
                         </li>
                         <!--<li><a href="{% url 'blog' %}">Our Blog</a></li>-->
@@ -62,10 +63,10 @@
             <div class="col-lg-2 d-none d-lg-block">
                 <div class="header__right">
                     <a href="#" class="search-switch"><span class="icon_search"></span></a>
-                    <div class="header__profile-dropdown">
+                    <div class="header__profile-dropdown" id="profileDropdown">
                         {% if request.user.is_authenticated %}
                             {% with perfil=request.user.perfiles.first %}
-                                <img src="{% if perfil and perfil.avatar %}{{ perfil.avatar.url }}{% else %}{% static 'myapp/img/default-avatar.png' %}{% endif %}" class="header-avatar" alt="Avatar">
+                                <img src="{% if perfil and perfil.avatar %}{{ perfil.avatar.url }}{% else %}{% static 'myapp/img/default-avatar.png' %}{% endif %}" class="header-avatar" alt="Avatar" id="profileAvatar">
                             {% endwith %}
                         {% else %}
                             <a href="#" class="header-profile-icon"><span class="icon_profile"></span></a>
@@ -85,6 +86,15 @@
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+    <!-- Modal de búsqueda global -->
+    <div class="search-model" id="search-model" style="display:none;">
+        <div class="d-flex justify-content-center align-items-center h-100">
+            <form class="search-model-form" method="get" action="{% url 'busqueda' %}">
+                <input id="search-input" type="text" name="q" placeholder="Buscar anime, película..." autocomplete="off" autofocus style="width: 400px; max-width: 90vw;">
+            </form>
+            <span class="search-close-switch" style="position:absolute;top:30px;right:30px;cursor:pointer;font-size:2.5rem;" onclick="$('.search-model').fadeOut(400);">&times;</span>
         </div>
     </div>
     <script>
@@ -117,6 +127,23 @@
         updateMenuDisplay();
     });
     window.addEventListener('resize', updateMenuDisplay);
+
+    // Script para el menú de perfil
+    document.addEventListener('DOMContentLoaded', function() {
+        var profileDropdown = document.getElementById('profileDropdown');
+        var profileAvatar = document.getElementById('profileAvatar');
+        if(profileAvatar && profileDropdown) {
+            profileAvatar.addEventListener('click', function(e) {
+                e.stopPropagation();
+                profileDropdown.classList.toggle('open');
+            });
+            document.addEventListener('click', function(e) {
+                if (!profileDropdown.contains(e.target)) {
+                    profileDropdown.classList.remove('open');
+                }
+            });
+        }
+    });
     </script>
 </header>
 

@@ -47,7 +47,7 @@
                             <div class="d-flex justify-content-center gap-3 mb-2 anime-action-buttons">
                                 <button class="btn btn-action btn-success" title="Me gusta" onclick="toggleActive(this)"><i class="fa fa-thumbs-up"></i></button>
                                 <button class="btn btn-action btn-danger" title="No me gusta" onclick="toggleActive(this)"><i class="fa fa-thumbs-down"></i></button>
-                                <button class="btn btn-action btn-warning text-white" title="Favorito" onclick="toggleActive(this)"><i class="fa fa-star"></i></button>
+                                <button id="btn-favorito" class="btn btn-action btn-warning text-white{% if es_favorito %} active{% endif %}" title="Favorito" onclick="toggleFavorito(this)" data-contenido-id="{{ contenido.id }}"><i class="fa fa-star"></i></button>
                             </div>
                         </div>
                     </div>
@@ -148,6 +148,40 @@
             });
         });
     });
+</script>
+<script>
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+function toggleFavorito(btn) {
+    const contenidoId = btn.getAttribute('data-contenido-id');
+    const csrftoken = getCookie('csrftoken');
+    fetch('{% url "toggle_favorito" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': csrftoken
+        },
+        body: 'contenido_id=' + encodeURIComponent(contenidoId)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            btn.classList.toggle('active', data.favorito);
+        }
+    });
+}
 </script>
 
 {% endblock %}

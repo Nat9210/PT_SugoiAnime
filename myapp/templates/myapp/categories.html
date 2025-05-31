@@ -22,20 +22,34 @@
 <section class="product-page spad">
     <div class="container">
         <div class="row">
-            <div class="col-lg-8">
+            <div class="col-lg-12">
                 <div class="product__page__content">
                     <div class="product__page__title">
-                        <div class="row">
-                            <div class="col-lg-8 col-md-8 col-sm-6">
+                        <div class="row align-items-center mb-3">
+                            <div class="col-lg-8">
                                 <div class="section-title">
-                                    <h4>Catálogo completo</h4>
+                                    <h4>Catálogo</h4>
                                 </div>
+                            </div>
+                            <div class="col-lg-4 d-flex justify-content-end align-items-center">
+                                <form method="get" class="d-inline-flex align-items-center" id="filtro-form">
+                                    {% if request.GET.cat %}
+                                        <input type="hidden" name="cat" value="{{ request.GET.cat }}">
+                                    {% endif %}
+                                    <label for="ordenar" class="me-2 mb-0">Ordenar por:</label>
+                                    <select name="ordenar" id="ordenar" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
+                                        <option value="nombre_asc" {% if request.GET.ordenar == 'nombre_asc' %}selected{% endif %}>Nombre A-Z</option>
+                                        <option value="nombre_desc" {% if request.GET.ordenar == 'nombre_desc' %}selected{% endif %}>Nombre Z-A</option>
+                                        <option value="anio_asc" {% if request.GET.ordenar == 'anio_asc' %}selected{% endif %}>Año ascendente</option>
+                                        <option value="anio_desc" {% if request.GET.ordenar == 'anio_desc' %}selected{% endif %}>Año descendente</option>
+                                    </select>
+                                </form>
                             </div>
                         </div>
                     </div>
                     <div class="row">
                         {% for contenido in contenidos %}
-                        <div class="col-lg-4 col-md-6 col-sm-6">
+                        <div class="col-lg-3 col-md-4 col-sm-6">
                             <div class="product__item">
                                 <div class="product__item__pic set-bg" data-setbg="{% if contenido.imagen_portada %}{{ contenido.imagen_portada.url }}{% else %}{% static 'myapp/img/default-cover.jpg' %}{% endif %}">
                                     <div class="ep">{{ contenido.duracion|default_if_none:'?' }} min</div>
@@ -55,117 +69,9 @@
                         {% endfor %}
                     </div>
                 </div>
-                <div class="product__pagination">
-                    <a href="#" class="current-page">1</a>
-                    <a href="#">2</a>
-                    <a href="#">3</a>
-                    <a href="#">4</a>
-                    <a href="#">5</a>
-                    <a href="#"><i class="fa fa-angle-double-right"></i></a>
-                </div>
             </div>
-            <div class="col-lg-4 col-md-6 col-sm-8">
-                <div class="product__sidebar">
-                    <div class="product__sidebar__view">
-                        <div class="section-title">
-                            <h5>Lo más visto</h5>
-                        </div>
-                        <ul class="filter__controls">
-                            <li class="active" data-filter="*">Día</li>
-                            <li data-filter=".week">Semana</li>
-                            <li data-filter=".month">Mes</li>
-                            <li data-filter=".years">Año</li>
-                        </ul>
-                        <div class="filter__gallery">
-                            <div class="product__sidebar__view__item set-bg mix day years"
-                            data-setbg="{% static 'myapp/img/sidebar/tv-1.jpg' %}">
-                            <div class="ep">18 / ?</div>
-                            <div class="view"><i class="fa fa-eye"></i> 9141</div>
-                            <h5><a href="#">Boruto: Naruto next generations</a></h5>
-                        </div>
-                        <div class="product__sidebar__view__item set-bg mix month week"
-                        data-setbg="{% static 'myapp/img/sidebar/tv-2.jpg' %}">
-                        <div class="ep">18 / ?</div>
-                        <div class="view"><i class="fa fa-eye"></i> 9141</div>
-                        <h5><a href="#">The Seven Deadly Sins: Wrath of the Gods</a></h5>
-                    </div>
-                    <div class="product__sidebar__view__item set-bg mix week years"
-                    data-setbg="{% static 'myapp/img/sidebar/tv-3.jpg' %}">
-                    <div class="ep">18 / ?</div>
-                    <div class="view"><i class="fa fa-eye"></i> 9141</div>
-                    <h5><a href="#">Sword art online alicization war of underworld</a></h5>
-                </div>
-                <div class="product__sidebar__view__item set-bg mix years month"
-                data-setbg="{% static 'myapp/img/sidebar/tv-4.jpg' %}">
-                <div class="ep">18 / ?</div>
-                <div class="view"><i class="fa fa-eye"></i> 9141</div>
-                <h5><a href="#">Fate/stay night: Heaven's Feel I. presage flower</a></h5>
-            </div>
-            <div class="product__sidebar__view__item set-bg mix day"
-            data-setbg="{% static 'myapp/img/sidebar/tv-5.jpg' %}">
-            <div class="ep">18 / ?</div>
-            <div class="view"><i class="fa fa-eye"></i> 9141</div>
-            <h5><a href="#">Fate stay night unlimited blade works</a></h5>
         </div>
     </div>
-</div>
-<div class="product__sidebar__comment">
-    <div class="section-title">
-        <h5>Nuevo Contenido</h5>
-    </div>
-    <div class="product__sidebar__comment__item">
-        <div class="product__sidebar__comment__item__pic">
-            <img src="{% static 'myapp/img/sidebar/comment-1.jpg' %}" alt="">
-        </div>
-        <div class="product__sidebar__comment__item__text">
-            <ul>
-                <li>Active</li>
-                <li>Movie</li>
-            </ul>
-            <h5><a href="#">The Seven Deadly Sins: Wrath of the Gods</a></h5>
-            <span><i class="fa fa-eye"></i> 19.141 Viewes</span>
-        </div>
-    </div>
-    <div class="product__sidebar__comment__item">
-        <div class="product__sidebar__comment__item__pic">
-            <img src="{% static 'myapp/img/sidebar/comment-2.jpg' %}" alt="">
-        </div>
-        <div class="product__sidebar__comment__item__text">
-            <ul>
-                <li>Active</li>
-                <li>Movie</li>
-            </ul>
-            <h5><a href="#">Shirogane Tamashii hen Kouhan sen</a></h5>
-            <span><i class="fa fa-eye"></i> 19.141 Viewes</span>
-        </div>
-    </div>
-    <div class="product__sidebar__comment__item">
-        <div class="product__sidebar__comment__item__pic">
-            <img src="{% static 'myapp/img/sidebar/comment-3.jpg' %}" alt="">
-        </div>
-        <div class="product__sidebar__comment__item__text">
-            <ul>
-                <li>Active</li>
-                <li>Movie</li>
-            </ul>
-            <h5><a href="#">Kizumonogatari III: Reiket su-hen</a></h5>
-            <span><i class="fa fa-eye"></i> 19.141 Viewes</span>
-        </div>
-    </div>
-    <div class="product__sidebar__comment__item">
-        <div class="product__sidebar__comment__item__pic">
-            <img src="{% static 'myapp/img/sidebar/comment-4.jpg' %}" alt="">
-        </div>
-        <div class="product__sidebar__comment__item__text">
-            <ul>
-                <li>Active</li>
-                <li>Movie</li>
-            </ul>
-            <h5><a href="#">Monogatari Series: Second Season</a></h5>
-            <span><i class="fa fa-eye"></i> 19.141 Viewes</span>
-        </div>
-    </div>
-</div>
 </div>
 </div>
 </section>

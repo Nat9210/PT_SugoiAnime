@@ -72,7 +72,29 @@
         {% elif seccion == 'favoritos' %}
             <div class="perfil-bienvenida">
                 <h3>Mis Favoritos</h3>
-                <p>Aquí aparecerá tu lista de favoritos (pendiente de implementación).</p>
+                {% if favoritos and favoritos.exists %}
+                <div class="row">
+                    {% for fav in favoritos %}
+                    <div class="col-md-4 col-lg-3 mb-4">
+                        <div class="card bg-dark text-white h-100 shadow-sm">
+                            <a href="{% url 'anime_details' fav.contenido.id %}" class="text-decoration-none text-white">
+                                {% if fav.contenido.imagen_portada %}
+                                    <img src="{{ fav.contenido.imagen_portada.url }}" class="card-img-top img-max-200" alt="Portada de {{ fav.contenido.titulo }}" style="object-fit:contain;max-height:180px;background:#222;">
+                                {% else %}
+                                    <img src="{% static 'myapp/img/default-cover.jpg' %}" class="card-img-top img-max-200" alt="Sin portada" style="object-fit:contain;max-height:180px;background:#222;">
+                                {% endif %}
+                                <div class="card-body p-2">
+                                    <h5 class="card-title mb-1" style="font-size:1.1em;">{{ fav.contenido.titulo }}</h5>
+                                    <span class="badge bg-purple">{{ fav.contenido.get_tipo_display }}</span>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted">Aún no tienes favoritos. Haz clic en la estrella de un anime para agregarlo aquí.</p>
+                {% endif %}
             </div>
         {% endif %}
     </section>

@@ -8,7 +8,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 from .forms import ContenidoForm, UserUpdateForm, PerfilUpdateForm, EpisodioForm
-from .models import Contenido, Categoria, Episodio, ContenidoCategoria, Perfil, HistorialReproduccion
+from .models import Contenido, Categoria, Episodio, ContenidoCategoria, Perfil, HistorialReproduccion, Favorito
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from django.template.loader import render_to_string
@@ -22,6 +22,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.forms import modelformset_factory
 import re
 from django.contrib import messages
+from django.views.decorators.http import require_POST
+from django.db.models import Q
 
 # Vistas que solo renderizan plantillas estáticas, sin conexión a la base de datos
 
@@ -54,9 +56,24 @@ def render_signup(request):
 
 @login_required
 def render_categories(request):
-    contenidos = Contenido.objects.all().order_by('-id')
+    cat_id = request.GET.get('cat')
+    ordenar = request.GET.get('ordenar', 'nombre_asc')
+    qs = Contenido.objects.all()
+    if cat_id:
+        qs = qs.filter(categorias__id=cat_id)
+    # Ordenamiento
+    if ordenar == 'nombre_asc':
+        qs = qs.order_by('titulo')
+    elif ordenar == 'nombre_desc':
+        qs = qs.order_by('-titulo')
+    elif ordenar == 'anio_asc':
+        qs = qs.order_by('año')  # corregido: el campo es 'año'
+    elif ordenar == 'anio_desc':
+        qs = qs.order_by('-año')  # corregido: el campo es 'año'
+    else:
+        qs = qs.order_by('-id')
     categorias = Categoria.objects.all()
-    return render(request, 'myapp/categories.html', {'contenidos': contenidos, 'categorias': categorias})
+    return render(request, 'myapp/categories.html', {'contenidos': qs, 'categorias': categorias})
 
 @login_required
 def render_catalogo(request):
@@ -75,8 +92,11 @@ def perfil_view(request):
     user_form = UserUpdateForm(instance=user)
     perfil_form = PerfilUpdateForm(instance=perfil)
     contenidos = None
+    favoritos = None
     if seccion == 'gestion' and user.is_staff:
         contenidos = Contenido.objects.all()
+    if seccion == 'favoritos':
+        favoritos = Favorito.objects.filter(perfil=perfil).select_related('contenido').order_by('-fecha_agregado')
 
     if request.method == 'POST':
         user_form = UserUpdateForm(request.POST, instance=user)
@@ -92,6 +112,7 @@ def perfil_view(request):
         'perfil': perfil,
         'seccion': seccion,
         'contenidos': contenidos,
+        'favoritos': favoritos,
     })
 
 def login_view(request):
@@ -282,7 +303,12 @@ def password_reset_confirm(request, uidb64, token):
 
 def anime_details(request, contenido_id):
     contenido = Contenido.objects.get(pk=contenido_id)
-    return render(request, 'myapp/anime-details.html', {'contenido': contenido})
+    es_favorito = False
+    if request.user.is_authenticated:
+        perfil = request.user.perfiles.first()
+        if perfil:
+            es_favorito = Favorito.objects.filter(perfil=perfil, contenido=contenido).exists()
+    return render(request, 'myapp/anime-details.html', {'contenido': contenido, 'es_favorito': es_favorito})
 
 @login_required
 def contenido_gestion_episodios(request, contenido_id):
@@ -356,3 +382,33 @@ def anime_watching(request, episodio_id):
         'contenido': contenido,
         'episodios_vistos': episodios_vistos
     })
+
+@login_required
+@require_POST
+def toggle_favorito(request):
+    contenido_id = request.POST.get('contenido_id')
+    user = request.user
+    perfil = user.perfiles.first()
+    if not perfil or not contenido_id:
+        return JsonResponse({'success': False, 'error': 'Perfil o contenido no encontrado'})
+    contenido = get_object_or_404(Contenido, pk=contenido_id)
+    favorito, created = Favorito.objects.get_or_create(perfil=perfil, contenido=contenido)
+    if not created:
+        favorito.delete()
+        return JsonResponse({'success': True, 'favorito': False})
+    return JsonResponse({'success': True, 'favorito': True})
+
+def busqueda(request):
+    query = request.GET.get('q', '').strip()
+    resultados = []
+    if query:
+        tipo = None
+        if query.lower() in ['serie', 'series']:
+            tipo = 'serie'
+        elif query.lower() in ['pelicula', 'películas', 'peliculas', 'movie', 'movies']:
+            tipo = 'pelicula'
+        filtros = Q(titulo__icontains=query) | Q(categorias__nombre__icontains=query)
+        if tipo:
+            filtros = filtros | Q(tipo=tipo)
+        resultados = Contenido.objects.filter(filtros).distinct().order_by('-id')
+    return render(request, 'myapp/busqueda.html', {'query': query, 'resultados': resultados})

@@ -30,4 +30,6 @@ urlpatterns = [
     path('password_reset/', views.password_reset_request, name='password_reset'),
     path('password_reset/confirm/<uidb64>/<token>/', views.password_reset_confirm, name='password_reset_confirm'),
     path('ver-episodio/<int:episodio_id>/', views.anime_watching, name='anime_watching'),
+    path('toggle-favorito/', views.toggle_favorito, name='toggle_favorito'),
+    path('busqueda/', views.busqueda, name='busqueda'),
 ]
