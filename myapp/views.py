@@ -282,20 +282,7 @@ def password_reset_confirm(request, uidb64, token):
 
 def anime_details(request, contenido_id):
     contenido = Contenido.objects.get(pk=contenido_id)
-    user = request.user
-    perfil = user.perfiles.first() if user.is_authenticated else None
-    if perfil:
-        episodios_vistos = list(
-            HistorialReproduccion.objects.filter(perfil=perfil, contenido=contenido)
-            .exclude(episodio=None)
-            .values_list('episodio_id', flat=True)
-        )
-    else:
-        episodios_vistos = []
-    return render(request, 'myapp/anime-details.html', {
-        'contenido': contenido,
-        'episodios_vistos': episodios_vistos
-    })
+    return render(request, 'myapp/anime-details.html', {'contenido': contenido})
 
 @login_required
 def contenido_gestion_episodios(request, contenido_id):

@@ -2680,40 +2680,6 @@ ol {
 	.anime__video__player .plyr__menu {
 		margin-right: 60px;
 	}
-	.blog__details__title h2 {
-		font-size: 30px;
-		line-height: normal;
-	}
-	.blog__details__title .blog__details__social a {
-		padding: 16px 25px 14px 20px;
-	}
-	.blog__details__comment__item.blog__details__comment__item--reply {
-		padding-left: 0;
-	}
-	.blog__details__comment__item__pic {
-		margin-right: 25px;
-	}
-	.blog__details__comment__item__text a {
-		margin-right: 6px;
-	}
-	.login__social__links ul li a {
-		left: 20px;
-	}
-	.login__form .forget_pass {
-		position: relative;
-		left: 0;
-		bottom: 0;
-		margin-top: 25px;
-	}
-	.header__right a {
-		margin-right: 10px;
-	}
-	.anime__review__item__text h6 span {
-		font-size: 12px;
-	}
-	.anime__review__item__text {
-		padding: 18px 20px 20px;
-	}
 }
 
 /* --- Migración de estilos inline de los templates HTML --- */
@@ -2926,4 +2892,341 @@ select:focus, select:active {
 }
 .anime__episode__desc strong {
   color: var(--main-purple) !important;
+}
+
+/* --- MINI-PLAYER: VIDEO Y POSTER SIEMPRE IGUAL DE GRANDES, LLENANDO EL ÁREA --- */
+.mini-player-outer {
+    aspect-ratio: 16/9;
+    width: 100%;
+    max-width: 220px;
+    min-width: 180px;
+    margin-left: auto;
+    margin-right: auto;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #181828;
+    display: flex;
+    align-items: stretch;
+    justify-content: stretch;
+    position: relative;
+}
+.mini-player-wrapper {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: stretch;
+    justify-content: stretch;
+    overflow: hidden;
+}
+.mini-player {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important; /* Mostrar la imagen completa, aunque haya barras negras */
+    object-position: center center !important;
+    border-radius: 0 !important;
+    background: #181828;
+    display: block;
+}
+.mini-player + .plyr__poster,
+.mini-player-wrapper .plyr__poster {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important; /* Mostrar la imagen completa, aunque haya barras negras */
+    object-position: center center !important;
+    background-size: contain !important;
+    background-position: center !important;
+    border-radius: 0 !important;
+    display: block;
+}
+.mini-player-wrapper .plyr {
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: 0 !important;
+    overflow: hidden;
+    background: transparent;
+    z-index: 3;
+    display: flex;
+    align-items: stretch;
+    justify-content: stretch;
+}
+.mini-player-wrapper .plyr__video-wrapper {
+    width: 100% !important;
+    height: 100% !important;
+    display: flex;
+    align-items: stretch;
+    justify-content: stretch;
+}
+.mini-player-wrapper .plyr__controls {
+    font-size: 0.95em;
+    padding: 0.15em 0.3em;
+    background: rgba(24,24,40,0.7);
+    border-radius: 0 0 8px 8px;
+    z-index: 4;
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    width: 100%;
+    box-sizing: border-box;
+    margin: 0;
+}
+.mini-player-wrapper .plyr__control {
+    min-width: 28px;
+    min-height: 28px;
+    font-size: 1em;
+}
+/* --- AJUSTE DE CARD Y MINI-PLAYER PARA MEJOR VISIBILIDAD Y PROPORCIÓN --- */
+.anime__details__episodes {
+    background: #23233a;
+    padding: 2rem 1.2rem 2rem 1.2rem;
+    border-radius: 18px;
+    box-shadow: 0 2px 12px 0 rgba(0,0,0,0.12);
+    min-width: 260px;
+    max-width: 340px;
+    margin-left: auto;
+    margin-right: auto;
+}
+.anime__details__episodes .d-flex.flex-column.gap-3 {
+    gap: 2rem !important;
+}
+.mini-player-outer {
+    aspect-ratio: 16/9;
+    width: 100%;
+    max-width: 220px;
+    min-width: 180px;
+    margin-left: auto;
+    margin-right: auto;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #181828;
+    display: flex;
+    align-items: stretch;
+    justify-content: stretch;
+    position: relative;
+}
+.mini-player-wrapper {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: stretch;
+    justify-content: stretch;
+    overflow: hidden;
+}
+.mini-player {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important; /* Mostrar la imagen completa, aunque haya barras negras */
+    object-position: center center !important;
+    border-radius: 0 !important;
+    background: #181828;
+    display: block;
+}
+.mini-player + .plyr__poster,
+.mini-player-wrapper .plyr__poster {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important; /* Mostrar la imagen completa, aunque haya barras negras */
+    object-position: center center !important;
+    background-size: contain !important;
+    background-position: center !important;
+    border-radius: 0 !important;
+    display: block;
+}
+.mini-player-wrapper .plyr {
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: 0 !important;
+    overflow: hidden;
+    background: transparent;
+    z-index: 3;
+    display: flex;
+    align-items: stretch;
+    justify-content: stretch;
+}
+.mini-player-wrapper .plyr__video-wrapper {
+    width: 100% !important;
+    height: 100% !important;
+    display: flex;
+    align-items: stretch;
+    justify-content: stretch;
+}
+.mini-player-wrapper .plyr__controls {
+    font-size: 0.95em;
+    padding: 0.15em 0.3em;
+    background: rgba(24,24,40,0.7);
+    border-radius: 0 0 8px 8px;
+    z-index: 4;
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    width: 100%;
+    box-sizing: border-box;
+    margin: 0;
+}
+.mini-player-wrapper .plyr__control {
+    min-width: 28px;
+    min-height: 28px;
+    font-size: 1em;
+}
+/* --- Portada de la descripción: mostrar siempre completa, sin recortes ni reflejos, y sin repetición visual --- */
+.anime__details__main img.img-fluid {
+    object-fit: contain !important;
+    object-position: center center !important;
+    width: 100%;
+    height: 350px;
+    max-height: 350px;
+    min-height: 320px;
+    background: transparent;
+    border-radius: 12px;
+    display: block;
+    background-repeat: no-repeat !important;
+    background-size: contain !important;
+}
+@media (max-width: 991px) {
+    .anime__details__episodes { max-width: 98vw; min-width: 0; }
+    .anime__details__episodes .mini-player-outer { max-width: 140px; min-width: 100px; }
+}
+@media (max-width: 767px) {
+    .anime__details__episodes { max-width: 100vw; min-width: 0; padding: 1rem 0.2rem; }
+    .anime__details__episodes .mini-player-outer { max-width: 100px; min-width: 70px; }
+}
+
+/* --- Estilos migrados desde anime-watching.html --- */
+.bg-purple {
+    background: var(--main-purple, #8c52ff) !important;
+    color: #fff !important;
+    font-weight: 600;
+    font-size: 1em;
+}
+.anime__video__player video, .anime__video__player iframe {
+    border-radius: 12px;
+    box-shadow: 0 4px 24px #0005;
+}
+.anime__episode__desc {
+    font-size: 1.08rem;
+}
+.plyr__video-outer, .plyr__video-outer .plyr, .plyr__video-outer video, .plyr__video-outer iframe {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100vw !important;
+    max-height: 100vh !important;
+    min-height: 320px;
+}
+.plyr--fullscreen-enabled .plyr__video-outer,
+.plyr--fullscreen-enabled .plyr__video-outer .plyr,
+.plyr--fullscreen-enabled .plyr__video-outer video,
+.plyr--fullscreen-enabled .plyr__video-outer iframe {
+    width: 100vw !important;
+    height: 100vh !important;
+    max-width: 100vw !important;
+    max-height: 100vh !important;
+    min-height: 100vh !important;
+    background: #000 !important;
+}
+@media (max-width: 991px) {
+    .anime__video__player { margin-bottom: 2rem; }
+    .anime__episode__desc, .anime__details__episodes { margin-bottom: 1.5rem; }
+    .anime__episode__desc, .anime__details__episodes { font-size: 1em; }
+    .anime__details__episodes { padding: 1rem 0.5rem; }
+}
+@media (max-width: 767px) {
+    .anime__video__player { margin-bottom: 1rem; }
+    .anime__episode__desc, .anime__details__episodes { padding: 0.5rem; font-size: 0.98em; }
+    .anime__details__episodes .list-group-item { font-size: 0.95em; }
+}
+.plyr--fullscreen-enabled .anime__episode__desc,
+.plyr--fullscreen-enabled .anime__details__episodes {
+    display: none !important;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+.plyr--fullscreen-enabled .plyr__video-outer {
+    animation: fadeInFull 0.4s;
+}
+@keyframes fadeInFull {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+.list-group-item.active, .list-group-item.active:focus, .list-group-item.active:hover {
+    background: var(--main-purple, #8c52ff) !important;
+    color: #fff !important;
+    border-color: #8c52ff !important;
+}
+.list-group-item.visto:not(.active) {
+    background: #23234a !important;
+    color: #b7b7b7 !important;
+    font-weight: 500;
+}
+.list-group-item.visto .badge.bg-success {
+    background: #4caf50 !important;
+    color: #fff;
+}
+.plyr__control[data-plyr="pip"] {
+    display: inline-flex !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* --- Botones de acción solo icono, minimalistas y adaptados al color del sitio --- */
+.anime-action-buttons .btn-action {
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    box-shadow: none;
+    margin: 0 6px 0 0;
+    transition: transform 0.12s, box-shadow 0.12s, background 0.12s, color 0.12s;
+    outline: none;
+    padding: 0;
+    background: transparent !important;
+}
+.anime-action-buttons .btn-action:last-child {
+    margin-right: 0;
+}
+.anime-action-buttons .btn-action i {
+    color: #fff !important;
+    margin: 0;
+    font-size: 1.2em;
+    vertical-align: middle;
+    transition: color 0.12s;
+}
+.anime-action-buttons .btn-action.active.btn-success,
+.anime-action-buttons .btn-action:active.btn-success {
+    background: #4caf50 !important;
+}
+.anime-action-buttons .btn-action.active.btn-danger,
+.anime-action-buttons .btn-action:active.btn-danger {
+    background: #e53935 !important;
+}
+.anime-action-buttons .btn-action.active.btn-warning,
+.anime-action-buttons .btn-action:active.btn-warning {
+    background: #ffb300 !important;
+}
+.anime-action-buttons .btn-action.active.btn-success i,
+.anime-action-buttons .btn-action:active.btn-success i {
+    color: #fff !important;
+}
+.anime-action-buttons .btn-action.active.btn-danger i,
+.anime-action-buttons .btn-action:active.btn-danger i {
+    color: #fff !important;
+}
+.anime-action-buttons .btn-action.active.btn-warning i,
+.anime-action-buttons .btn-action:active.btn-warning i {
+    color: #fff !important;
+}
+.anime-action-buttons .btn-action:active,
+.anime-action-buttons .btn-action:focus {
+    transform: scale(0.96);
+    box-shadow: 0 0 0 2px var(--main-purple, #8c52ff)33;
+    background: rgba(140,82,255,0.08);
+}
+.anime-action-buttons .btn-action:hover {
+    background: rgba(140,82,255,0.10);
+    filter: none;
+    transform: scale(1.10);
 }

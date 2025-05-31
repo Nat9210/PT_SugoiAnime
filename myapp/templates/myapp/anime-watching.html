@@ -28,10 +28,10 @@
                 <div class="anime__video__player mb-4 rounded shadow overflow-hidden plyr__video-outer">
                     {% if 'youtube.com' in episodio.video_url or 'youtu.be' in episodio.video_url %}
                         <div class="ratio ratio-16x9">
-                            <iframe id="player" width="100%" height="500" src="https://www.youtube.com/embed/{{ episodio.video_url|youtube_id }}" frameborder="0" allowfullscreen allow="fullscreen"></iframe>
+                            <iframe id="player" width="100%" height="500" src="https://www.youtube.com/embed/{{ episodio.video_url|youtube_id }}" frameborder="0" allowfullscreen allow="fullscreen picture-in-picture"></iframe>
                         </div>
                     {% else %}
-                        <video id="player" class="w-100 rounded" playsinline controls poster="{% if contenido.imagen_portada %}{{ contenido.imagen_portada.url }}{% else %}{% static 'myapp/img/default-cover.jpg' %}{% endif %}" style="background: #181828;" webkit-playsinline>
+                        <video id="player" class="w-100 rounded" playsinline controls poster="{% if contenido.imagen_portada %}{{ contenido.imagen_portada.url }}{% else %}{% static 'myapp/img/default-cover.jpg' %}{% endif %}" style="background: #181828;" webkit-playsinline allow="picture-in-picture">
                             <source src="{{ episodio.video_url }}" type="video/mp4" />
                             Tu navegador no soporta la reproducción de video.
                         </video>
@@ -71,81 +71,7 @@
 </section>
 <!-- Anime Section End -->
 
-<style>
-.bg-purple {
-    background: var(--main-purple, #8c52ff) !important;
-    color: #fff !important;
-    font-weight: 600;
-    font-size: 1em;
-}
-.anime__video__player video, .anime__video__player iframe {
-    border-radius: 12px;
-    box-shadow: 0 4px 24px #0005;
-}
-.anime__episode__desc {
-    font-size: 1.08rem;
-}
-.plyr__video-outer, .plyr__video-outer .plyr, .plyr__video-outer video, .plyr__video-outer iframe {
-    width: 100% !important;
-    height: 100% !important;
-    max-width: 100vw !important;
-    max-height: 100vh !important;
-    min-height: 320px;
-}
-.plyr--fullscreen-enabled .plyr__video-outer,
-.plyr--fullscreen-enabled .plyr__video-outer .plyr,
-.plyr--fullscreen-enabled .plyr__video-outer video,
-.plyr--fullscreen-enabled .plyr__video-outer iframe {
-    width: 100vw !important;
-    height: 100vh !important;
-    max-width: 100vw !important;
-    max-height: 100vh !important;
-    min-height: 100vh !important;
-    background: #000 !important;
-}
-/* Mejoras responsividad y fullscreen */
-@media (max-width: 991px) {
-    .anime__video__player { margin-bottom: 2rem; }
-    .anime__episode__desc, .anime__details__episodes { margin-bottom: 1.5rem; }
-    .anime__episode__desc, .anime__details__episodes { font-size: 1em; }
-    .anime__details__episodes { padding: 1rem 0.5rem; }
-}
-@media (max-width: 767px) {
-    .anime__video__player { margin-bottom: 1rem; }
-    .anime__episode__desc, .anime__details__episodes { padding: 0.5rem; font-size: 0.98em; }
-    .anime__details__episodes .list-group-item { font-size: 0.95em; }
-}
-/* Ocultar columnas en fullscreen */
-.plyr--fullscreen-enabled .anime__episode__desc,
-.plyr--fullscreen-enabled .anime__details__episodes {
-    display: none !important;
-    opacity: 0;
-    transition: opacity 0.3s;
-}
-/* Microinteracción visual fullscreen */
-.plyr--fullscreen-enabled .plyr__video-outer {
-    animation: fadeInFull 0.4s;
-}
-@keyframes fadeInFull {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-/* Mejor contraste para episodios activos/vistos */
-.list-group-item.active, .list-group-item.active:focus, .list-group-item.active:hover {
-    background: var(--main-purple, #8c52ff) !important;
-    color: #fff !important;
-    border-color: #8c52ff !important;
-}
-.list-group-item.visto:not(.active) {
-    background: #23234a !important;
-    color: #b7b7b7 !important;
-    font-weight: 500;
-}
-.list-group-item.visto .badge.bg-success {
-    background: #4caf50 !important;
-    color: #fff;
-}
-</style>
+<!-- Los estilos han sido migrados a static/myapp/css/style.css -->
 
 {% endblock %}
 

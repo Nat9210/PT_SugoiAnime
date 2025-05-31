@@ -20,14 +20,14 @@
 
 <!-- Mensajes de éxito/error Begin -->
 {% if messages %}
-  <div class="container mt-3">
+<div class="container mt-3">
     {% for message in messages %}
-      <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
         {{ message }}
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
-      </div>
+    </div>
     {% endfor %}
-  </div>
+</div>
 {% endif %}
 <!-- Mensajes de éxito/error End -->
 
@@ -38,27 +38,28 @@
             <div class="row">
                 <!-- Miniatura a la izquierda -->
                 <div class="col-lg-3 d-flex flex-column align-items-center">
-                    <div class="anime__details__pic set-bg mb-3 w-100" style="min-height: 320px; background-size: cover; background-position: center; border-radius: 8px;"
-                        data-setbg="{% if contenido.imagen_portada %}{{ contenido.imagen_portada.url }}{% else %}{% static 'myapp/img/default-cover.jpg' %}{% endif %}">
-                        <img src="{% if contenido.imagen_portada %}{{ contenido.imagen_portada.url }}{% else %}{% static 'myapp/img/default-cover.jpg' %}{% endif %}" alt="Portada" class="img-fluid rounded w-100" style="object-fit:cover; min-height: 320px; max-height: 350px;">
-                    </div>
-                    <div class="d-flex flex-wrap gap-2 justify-content-center mb-2 anime-action-buttons">
-                        <button class="btn btn-action btn-success" title="Me gusta"><i class="fa fa-thumbs-up"></i></button>
-                        <button class="btn btn-action btn-danger" title="No me gusta"><i class="fa fa-thumbs-down"></i></button>
-                        <button class="btn btn-action btn-warning text-white" title="Favorito"><i class="fa fa-star"></i> Favorito</button>
-                        {% if contenido.video_url %}
-                            <a href="{{ contenido.video_url }}" target="_blank" class="btn btn-action btn-primary" title="Ver ahora"><i class="fa fa-play"></i> Ver ahora</a>
-                        {% endif %}
+                    <div class="anime__details__pic set-bg mb-3 w-100 position-relative" style="min-height: 320px; background: transparent; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                        <img src="{% if contenido.imagen_portada %}{{ contenido.imagen_portada.url }}{% else %}{% static 'myapp/img/default-cover.jpg' %}{% endif %}"
+                            alt="Portada"
+                            class="img-fluid rounded w-100"
+                            style="object-fit: contain; object-position: center center; width: 100%; height: 350px; max-height: 350px; min-height: 320px; background: transparent; border-radius: 12px; display: block;" />
+                        <div class="d-flex flex-column align-items-center w-100" style="position: absolute; bottom: 0; left: 0;">
+                            <div class="d-flex justify-content-center gap-3 mb-2 anime-action-buttons">
+                                <button class="btn btn-action btn-success" title="Me gusta" onclick="toggleActive(this)"><i class="fa fa-thumbs-up"></i></button>
+                                <button class="btn btn-action btn-danger" title="No me gusta" onclick="toggleActive(this)"><i class="fa fa-thumbs-down"></i></button>
+                                <button class="btn btn-action btn-warning text-white" title="Favorito" onclick="toggleActive(this)"><i class="fa fa-star"></i></button>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <!-- Descripción y detalles en el centro -->
                 <div class="col-lg-6">
                     <div class="anime__details__text">
-                        <div class="anime__details__title mb-2">
-                            <h3>{{ contenido.titulo }}</h3>
+                        <div class="anime__details__title mb-2 d-flex align-items-center gap-2">
+                            <h3 class="mb-0">{{ contenido.titulo }}</h3>
                         </div>
                         <p class="mb-3">{{ contenido.descripcion }}</p>
-                        <div class="anime__details__widget mb-3">
+                        <div class="anime__details__widget mb-1">
                             <ul class="list-unstyled">
                                 <li><span>Tipo:</span> {{ contenido.get_tipo_display }}</li>
                                 <li><span>Año:</span> {{ contenido.año }}</li>
@@ -67,6 +68,24 @@
                                 <li><span>Categorías:</span> {% for cat in contenido.categorias.all %}{{ cat.nombre }}{% if not forloop.last %}, {% endif %}{% endfor %}</li>
                             </ul>
                         </div>
+                        <div class="d-flex flex-wrap gap-2 justify-content-start mb-3 anime-action-buttons">
+                            {% if contenido.video_url %}
+                                <a href="{{ contenido.video_url }}" target="_blank" class="btn btn-action btn-primary" title="Ver ahora"><i class="fa fa-play"></i> Ver ahora</a>
+                            {% endif %}
+                        </div>
+                        <script>
+                        function toggleActive(btn) {
+                            // Solo uno activo a la vez entre like/dislike, y se puede desactivar si ya está activo
+                            if (btn.classList.contains('btn-success') || btn.classList.contains('btn-danger')) {
+                                const group = btn.parentElement.querySelectorAll('.btn-success, .btn-danger');
+                                const isActive = btn.classList.contains('active');
+                                group.forEach(b => b.classList.remove('active'));
+                                if (!isActive) btn.classList.add('active');
+                            } else {
+                                btn.classList.toggle('active');
+                            }
+                        }
+                        </script>
                         {% if contenido.video_url %}
                         <div class="anime__details__video mt-4">
                             <iframe width="100%" height="300" src="{{ contenido.video_url }}" frameborder="0" allowfullscreen></iframe>
@@ -82,11 +101,15 @@
                         <div class="d-flex flex-column gap-3">
                             {% for episodio in contenido.episodio_set.all %}
                             <div class="text-center">
-                                <div class="mini-player-wrapper mb-1">
-                                    <video id="mini-player-{{ episodio.id }}" class="mini-player rounded shadow-sm" style="width: 100%; max-width: 140px; max-height: 80px; object-fit: cover; background: #181828;" poster="{% if contenido.imagen_portada %}{{ contenido.imagen_portada.url }}{% else %}{% static 'myapp/img/default-cover.jpg' %}{% endif %}" preload="none">
-                                        <source src="{{ episodio.video_url }}" type="video/mp4">
-                                    </video>
-                                </div>
+                                <a href="{% url 'anime_watching' episodio.id %}" class="mini-player-link" style="display:block;position:relative;z-index:2;">
+                                    <div class="mini-player-outer mb-1">
+                                        <div class="mini-player-wrapper">
+                                            <video id="mini-player-{{ episodio.id }}" class="mini-player rounded shadow-sm" poster="{% if contenido.imagen_portada %}{{ contenido.imagen_portada.url }}{% else %}{% static 'myapp/img/default-cover.jpg' %}{% endif %}" preload="none">
+                                                <source src="{{ episodio.video_url }}" type="video/mp4">
+                                            </video>
+                                        </div>
+                                    </div>
+                                </a>
                                 <div class="fw-bold small text-white">Ep {{ episodio.numero_episodio }} - {{ episodio.titulo }}</div>
                             </div>
                             {% endfor %}
@@ -126,15 +149,5 @@
         });
     });
 </script>
-<style>
-.mini-player-wrapper { position: relative; }
-.mini-player { border: 2px solid var(--main-purple, #8c52ff); transition: box-shadow 0.2s, border-color 0.2s; cursor: pointer; background: #181828; }
-.mini-player:hover { box-shadow: 0 0 0 4px #8c52ff44; border-color: #fff; }
-@media (max-width: 991px) {
-    .anime__details__episodes .mini-player { max-width: 100px; max-height: 60px; }
-}
-@media (max-width: 767px) {
-    .anime__details__episodes .mini-player { max-width: 80px; max-height: 48px; }
-}
-</style>
+
 {% endblock %}
