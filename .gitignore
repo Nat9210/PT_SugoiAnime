@@ -13,7 +13,7 @@ ENV/
 # Django
 *.log
 db.sqlite3
-media/
+# media/ - Comentado para permitir archivos de media estáticos
 staticfiles/
 
 # Archivos del sistema
