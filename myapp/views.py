@@ -357,10 +357,12 @@ def episodio_delete(request, episodio_id):
 
 @login_required
 def anime_watching(request, episodio_id):
+    # OPTIMIZACIÓN: Usar select_related para evitar consultas adicionales
     episodio = Episodio.objects.select_related('serie').get(pk=episodio_id)
     contenido = episodio.serie
     user = request.user
     perfil = user.perfiles.first()  # Se asume un perfil por usuario
+    
     if perfil:
         # Marcar como visto (si no existe ya un registro para este episodio y perfil)
         HistorialReproduccion.objects.get_or_create(
@@ -369,7 +371,7 @@ def anime_watching(request, episodio_id):
             episodio=episodio,
             defaults={'tiempo_reproducido': 0}
         )
-        # Obtener todos los episodios vistos de esta serie por este perfil
+        # OPTIMIZACIÓN: Obtener todos los episodios vistos de una vez
         episodios_vistos = list(
             HistorialReproduccion.objects.filter(perfil=perfil, contenido=contenido)
             .exclude(episodio=None)
@@ -377,11 +379,25 @@ def anime_watching(request, episodio_id):
         )
     else:
         episodios_vistos = []
-    return render(request, 'myapp/anime-watching.html', {
+    
+    # OPTIMIZACIÓN GRATUITA: Headers de cache para recursos estáticos
+    response = render(request, 'myapp/anime-watching.html', {
         'episodio': episodio,
         'contenido': contenido,
         'episodios_vistos': episodios_vistos
     })
+    
+    # Cache de página por 5 minutos (solo para contenido que no cambia frecuentemente)
+    response['Cache-Control'] = 'max-age=300, must-revalidate'
+    # Hint para precargar el próximo episodio
+    next_episode = Episodio.objects.filter(
+        serie=contenido, 
+        numero_episodio=episodio.numero_episodio + 1
+    ).first()
+    if next_episode:
+        response['Link'] = f'</static/myapp/css/video-optimizations.css>; rel=preload; as=style'
+    
+    return response
 
 @login_required
 @require_POST
@@ -402,13 +418,22 @@ def busqueda(request):
     query = request.GET.get('q', '').strip()
     resultados = []
     if query:
+        # Búsqueda optimizada con índices
         tipo = None
         if query.lower() in ['serie', 'series']:
             tipo = 'serie'
         elif query.lower() in ['pelicula', 'películas', 'peliculas', 'movie', 'movies']:
             tipo = 'pelicula'
-        filtros = Q(titulo__icontains=query) | Q(categorias__nombre__icontains=query)
+        
+        # Construir filtros de búsqueda optimizados
+        filtros = Q(titulo__icontains=query) | Q(descripcion__icontains=query) | Q(categorias__nombre__icontains=query)
         if tipo:
             filtros = filtros | Q(tipo=tipo)
-        resultados = Contenido.objects.filter(filtros).distinct().order_by('-id')
+        
+        # Optimizar consulta con prefetch_related y select_related
+        resultados = Contenido.objects.filter(filtros).prefetch_related('categorias').distinct().order_by('-año', '-id')
+        
+        # Limitar resultados para mejor rendimiento
+        resultados = resultados[:50]  # Máximo 50 resultados
+        
     return render(request, 'myapp/busqueda.html', {'query': query, 'resultados': resultados})

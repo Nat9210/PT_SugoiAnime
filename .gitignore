@@ -24,6 +24,14 @@ desktop.ini
 # VSCode
 .vscode/
 
+# Documentación local
+*.md
+README.md
+CARACTERISTICAS_PRINCIPALES.md
+GUIA_PRESENTACION.md
+REPORTE_FINAL_COMPLETITUD.md
+ESTADO_FINAL_VALIDACION.md
+
 # Otros
 *.sqlite3
 *.bak

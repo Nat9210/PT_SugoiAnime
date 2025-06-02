@@ -1,0 +1,405 @@
+/* Optimizaciones de rendimiento para video player */
+
+/* Preload hints para recursos críticos */
+.plyr {
+    /* Mejora el rendimiento de rendering */
+    will-change: transform;
+    contain: layout style paint;
+    /* Optimiza la carga inicial */
+    content-visibility: auto;
+}
+
+/* Loading states optimizados */
+.plyr--loading .plyr__poster {
+    /* Skeleton loading effect */
+    background: linear-gradient(90deg, 
+        rgba(255,255,255,0.1) 25%, 
+        rgba(255,255,255,0.2) 50%, 
+        rgba(255,255,255,0.1) 75%);
+    background-size: 200% 100%;
+    animation: loading-shimmer 1.5s infinite;
+}
+
+@keyframes loading-shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+/* Optimizaciones para conexiones lentas */
+@media (prefers-reduced-data: reduce) {
+    .plyr__poster {
+        /* Usa imagen más pequeña en conexiones lentas */
+        background-size: contain;
+        image-rendering: optimizeSpeed;
+    }
+}
+
+/* Hint para navegador sobre importancia de elementos */
+.plyr__video-wrapper {
+    /* Prioridad alta para el video */
+    content-visibility: auto;
+    contain-intrinsic-size: 1280px 720px;
+}
+
+/* Notificación de calidad automática */
+.quality-notification {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    background: rgba(0,0,0,0.8);
+    color: white;
+    padding: 10px 15px;
+    border-radius: 5px;
+    font-size: 14px;
+    animation: fadeInOut 3s ease-in-out;
+}
+
+@keyframes fadeInOut {
+    0%, 100% { 
+        opacity: 0; 
+        transform: translateY(-10px); 
+    }
+    20%, 80% { 
+        opacity: 1; 
+        transform: translateY(0); 
+    }
+}
+
+/* Optimización para pantallas de alta densidad */
+@media (-webkit-min-device-pixel-ratio: 2), 
+       (min-resolution: 192dpi) {
+    .plyr__controls {
+        /* Iconos más nítidos en pantallas retina */
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: crisp-edges;
+    }
+}
+
+/* Modo de bajo consumo de datos */
+.low-data-mode .plyr__poster {
+    filter: blur(1px);
+    transition: filter 0.3s ease;
+}
+
+.low-data-mode .plyr__poster:hover {
+    filter: none;
+}
+
+/* Mejoras específicas para el control de calidad */
+.plyr__menu__container .plyr__control[role="menuitemradio"] {
+    position: relative;
+    padding-left: 30px;
+}
+
+.plyr__menu__container .plyr__control[role="menuitemradio"]:before {
+    content: '';
+    position: absolute;
+    left: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: transparent;
+    transition: background-color 0.2s ease;
+    border: 1px solid rgba(255,255,255,0.3);
+}
+
+.plyr__menu__container .plyr__control[role="menuitemradio"][aria-checked="true"]:before {
+    background: #8b45ff;
+    border-color: #8b45ff;
+    box-shadow: 0 0 8px rgba(139, 69, 255, 0.5);
+}
+
+/* Notificaciones de calidad mejoradas */
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+}
+
+.quality-notification {
+    display: flex !important;
+    align-items: center;
+    gap: 8px;
+    background: rgba(139, 69, 255, 0.9) !important;
+    border: 1px solid rgba(139, 69, 255, 0.5);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    backdrop-filter: blur(10px);
+}
+
+.quality-notification i {
+    font-size: 16px;
+    color: white;
+}
+
+/* Mejoras visuales para el selector de calidad */
+.plyr__menu {
+    background: rgba(24, 24, 40, 0.95) !important;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(139, 69, 255, 0.3);
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+}
+
+/* Estilo para todos los elementos del menú */
+.plyr__menu__container .plyr__control,
+.plyr__menu__container .plyr__menu__value,
+.plyr__menu__container [role="menuitem"],
+.plyr__menu__container [role="menuitemradio"] {
+    color: white !important;
+    background: transparent !important;
+    transition: all 0.2s ease;
+    border-radius: 4px;
+    margin: 2px;
+    padding: 8px 16px !important;
+    border: none !important;
+    text-align: left;
+    font-size: 14px;
+}
+
+/* Efectos hover para elementos del menú */
+.plyr__menu__container .plyr__control:hover,
+.plyr__menu__container [role="menuitem"]:hover,
+.plyr__menu__container [role="menuitemradio"]:hover {
+    background: rgba(139, 69, 255, 0.3) !important;
+    color: #ffffff !important;
+    transform: translateX(2px);
+}
+
+/* Indicador de calidad activa */
+.plyr__menu__container .plyr__control[aria-checked="true"],
+.plyr__menu__container [role="menuitemradio"][aria-checked="true"] {
+    background: rgba(139, 69, 255, 0.4) !important;
+    color: #ffffff !important;
+    font-weight: bold;
+    border-left: 3px solid #8b45ff !important;
+}
+
+/* Estilos específicos para los títulos de las secciones */
+.plyr__menu__container .plyr__control[role="menuitem"]:first-child {
+    font-weight: bold;
+    color: #8b45ff !important;
+    background: rgba(139, 69, 255, 0.1) !important;
+    pointer-events: none;
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 1px;
+}
+
+/* Separador visual entre secciones */
+.plyr__menu__container hr {
+    border: none;
+    height: 1px;
+    background: rgba(139, 69, 255, 0.3);
+    margin: 8px 0;
+}
+
+/* Texto general del menú */
+.plyr__menu__container {
+    color: white !important;
+}
+
+/* Valores mostrados (como "720p", "1x") */
+.plyr__menu__value {
+    color: #8b45ff !important;
+    font-weight: bold;
+}
+
+/* Badge de calidad en el botón de configuración */
+.plyr__control--settings:after {
+    content: attr(data-quality);
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: linear-gradient(135deg, #8b45ff, #6a35cc);
+    color: white;
+    font-size: 10px;
+    padding: 3px 6px;
+    border-radius: 12px;
+    min-width: 25px;
+    text-align: center;
+    font-weight: bold;
+    border: 2px solid rgba(255,255,255,0.3);
+    box-shadow: 0 2px 8px rgba(139, 69, 255, 0.4);
+    z-index: 100;
+    animation: qualityPulse 2s infinite;
+}
+
+@keyframes qualityPulse {
+    0%, 100% { 
+        transform: scale(1); 
+        box-shadow: 0 2px 8px rgba(139, 69, 255, 0.4);
+    }
+    50% { 
+        transform: scale(1.1); 
+        box-shadow: 0 4px 12px rgba(139, 69, 255, 0.6);
+    }
+}
+
+/* Indicador de carga de calidad */
+.plyr--quality-changing {
+    position: relative;
+}
+
+.plyr--quality-changing:before {
+    content: 'Cambiando calidad...';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0,0,0,0.8);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    z-index: 1000;
+    font-size: 14px;
+    animation: fadeInOut 2s ease-in-out;
+}
+
+/* Estilos adicionales para garantizar visibilidad del menú */
+
+/* Forzar colores para todos los elementos posibles */
+.plyr__menu *,
+.plyr__menu__container *,
+.plyr__menu__container > * {
+    color: white !important;
+}
+
+/* Estilos específicos para elementos de lista */
+.plyr__menu__container li,
+.plyr__menu__container li button,
+.plyr__menu__container li [role="menuitemradio"],
+.plyr__menu__container li [role="menuitem"] {
+    background: transparent !important;
+    color: white !important;
+    border: none !important;
+    outline: none !important;
+}
+
+/* Hover state más fuerte */
+.plyr__menu__container li:hover,
+.plyr__menu__container li button:hover,
+.plyr__menu__container li [role="menuitemradio"]:hover,
+.plyr__menu__container li [role="menuitem"]:hover {
+    background: rgba(139, 69, 255, 0.4) !important;
+    color: #ffffff !important;
+}
+
+/* Estado activo/seleccionado */
+.plyr__menu__container li[aria-checked="true"],
+.plyr__menu__container li button[aria-checked="true"],
+.plyr__menu__container li [aria-checked="true"] {
+    background: rgba(139, 69, 255, 0.6) !important;
+    color: #ffffff !important;
+    font-weight: bold;
+}
+
+/* Fondo del menú más oscuro para mejor contraste */
+.plyr__menu,
+.plyr__menu__container {
+    background: rgba(15, 15, 25, 0.98) !important;
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(139, 69, 255, 0.5);
+}
+
+/* Texto del botón principal de configuración */
+.plyr__control--settings {
+    color: white !important;
+}
+
+/* Override para cualquier estilo heredado problemático */
+.plyr__menu__container .plyr__control[style*="color"],
+.plyr__menu__container [style*="color"] {
+    color: white !important;
+}
+
+/* PARCHE CRÍTICO: Sobrescribir estilos problemáticos de Plyr */
+
+/* Forzar estilo para el menú principal */
+.plyr__menu {
+    background: #1a1a2e !important;
+    color: white !important;
+    border: 1px solid #8b45ff !important;
+    border-radius: 8px !important;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.7) !important;
+}
+
+/* Forzar estilo para elementos del menú - MÁXIMA PRIORIDAD */
+.plyr__menu button,
+.plyr__menu .plyr__control,
+.plyr__menu [role="menuitem"],
+.plyr__menu [role="menuitemradio"],
+.plyr__menu li,
+.plyr__menu li button {
+    background: transparent !important;
+    color: #ffffff !important;
+    border: none !important;
+    text-shadow: none !important;
+    padding: 10px 16px !important;
+    font-size: 14px !important;
+    width: 100% !important;
+    text-align: left !important;
+    transition: all 0.2s ease !important;
+}
+
+/* Estados hover y activo - MÁXIMA PRIORIDAD */
+.plyr__menu button:hover,
+.plyr__menu .plyr__control:hover,
+.plyr__menu [role="menuitem"]:hover,
+.plyr__menu [role="menuitemradio"]:hover,
+.plyr__menu li:hover,
+.plyr__menu li button:hover {
+    background: rgba(139, 69, 255, 0.5) !important;
+    color: #ffffff !important;
+    transform: none !important;
+}
+
+/* Estado seleccionado - MÁXIMA PRIORIDAD */
+.plyr__menu [aria-checked="true"],
+.plyr__menu button[aria-checked="true"],
+.plyr__menu .plyr__control[aria-checked="true"] {
+    background: rgba(139, 69, 255, 0.7) !important;
+    color: #ffffff !important;
+    font-weight: bold !important;
+    border-left: 3px solid #8b45ff !important;
+}
+
+/* Eliminar cualquier background blanco problemático */
+.plyr__menu *[style*="background: white"],
+.plyr__menu *[style*="background-color: white"],
+.plyr__menu *[style*="background: #fff"],
+.plyr__menu *[style*="background-color: #fff"] {
+    background: transparent !important;
+}
+
+/* Eliminar cualquier color de texto problemático */
+.plyr__menu *[style*="color: white"] {
+    color: #ffffff !important;
+}
+
+/* Asegurar que el texto sea siempre visible */
+.plyr__menu * {
+    color: inherit !important;
+}
+
+.plyr__menu {
+    color: #ffffff !important;
+}

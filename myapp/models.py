@@ -17,7 +17,10 @@ class Perfil(models.Model):
 
 # Tabla de categorías
 class Categoria(models.Model):
-    nombre = models.CharField(max_length=100, unique=True)
+    nombre = models.CharField(max_length=100, unique=True, db_index=True)  # Índice para búsquedas por categoría
+
+    class Meta:
+        ordering = ['nombre']
 
     def __str__(self):
         return self.nombre
@@ -29,16 +32,25 @@ class Contenido(models.Model):
         ('pelicula', 'Película'),
     ]
 
-    titulo = models.CharField(max_length=255)
-    tipo = models.CharField(max_length=10, choices=TIPO_CHOICES)
+    titulo = models.CharField(max_length=255, db_index=True)  # Índice para búsquedas
+    tipo = models.CharField(max_length=10, choices=TIPO_CHOICES, db_index=True)  # Índice para filtros
     descripcion = models.TextField(blank=True)
-    año = models.PositiveIntegerField(null=True, blank=True)
+    año = models.PositiveIntegerField(null=True, blank=True, db_index=True)  # Índice para ordenamiento
     duracion = models.PositiveIntegerField(help_text="Duración en minutos", null=True, blank=True)
     idioma = models.CharField(max_length=50, blank=True)
     imagen_portada = models.ImageField(upload_to='portadas/', null=True, blank=True)
     video_url = models.URLField(max_length=1000, null=True, blank=True)
 
     categorias = models.ManyToManyField(Categoria, through='ContenidoCategoria', related_name='contenidos')
+
+    class Meta:
+        # Índices compuestos para búsquedas más eficientes
+        indexes = [
+            models.Index(fields=['titulo', 'tipo']),  # Índice compuesto para búsquedas
+            models.Index(fields=['año', '-id']),      # Índice para ordenamiento por año
+            models.Index(fields=['-id']),             # Índice para contenido más reciente
+        ]
+        ordering = ['-id']  # Ordenamiento por defecto
 
     def __str__(self):
         return self.titulo
