@@ -17,7 +17,7 @@ class Perfil(models.Model):
 
 # Tabla de categorías
 class Categoria(models.Model):
-    nombre = models.CharField(max_length=100, unique=True, db_index=True)  # Índice para búsquedas por categoría
+    nombre = models.CharField(max_length=100, unique=True, db_index=True)
 
     class Meta:
         ordering = ['nombre']
@@ -32,25 +32,23 @@ class Contenido(models.Model):
         ('pelicula', 'Película'),
     ]
 
-    titulo = models.CharField(max_length=255, db_index=True)  # Índice para búsquedas
-    tipo = models.CharField(max_length=10, choices=TIPO_CHOICES, db_index=True)  # Índice para filtros
+    titulo = models.CharField(max_length=255, db_index=True)
+    tipo = models.CharField(max_length=10, choices=TIPO_CHOICES, db_index=True)
     descripcion = models.TextField(blank=True)
-    año = models.PositiveIntegerField(null=True, blank=True, db_index=True)  # Índice para ordenamiento
+    año = models.PositiveIntegerField(null=True, blank=True, db_index=True)
     duracion = models.PositiveIntegerField(help_text="Duración en minutos", null=True, blank=True)
     idioma = models.CharField(max_length=50, blank=True)
     imagen_portada = models.ImageField(upload_to='portadas/', null=True, blank=True)
     video_url = models.URLField(max_length=1000, null=True, blank=True)
-
     categorias = models.ManyToManyField(Categoria, through='ContenidoCategoria', related_name='contenidos')
 
     class Meta:
-        # Índices compuestos para búsquedas más eficientes
         indexes = [
-            models.Index(fields=['titulo', 'tipo']),  # Índice compuesto para búsquedas
-            models.Index(fields=['año', '-id']),      # Índice para ordenamiento por año
-            models.Index(fields=['-id']),             # Índice para contenido más reciente
+            models.Index(fields=['titulo', 'tipo']),
+            models.Index(fields=['año', '-id']),
+            models.Index(fields=['-id']),
         ]
-        ordering = ['-id']  # Ordenamiento por defecto
+        ordering = ['-id']
 
     def __str__(self):
         return self.titulo
@@ -67,11 +65,21 @@ class Episodio(models.Model):
     numero_episodio = models.PositiveIntegerField()
     titulo = models.CharField(max_length=255)
     duracion = models.PositiveIntegerField(help_text="Duración en minutos")
-    video_url = models.URLField(max_length=1000)
+    video_url = models.URLField(max_length=1000, blank=True, null=True)
+    video_file = models.FileField(upload_to='videos/', blank=True, null=True)
     descripcion = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return f"T{self.temporada}E{self.numero_episodio} - {self.titulo}"
+    
+    @property
+    def video_source(self):
+        """Devuelve la fuente de video prioritaria"""
+        if self.video_file and self.video_file.name:
+            return self.video_file.url
+        elif self.video_url:
+            return self.video_url
+        return ""
 
 # Historial de reproducción por perfil
 class HistorialReproduccion(models.Model):

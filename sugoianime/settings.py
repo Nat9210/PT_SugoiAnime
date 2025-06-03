@@ -45,7 +45,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'myapp',  # App principal
-    'sslserver',  # Agregada la app sslserver para desarrollo con HTTPS
 ]
 
 MIDDLEWARE = [

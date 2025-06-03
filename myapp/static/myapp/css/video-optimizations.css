@@ -403,3 +403,47 @@
 .plyr__menu {
     color: #ffffff !important;
 }
+
+/* ====== OPTIMIZACIONES PARA VIDEOS S3 ====== */
+
+/* Optimizaciones para videos de S3 */
+.plyr__video-outer {
+    position: relative;
+    overflow: hidden;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Mejoras visuales para el player */
+video#player {
+    width: 100%;
+    max-width: 100%;
+    background-color: #000;
+    transition: opacity 0.3s ease;
+}
+
+/* Animación de carga para videos */
+.plyr--loading::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(139, 69, 255, 0.3);
+    border-top: 3px solid #8b45ff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    z-index: 10;
+}
+
+@keyframes spin {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Estado de buffering - Sin mostrar mensaje */
+.plyr--buffering::after {
+    display: none; /* Ocultar completamente el mensaje de carga */
+}
