@@ -24,6 +24,8 @@
 8.  Latest Section
 9.  Contact
 10.  Footer Style
+11. Perfil Section
+12. Migración de estilos inline
 -------------------------------------------------------------------*/
 
 /*----------------------------------------*/
@@ -31,12 +33,16 @@
 /* Template default CSS
 /*----------------------------------------*/
 
+:root {
+	--main-purple: #8c52ff;
+}
+
 html,
 body {
 	height: 100%;
 	font-family: "Mulish", sans-serif;
 	-webkit-font-smoothing: antialiased;
-	background: #0b0c2a;
+	background: #1a1919 !important;
 }
 
 h1,
@@ -134,7 +140,7 @@ ol {
 	top: -6px;
 	height: 32px;
 	width: 4px;
-	background: #8c52ff;
+	background: var(--main-purple);
 	content: "";
 }
 
@@ -171,6 +177,8 @@ ol {
 	text-transform: uppercase;
 	color: #ffffff;
 	letter-spacing: 2px;
+	background: var(--main-purple) !important;
+	border-color: var(--main-purple) !important;
 }
 
 .primary-btn span {
@@ -183,7 +191,7 @@ ol {
 .site-btn {
 	font-size: 13px;
 	color: #ffffff;
-	background: #8c52ff;
+	background: var(--main-purple) !important;
 	font-weight: 700;
 	border: none;
 	border-radius: 2px;
@@ -191,6 +199,38 @@ ol {
 	text-transform: uppercase;
 	display: inline-block;
 	padding: 12px 30px;
+}
+
+/* Danger buttons */
+
+.btn-danger, .btn-danger:focus, .btn-danger:active {
+	color: #fff;
+	background-color: #dc3545 !important;
+	border-color: #dc3545 !important;
+}
+
+.btn-danger:hover {
+	color: #fff;
+	background-color: #a71d2a !important;
+	border-color: #a71d2a !important;
+}
+
+/* Botón morado personalizado */
+.btn-purple, .btn-purple:focus, .btn-purple:active {
+	color: #fff;
+	background-color: #8c52ff;
+	border-color: #8c52ff;
+}
+.btn-purple:hover {
+	color: #fff;
+	background-color: #6d3fcf;
+	border-color: #6d3fcf;
+}
+
+/* Excepción: Botón Google mantiene su color original */
+.login__social__links ul li a.google {
+	background: #ff4343 !important;
+	border-color: #ff4343 !important;
 }
 
 /* Preloder */
@@ -222,7 +262,7 @@ ol {
 	0% {
 		-webkit-transform: rotate(0deg);
 		transform: rotate(0deg);
-		border: 4px solid #f44336;
+		border: 4px solid #ff66c4;
 		border-left-color: transparent;
 	}
 	50% {
@@ -234,7 +274,7 @@ ol {
 	100% {
 		-webkit-transform: rotate(360deg);
 		transform: rotate(360deg);
-		border: 4px solid #f44336;
+		border: 4px solid #5ce1e6;
 		border-left-color: transparent;
 	}
 }
@@ -242,7 +282,7 @@ ol {
 @-webkit-keyframes loader {
 	0% {
 		-webkit-transform: rotate(0deg);
-		border: 4px solid #f44336;
+		border: 4px solid #ff66c4;
 		border-left-color: transparent;
 	}
 	50% {
@@ -252,7 +292,7 @@ ol {
 	}
 	100% {
 		-webkit-transform: rotate(360deg);
-		border: 4px solid #f44336;
+		border: 4px solid #5ce1e6;
 		border-left-color: transparent;
 	}
 }
@@ -327,7 +367,7 @@ ol {
 -----------------------*/
 
 .header {
-	background: #070720;
+	background: linear-gradient(180deg, rgba(0,0,0,0.7) 0%, rgba(84,84,84,0.5) 60%, rgba(84,84,84,0) 100%) !important;
 }
 
 .header__logo {
@@ -338,34 +378,57 @@ ol {
 	display: inline-block;
 }
 
+.header__logo img {
+	max-width: 140px !important;
+	min-width: 140px !important;
+	width: 140px !important;
+	height: auto !important;
+	display: block !important;
+}
+
+.header__nav {
+	display: flex;
+	align-items: center;
+	height: 100%;
+	justify-content: center;
+}
+
 .header__menu {
-	text-align: center;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+}
+
+.header__menu ul {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	margin: 0;
+	padding: 0;
 }
 
 .header__menu ul li {
 	list-style: none;
 	display: inline-block;
 	position: relative;
-	margin-right: 16px;
+	margin-right: 24px;
 }
 
 .header__menu ul li.active a {
-	background: #8c52ff;
-	color: #ffffff;
+	background: rgba(140, 82, 255, 0.15) !important;
+	color: #fff;
 }
 
 .header__menu ul li:hover a {
-	color: #ffffff;
+	background: rgba(140, 82, 255, 0.15) !important;
+	color: #fff;
 }
 
-.header__menu ul li:hover .dropdown {
-	top: 62px;
-	opacity: 1;
-	visibility: visible;
-}
-
-.header__menu ul li:hover .dropdown li a {
-	background: transparent;
+.header__menu ul li:focus a {
+	background: rgba(140, 82, 255, 0.15) !important;
+	color: #fff;
 }
 
 .header__menu ul li:last-child {
@@ -373,11 +436,14 @@ ol {
 }
 
 .header__menu ul li .dropdown {
+	display: block;
+	flex-direction: column;
 	position: absolute;
 	left: 0;
 	top: 82px;
-	width: 150px;
-	background: #ffffff;
+	width: 170px;
+	background: #232323;
+	color: #fff;
 	text-align: left;
 	padding: 5px 0;
 	z-index: 9;
@@ -386,18 +452,39 @@ ol {
 	-webkit-transition: all, 0.3s;
 	-o-transition: all, 0.3s;
 	transition: all, 0.3s;
+	box-shadow: 0 4px 16px #0002;
+	border-radius: 0 0 8px 8px;
 }
 
 .header__menu ul li .dropdown li {
 	display: block;
-	margin-right: 0;
+	width: 100%;
+	margin: 0;
 }
 
 .header__menu ul li .dropdown li a {
-	font-size: 14px;
-	color: #111111;
+	display: block;
+	width: 100%;
+	font-size: 15px;
+	color: #fff !important;
+	background: transparent !important;
 	font-weight: 500;
-	padding: 5px 20px;
+	padding: 10px 24px;
+	border: none;
+	text-align: left;
+	transition: background 0.2s, color 0.2s;
+}
+
+/* Solo para Series y Películas: fondo transparente incluso en hover */
+.header__menu ul li .dropdown li a[href="#"]:hover {
+    background: var(--main-purple) !important;
+    color: #fff !important;
+}
+
+/* Si quieres que solo el texto cambie a morado en hover, pero sin fondo */
+.header__menu ul li .dropdown li a:hover {
+    background: var(--main-purple) !important;
+    color: #fff !important;
 }
 
 .header__menu ul li a {
@@ -405,10 +492,27 @@ ol {
 	color: #b7b7b7;
 	display: block;
 	font-weight: 700;
-	-webkit-transition: all, 0.5s;
-	-o-transition: all, 0.5s;
-	transition: all, 0.5s;
+	background: transparent !important;
+	border: none;
+	box-shadow: none;
+	transition: background 0.3s, color 0.3s;
 	padding: 20px;
+}
+
+.header__menu ul li a[href$='index/'],
+.header__menu ul li.active a[href$='index/'],
+.header__menu ul li a[href$='index/'] {
+    background: transparent !important;
+    color: #fff;
+    box-shadow: none;
+}
+
+.header__menu ul li a[href$='categories/'],
+.header__menu ul li.active a[href$='categories/'],
+.header__menu ul li a[href$='categories/'] {
+    background: transparent !important;
+    color: #fff;
+    box-shadow: none;
 }
 
 .header__menu ul li a span {
@@ -420,6 +524,32 @@ ol {
 .header__right {
 	text-align: right;
 	padding: 20px 0 15px;
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 10px;
+}
+
+.header__right .search-switch {
+	order: 1;
+	margin-right: 0;
+}
+
+.header__profile-dropdown {
+	order: 2;
+	margin-left: 10px;
+}
+
+@media (max-width: 991px) {
+	.header__right {
+		flex-direction: column;
+		align-items: flex-end;
+		gap: 0;
+	}
+	.header__profile-dropdown {
+		margin-left: 0;
+		margin-top: 10px;
+	}
 }
 
 .header__right a {
@@ -435,6 +565,107 @@ ol {
 
 .slicknav_menu {
 	display: none;
+}
+
+.header__profile-dropdown {
+	position: relative;
+	display: inline-block;
+}
+
+.header-profile-icon {
+	color: #fff;
+	font-size: 20px;
+	cursor: pointer;
+	text-decoration: none;
+	padding: 8px 16px;
+	border-radius: 4px;
+	background: var(--main-purple);
+	transition: background 0.3s;
+}
+
+.header-profile-icon:hover {
+	background: #6d3fcf;
+}
+
+.header-dropdown-menu {
+	display: none;
+	position: absolute;
+	right: 0;
+	background: #232323;
+	min-width: 160px;
+	box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+	z-index: 10;
+	border-radius: 4px;
+	margin-top: 8px;
+	padding: 0;
+}
+
+.header__profile-dropdown:hover .header-dropdown-menu,
+.header__profile-dropdown:focus-within .header-dropdown-menu {
+	display: block;
+}
+
+.header-dropdown-menu li {
+	list-style: none;
+}
+
+.header-dropdown-menu li a {
+	color: #fff;
+	padding: 12px 16px;
+	text-decoration: none;
+	display: block;
+	border-bottom: 1px solid #333;
+	transition: background 0.2s;
+}
+
+.header-dropdown-menu li:last-child a {
+	border-bottom: none;
+}
+
+.header-dropdown-menu li a:hover {
+	background: var(--main-purple);
+}
+
+.header-avatar {
+	width: 32px;
+	height: 32px;
+	border-radius: 50%;
+	object-fit: cover;
+	vertical-align: middle;
+}
+
+.header-avatar {
+    cursor: pointer;
+    width: 54px;
+    height: 54px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 2px solid var(--main-purple);
+    transition: box-shadow .18s;
+    box-shadow: 0 2px 12px #0005;
+}
+
+.header-avatar:hover {
+    box-shadow: 0 4px 24px #8c52ff55;
+}
+
+.header-hello {
+	color: #fff;
+	font-weight: 600;
+	margin-right: 10px;
+	vertical-align: middle;
+}
+
+@media (max-width: 991px) {
+	.header__nav, .header__menu, .header__menu ul {
+		flex-direction: column;
+		align-items: flex-start;
+		width: 100%;
+	}
+	.header__menu ul li {
+		margin-right: 0;
+		margin-bottom: 10px;
+	}
 }
 
 /*---------------------
@@ -457,7 +688,7 @@ ol {
 
 .hero__text .label {
 	font-size: 13px;
-	color: #8c52ff;
+	color: var(--main-purple);
 	background: #ffffff;
 	padding: 5px 14px 3px;
 	display: inline-block;
@@ -509,7 +740,7 @@ ol {
 .hero__text a span {
 	font-size: 13px;
 	color: #ffffff;
-	background: #8c52ff;
+	background: var(--main-purple) !important;
 	display: inline-block;
 	font-weight: 700;
 	letter-spacing: 2px;
@@ -522,7 +753,7 @@ ol {
 .hero__text a i {
 	font-size: 20px;
 	display: inline-block;
-	background: #8c52ff;
+	background: var(--main-purple) !important;
 	padding: 11px 5px 16px 8px;
 	color: #ffffff;
 	border-radius: 0 4px 4px 0;
@@ -660,7 +891,7 @@ ol {
 .product__item__pic .ep {
 	font-size: 13px;
 	color: #ffffff;
-	background: #8c52ff;
+	background: var(--main-purple) !important;
 	display: inline-block;
 	padding: 2px 12px;
 	border-radius: 4px;
@@ -734,7 +965,7 @@ ol {
 	top: -6px;
 	height: 32px;
 	width: 4px;
-	background: #8c52ff;
+	background: var(--main-purple);
 	content: "";
 }
 
@@ -776,7 +1007,7 @@ ol {
 .product__sidebar__view__item .ep {
 	font-size: 13px;
 	color: #ffffff;
-	background: #8c52ff;
+	background: var(--main-purple) !important;
 	display: inline-block;
 	padding: 2px 12px;
 	border-radius: 4px;
@@ -1064,7 +1295,7 @@ ol {
 .anime__details__btn .follow-btn {
 	font-size: 13px;
 	color: #ffffff;
-	background: #8c52ff;
+	background: var(--main-purple) !important;
 	display: inline-block;
 	font-weight: 700;
 	letter-spacing: 2px;
@@ -1077,7 +1308,7 @@ ol {
 .anime__details__btn .watch-btn span {
 	font-size: 13px;
 	color: #ffffff;
-	background: #8c52ff;
+	background: var(--main-purple) !important;
 	display: inline-block;
 	font-weight: 700;
 	letter-spacing: 2px;
@@ -1090,7 +1321,7 @@ ol {
 .anime__details__btn .watch-btn i {
 	font-size: 20px;
 	display: inline-block;
-	background: #8c52ff;
+	background: var(--main-purple) !important;
 	padding: 11px 5px 16px 8px;
 	color: #ffffff;
 	border-radius: 0 4px 4px 0;
@@ -1172,7 +1403,7 @@ ol {
 	font-weight: 700;
 	letter-spacing: 2px;
 	text-transform: uppercase;
-	background: #8c52ff;
+	background: var(--main-purple) !important;
 	border: none;
 	padding: 10px 15px;
 	border-radius: 2px;
@@ -1306,7 +1537,7 @@ ol {
 
 .breadcrumb__links a i {
 	margin-right: 5px;
-	color: #8c52ff;
+	color: var(--main-purple) !important;
 }
 
 .breadcrumb__links a:after {
@@ -1403,7 +1634,7 @@ ol {
 }
 
 .blog__item__text p span {
-	color: #8c52ff;
+	color: var(--main-purple) !important;
 	margin-right: 5px;
 }
 
@@ -1633,7 +1864,7 @@ ol {
 }
 
 .blog__details__comment__item__text a:hover {
-	background: #8c52ff;
+	background: var(--main-purple) !important;
 }
 
 .blog__details__form {
@@ -1823,7 +2054,7 @@ ol {
 }
 
 .login__register .primary-btn {
-	background: #8c52ff;
+	background: var(--main-purple) !important;
 	padding: 12px 42px;
 }
 
@@ -1872,7 +2103,8 @@ ol {
 }
 
 .login__social__links ul li a.google {
-	background: #ff4343;
+	background: #ff4343 !important;
+	border-color: #ff4343 !important;
 }
 
 .login__social__links ul li a.twitter {
@@ -1906,7 +2138,7 @@ ol {
 }
 
 .signup .login__form h5 a {
-	color: #8c52ff;
+	color: var(--main-purple) !important;
 	font-weight: 700;
 }
 
@@ -1932,7 +2164,7 @@ ol {
 -----------------------*/
 
 .footer {
-	background: #070720;
+	background: linear-gradient(0deg, rgba(0,0,0,0.7) 0%, rgba(84,84,84,0.5) 60%, rgba(84,84,84,0) 100%) !important;
 	padding-top: 60px;
 	padding-bottom: 40px;
 	position: relative;
@@ -1951,7 +2183,7 @@ ol {
 	color: #ffffff;
 	height: 50px;
 	width: 50px;
-	background: #8c52ff;
+	background: var(--main-purple) !important;
 	line-height: 50px;
 	text-align: center;
 	border-radius: 50%;
@@ -1985,6 +2217,10 @@ ol {
 	font-weight: 700;
 }
 
+.footer__nav ul li a:hover {
+	color: #ffffff;
+}
+
 .footer__copyright__text {
 	color: #b7b7b7;
 	margin-bottom: 0;
@@ -1992,7 +2228,168 @@ ol {
 }
 
 .footer__copyright__text a {
-	color: #8c52ff;
+	color: var(--main-purple) !important;
+}
+
+.footer__profile-dropdown {
+	position: relative;
+	display: inline-block;
+	margin-top: 20px;
+}
+
+.footer-profile-icon {
+	color: #fff;
+	font-size: 20px;
+	cursor: pointer;
+	text-decoration: none;
+	padding: 8px 16px;
+	border-radius: 4px;
+	background: var(--main-purple);
+	transition: background 0.3s;
+}
+
+.footer-profile-icon:hover {
+	background: #6d3fcf;
+}
+
+.footer-dropdown-menu {
+	display: none;
+	position: absolute;
+	right: 0;
+	background: #232323;
+	min-width: 160px;
+	box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+	z-index: 1;
+	border-radius: 4px;
+	margin-top: 8px;
+	padding: 0;
+}
+
+.footer__profile-dropdown:hover .footer-dropdown-menu,
+.footer__profile-dropdown:focus-within .footer-dropdown-menu {
+	display: block;
+}
+
+.footer-dropdown-menu li {
+	list-style: none;
+}
+
+.footer-dropdown-menu li a {
+	color: #fff;
+	padding: 12px 16px;
+	text-decoration: none;
+	display: block;
+	border-bottom: 1px solid #333;
+	transition: background 0.2s;
+}
+
+.footer-dropdown-menu li:last-child a {
+	border-bottom: none;
+}
+
+.footer-dropdown-menu li a:hover {
+	background: var(--main-purple);
+}
+
+/*---------------------
+  Perfil
+-----------------------*/
+
+.perfil-container {
+	display: flex;
+	min-height: 60vh;
+	margin-top: 40px;
+	gap: 32px;
+}
+
+.perfil-sidebar {
+	width: 260px;
+	background: rgba(44, 44, 44, 0.95);
+	border-radius: 12px;
+	padding: 32px 16px 24px 16px;
+	box-shadow: 0 2px 16px rgba(0,0,0,0.12);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+.perfil-avatar-box {
+	text-align: center;
+	margin-bottom: 32px;
+}
+
+.perfil-avatar {
+	width: 100px;
+	height: 100px;
+	border-radius: 50%;
+	object-fit: cover;
+	border: 3px solid var(--main-purple);
+	margin-bottom: 12px;
+}
+
+.perfil-hola {
+	color: #fff;
+	font-size: 1.2rem;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+.perfil-menu {
+	width: 100%;
+}
+
+.perfil-menu ul {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+
+.perfil-menu-link {
+	display: block;
+	padding: 12px 18px;
+	color: #fff;
+	border-radius: 6px;
+	margin-bottom: 8px;
+	text-decoration: none;
+	font-weight: 500;
+	background: transparent;
+	transition: background 0.2s, color 0.2s;
+}
+
+.perfil-menu-link.active,
+.perfil-menu-link:hover {
+	background: var(--main-purple);
+	color: #fff;
+}
+
+.perfil-main {
+	flex: 1;
+	background: rgba(255,255,255,0.01);
+	border-radius: 12px;
+	padding: 32px 24px;
+	color: #fff;
+	min-width: 0;
+}
+
+.perfil-bienvenida h3 {
+	color: var(--main-purple);
+	font-weight: 700;
+}
+
+@media (max-width: 900px) {
+	.perfil-container {
+		flex-direction: column;
+		gap: 0;
+	}
+	.perfil-sidebar {
+		width: 100%;
+		flex-direction: row;
+		justify-content: center;
+		padding: 24px 0;
+	}
+	.perfil-main {
+		padding: 24px 8px;
+	}
 }
 
 /*--------------------------------- Responsive Media Quaries -----------------------------*/
@@ -2305,38 +2702,624 @@ ol {
 	.anime__video__player .plyr__menu {
 		margin-right: 60px;
 	}
-	.blog__details__title h2 {
-		font-size: 30px;
-		line-height: normal;
-	}
-	.blog__details__title .blog__details__social a {
-		padding: 16px 25px 14px 20px;
-	}
-	.blog__details__comment__item.blog__details__comment__item--reply {
-		padding-left: 0;
-	}
-	.blog__details__comment__item__pic {
-		margin-right: 25px;
-	}
-	.blog__details__comment__item__text a {
-		margin-right: 6px;
-	}
-	.login__social__links ul li a i {
-		left: 20px;
-	}
-	.login__form .forget_pass {
-		position: relative;
-		left: 0;
-		bottom: 0;
-		margin-top: 25px;
-	}
-	.header__right a {
-		margin-right: 10px;
-	}
-	.anime__review__item__text h6 span {
-		font-size: 12px;
-	}
-	.anime__review__item__text {
-		padding: 18px 20px 20px;
-	}
+}
+
+/* --- Migración de estilos inline de los templates HTML --- */
+
+.titulo-gestor {
+  color: #8c52ff;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 30px;
+  letter-spacing: 1px;
+}
+.titulo-gestor-mb {
+  color: #8c52ff;
+  font-weight: bold;
+  margin-bottom: 24px;
+  letter-spacing: 1px;
+}
+.header__profile-dropdown {
+  display: inline-block;
+  position: relative;
+}
+.header-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  vertical-align: middle;
+}
+.footer-final {
+  color: #fff;
+}
+.form-max-500 {
+  max-width: 500px;
+  margin-top: 32px;
+}
+.form-max-400 {
+  max-width: 400px;
+}
+.form-max-600 {
+  max-width: 600px;
+  margin: auto;
+  color: #fff;
+}
+.form-flex-col {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+.label-bold-white {
+  font-weight: bold;
+  color: #fff;
+}
+.full-width {
+  width: 100%;
+}
+.text-purple {
+  color: #8c52ff;
+}
+.text-muted {
+  color: #888;
+  font-size: 0.9em;
+}
+.img-max-200 {
+  max-width: 200px;
+}
+
+/* Agranda los iconos de redes sociales del footer */
+.footer__social a i {
+    font-size: 1.3rem !important;
+    margin: 0 8px;
+    vertical-align: middle;
+}
+
+.activation-message {
+    background: #23233a;
+    border-radius: 10px;
+    box-shadow: 0 2px 12px #0002;
+    padding: 32px 24px;
+}
+.activation-title {
+    color: #8c52ff;
+}
+.activation-desc {
+    color: #b7b7b7;
+}
+
+.header__menu ul li:hover > .dropdown,
+.header__menu ul li:focus-within > .dropdown {
+    opacity: 1;
+    visibility: visible;
+}
+
+@media (max-width: 991px) {
+    .header__menu {
+        width: 100%;
+    }
+    #mainMenu {
+        display: none;
+        background: #232323;
+        border-radius: 0 0 12px 12px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+        padding-bottom: 16px;
+        margin-top: 8px;
+    }
+    #mainMenu.show {
+        display: block !important;
+    }
+    #mainMenu ul {
+        flex-direction: column !important;
+        align-items: flex-start;
+        width: 100%;
+    }
+    #mainMenu ul li {
+        width: 100%;
+        margin: 0;
+    }
+    #mainMenu ul li a {
+        width: 100%;
+        padding: 18px 28px;
+        font-size: 1.08rem;
+    }
+    #mobile-extras {
+        display: block !important;
+        margin-top: 10px;
+        padding: 0 18px;
+    }
+    .header__profile-dropdown {
+        width: 100%;
+        margin-top: 10px;
+    }
+    .header__profile-dropdown .header-dropdown-menu {
+        position: static;
+        min-width: 100%;
+        box-shadow: none;
+        border-radius: 8px;
+        margin-top: 0;
+    }
+}
+
+.footer__logo img {
+    max-width: 140px;
+    min-width: 140px;
+    width: 140px;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+}
+@media (max-width: 991px) {
+    .footer__logo img {
+        max-width: 120px;
+        min-width: 100px;
+        width: 100%;
+    }
+}
+
+select, select.form-control {
+    background-color: #222 !important;
+    color: #fff !important;
+    border: 1px solid #8c52ff !important;
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    box-shadow: none !important;
+}
+select option {
+    background-color: #222 !important;
+    color: #fff !important;
+}
+
+.titulo-gestor, .titulo-gestor-mb, .perfil-bienvenida h3, .perfil-main h3, .perfil-main h2 {
+    color: var(--main-purple) !important;
+    font-weight: 700;
+}
+
+.form-label.label-bold-white, label, legend, h5, h4, h6 {
+    color: #fff !important;
+    font-weight: 600;
+}
+
+input, textarea, .form-control {
+    background-color: #222 !important;
+    color: #fff !important;
+    border: 1px solid #444 !important;
+}
+
+.form-group label, .form-group legend {
+    color: #fff !important;
+}
+
+.perfil-bienvenida h5, .perfil-bienvenida label, .perfil-bienvenida legend {
+    color: #fff !important;
+    font-weight: 600;
+}
+
+/* Forzar color en selects incluso en Chrome/Edge */
+select:focus, select:active {
+    background-color: #222 !important;
+    color: #fff !important;
+}
+
+/* Mejora visibilidad descripción en anime-watching */
+.anime__episode__desc p {
+  color: #fff !important;
+  font-size: 1.1rem;
+  background: rgba(140,82,255,0.10);
+  border-left: 4px solid var(--main-purple);
+  padding: 10px 16px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
+.anime__episode__desc strong {
+  color: var(--main-purple) !important;
+}
+
+/* --- MINI-PLAYER: VIDEO Y POSTER SIEMPRE IGUAL DE GRANDES, LLENANDO EL ÁREA --- */
+.mini-player-outer {
+    aspect-ratio: 16/9;
+    width: 100%;
+    max-width: 220px;
+    min-width: 180px;
+    margin-left: auto;
+    margin-right: auto;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #181828;
+    display: flex;
+    align-items: stretch;
+    justify-content: stretch;
+    position: relative;
+}
+.mini-player-wrapper {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: stretch;
+    justify-content: stretch;
+    overflow: hidden;
+}
+.mini-player {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important; /* Mostrar la imagen completa, aunque haya barras negras */
+    object-position: center center !important;
+    border-radius: 0 !important;
+    background: #181828;
+    display: block;
+}
+.mini-player + .plyr__poster,
+.mini-player-wrapper .plyr__poster {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important; /* Mostrar la imagen completa, aunque haya barras negras */
+    object-position: center center !important;
+    background-size: contain !important;
+    background-position: center !important;
+    border-radius: 0 !important;
+    display: block;
+}
+.mini-player-wrapper .plyr {
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: 0 !important;
+    overflow: hidden;
+    background: transparent;
+    z-index: 3;
+    display: flex;
+    align-items: stretch;
+    justify-content: stretch;
+}
+.mini-player-wrapper .plyr__video-wrapper {
+    width: 100% !important;
+    height: 100% !important;
+    display: flex;
+    align-items: stretch;
+    justify-content: stretch;
+}
+.mini-player-wrapper .plyr__controls {
+    font-size: 0.95em;
+    padding: 0.15em 0.3em;
+    background: rgba(24,24,40,0.7);
+    border-radius: 0 0 8px 8px;
+    z-index: 4;
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    width: 100%;
+    box-sizing: border-box;
+    margin: 0;
+}
+.mini-player-wrapper .plyr__control {
+    min-width: 28px;
+    min-height: 28px;
+    font-size: 1em;
+}
+/* --- AJUSTE DE CARD Y MINI-PLAYER PARA MEJOR VISIBILIDAD Y PROPORCIÓN --- */
+.anime__details__episodes {
+    background: #23233a;
+    padding: 2rem 1.2rem 2rem 1.2rem;
+    border-radius: 18px;
+    box-shadow: 0 2px 12px 0 rgba(0,0,0,0.12);
+    min-width: 260px;
+    max-width: 340px;
+    margin-left: auto;
+    margin-right: auto;
+}
+.anime__details__episodes .d-flex.flex-column.gap-3 {
+    gap: 2rem !important;
+}
+.mini-player-outer {
+    aspect-ratio: 16/9;
+    width: 100%;
+    max-width: 220px;
+    min-width: 180px;
+    margin-left: auto;
+    margin-right: auto;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #181828;
+    display: flex;
+    align-items: stretch;
+    justify-content: stretch;
+    position: relative;
+}
+.mini-player-wrapper {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: stretch;
+    justify-content: stretch;
+    overflow: hidden;
+}
+.mini-player {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important; /* Mostrar la imagen completa, aunque haya barras negras */
+    object-position: center center !important;
+    border-radius: 0 !important;
+    background: #181828;
+    display: block;
+}
+.mini-player + .plyr__poster,
+.mini-player-wrapper .plyr__poster {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important; /* Mostrar la imagen completa, aunque haya barras negras */
+    object-position: center center !important;
+    background-size: contain !important;
+    background-position: center !important;
+    border-radius: 0 !important;
+    display: block;
+}
+.mini-player-wrapper .plyr {
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: 0 !important;
+    overflow: hidden;
+    background: transparent;
+    z-index: 3;
+    display: flex;
+    align-items: stretch;
+    justify-content: stretch;
+}
+.mini-player-wrapper .plyr__video-wrapper {
+    width: 100% !important;
+    height: 100% !important;
+    display: flex;
+    align-items: stretch;
+    justify-content: stretch;
+}
+.mini-player-wrapper .plyr__controls {
+    font-size: 0.95em;
+    padding: 0.15em 0.3em;
+    background: rgba(24,24,40,0.7);
+    border-radius: 0 0 8px 8px;
+    z-index: 4;
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    width: 100%;
+    box-sizing: border-box;
+    margin: 0;
+}
+.mini-player-wrapper .plyr__control {
+    min-width: 28px;
+    min-height: 28px;
+    font-size: 1em;
+}
+/* --- Portada de la descripción: mostrar siempre completa, sin recortes ni reflejos, y sin repetición visual --- */
+.anime__details__main img.img-fluid {
+    object-fit: contain !important;
+    object-position: center center !important;
+    width: 100%;
+    height: 350px;
+    max-height: 350px;
+    min-height: 320px;
+    background: transparent;
+    border-radius: 12px;
+    display: block;
+    background-repeat: no-repeat !important;
+    background-size: contain !important;
+}
+@media (max-width: 991px) {
+    .anime__details__episodes { max-width: 98vw; min-width: 0; }
+    .anime__details__episodes .mini-player-outer { max-width: 140px; min-width: 100px; }
+}
+@media (max-width: 767px) {
+    .anime__details__episodes { max-width: 100vw; min-width: 0; padding: 1rem 0.2rem; }
+    .anime__details__episodes .mini-player-outer { max-width: 100px; min-width: 70px; }
+}
+
+/* --- Estilos migrados desde anime-watching.html --- */
+.bg-purple {
+    background: var(--main-purple, #8c52ff) !important;
+    color: #fff !important;
+    font-weight: 600;
+    font-size: 1em;
+}
+.anime__video__player video, .anime__video__player iframe {
+    border-radius: 12px;
+    box-shadow: 0 4px 24px #0005;
+}
+.anime__episode__desc {
+    font-size: 1.08rem;
+}
+.plyr__video-outer, .plyr__video-outer .plyr, .plyr__video-outer video, .plyr__video-outer iframe {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100vw !important;
+    max-height: 100vh !important;
+    min-height: 320px;
+}
+.plyr--fullscreen-enabled .plyr__video-outer,
+.plyr--fullscreen-enabled .plyr__video-outer .plyr,
+.plyr--fullscreen-enabled .plyr__video-outer video,
+.plyr--fullscreen-enabled .plyr__video-outer iframe {
+    width: 100vw !important;
+    height: 100vh !important;
+    max-width: 100vw !important;
+    max-height: 100vh !important;
+    min-height: 100vh !important;
+    background: #000 !important;
+}
+@media (max-width: 991px) {
+    .anime__video__player { margin-bottom: 2rem; }
+    .anime__episode__desc, .anime__details__episodes { margin-bottom: 1.5rem; }
+    .anime__episode__desc, .anime__details__episodes { font-size: 1em; }
+    .anime__details__episodes { padding: 1rem 0.5rem; }
+}
+@media (max-width: 767px) {
+    .anime__video__player { margin-bottom: 1rem; }
+    .anime__episode__desc, .anime__details__episodes { padding: 0.5rem; font-size: 0.98em; }
+    .anime__details__episodes .list-group-item { font-size: 0.95em; }
+}
+.plyr--fullscreen-enabled .anime__episode__desc,
+.plyr--fullscreen-enabled .anime__details__episodes {
+    display: none !important;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+.plyr--fullscreen-enabled .plyr__video-outer {
+    animation: fadeInFull 0.4s;
+}
+@keyframes fadeInFull {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+.list-group-item.active, .list-group-item.active:focus, .list-group-item.active:hover {
+    background: var(--main-purple, #8c52ff) !important;
+    color: #fff !important;
+    border-color: #8c52ff !important;
+}
+.list-group-item.visto:not(.active) {
+    background: #23234a !important;
+    color: #b7b7b7 !important;
+    font-weight: 500;
+}
+.list-group-item.visto .badge.bg-success {
+    background: #4caf50 !important;
+    color: #fff;
+}
+.plyr__control[data-plyr="pip"] {
+    display: inline-flex !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* --- Botones de acción solo icono, minimalistas y adaptados al color del sitio --- */
+.anime-action-buttons .btn-action {
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    box-shadow: none;
+    margin: 0 6px 0 0;
+    transition: transform 0.12s, box-shadow 0.12s, background 0.12s, color 0.12s;
+    outline: none;
+    padding: 0;
+    background: transparent !important;
+}
+.anime-action-buttons .btn-action:last-child {
+    margin-right: 0;
+}
+.anime-action-buttons .btn-action i {
+    color: #fff !important;
+    margin: 0;
+    font-size: 1.2em;
+    vertical-align: middle;
+    transition: color 0.12s;
+}
+.anime-action-buttons .btn-action.active.btn-success,
+.anime-action-buttons .btn-action:active.btn-success {
+    background: #4caf50 !important;
+}
+.anime-action-buttons .btn-action.active.btn-danger,
+.anime-action-buttons .btn-action:active.btn-danger {
+    background: #e53935 !important;
+}
+.anime-action-buttons .btn-action.active.btn-warning,
+.anime-action-buttons .btn-action:active.btn-warning {
+    background: #ffb300 !important;
+}
+.anime-action-buttons .btn-action.active.btn-success i,
+.anime-action-buttons .btn-action:active.btn-success i {
+    color: #fff !important;
+}
+.anime-action-buttons .btn-action.active.btn-danger i,
+.anime-action-buttons .btn-action:active.btn-danger i {
+    color: #fff !important;
+}
+.anime-action-buttons .btn-action.active.btn-warning i,
+.anime-action-buttons .btn-action:active.btn-warning i {
+    color: #fff !important;
+}
+.anime-action-buttons .btn-action:active,
+.anime-action-buttons .btn-action:focus {
+    transform: scale(0.96);
+    box-shadow: 0 0 0 2px var(--main-purple, #8c52ff)33;
+    background: rgba(140,82,255,0.08);
+}
+.anime-action-buttons .btn-action:hover {
+    background: rgba(140,82,255,0.10);
+    filter: none;
+    transform: scale(1.10);
+}
+
+/* Dropdown perfil estático */
+.header__profile-dropdown {
+    position: relative;
+}
+.header__profile-dropdown .header-avatar {
+    cursor: pointer;
+}
+.header__profile-dropdown .header-dropdown-menu {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 110%;
+    min-width: 180px;
+    background: #181828; /* igual que el menú de categorías */
+    border-radius: 10px;
+    box-shadow: 0 8px 32px #0007;
+    z-index: 1200;
+    padding: 0.5rem 0;
+    list-style: none;
+}
+.header__profile-dropdown.open .header-dropdown-menu {
+    display: block;
+}
+.header__profile-dropdown .header-dropdown-menu li a {
+    color: #fff;
+    padding: 10px 18px;
+    display: block;
+    text-decoration: none;
+    transition: background .15s;
+}
+.header__profile-dropdown .header-dropdown-menu li a:hover {
+    background: var(--main-purple);
+    color: #fff;
+}
+
+.dropdown-categorias-multicol {
+    columns: 3;
+    -webkit-columns: 3;
+    -moz-columns: 3;
+    min-width: 420px;
+    max-width: 700px;
+    padding: 1.2rem 1.5rem;
+    background: #181828 !important;
+    border-radius: 10px;
+    box-shadow: 0 8px 32px #0007;
+    z-index: 1200;
+    list-style: none;
+}
+.dropdown-categorias-multicol li {
+    break-inside: avoid;
+    -webkit-column-break-inside: avoid;
+    page-break-inside: avoid;
+    margin-bottom: 0.7rem;
+    white-space: normal;
+}
+.dropdown-categorias-multicol li a {
+    color: #fff !important;
+    padding: 10px 18px;
+    display: block;
+    text-decoration: none;
+    border-radius: 6px;
+    transition: background .15s;
+    font-size: 16px;
+    font-weight: 500;
+    background: transparent !important;
+}
+.dropdown-categorias-multicol li a:hover {
+    background: var(--main-purple) !important;
+    color: #fff !important;
 }

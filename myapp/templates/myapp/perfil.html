@@ -5,7 +5,7 @@
 <div class="perfil-container">
     <aside class="perfil-sidebar">
         <div class="perfil-avatar-box">
-            <img src="{% if perfil.avatar %}{{ perfil.avatar.url }}{% else %}{% static 'myapp/img/default-avatar.png' %}{% endif %}" class="perfil-avatar" alt="Avatar">
+            <img src="{% if perfil.avatar %}{{ perfil.avatar.url }}{% else %}{% static 'myapp/img/avatars/avatar.png' %}{% endif %}" class="perfil-avatar" alt="Avatar">
             <h2 class="perfil-hola">¡Hola, {{ request.user.username }}!</h2>
         </div>
         <nav class="perfil-menu">

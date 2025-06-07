@@ -28,8 +28,12 @@ urlpatterns = [
     path('activar/<uidb64>/<token>/', views.activate_account, name='activate_account'),
     # Password Reset
     path('password_reset/', views.password_reset_request, name='password_reset'),
-    path('password_reset/confirm/<uidb64>/<token>/', views.password_reset_confirm, name='password_reset_confirm'),
-    path('ver-episodio/<int:episodio_id>/', views.anime_watching, name='anime_watching'),
+    path('password_reset/confirm/<uidb64>/<token>/', views.password_reset_confirm, name='password_reset_confirm'),    path('ver-episodio/<int:episodio_id>/', views.anime_watching, name='anime_watching'),
     path('toggle-favorito/', views.toggle_favorito, name='toggle_favorito'),
+    # Sistema de Rating/Like-Dislike
+    path('toggle-like/', views.toggle_like, name='toggle_like'),
+    path('toggle-dislike/', views.toggle_dislike, name='toggle_dislike'),
+    path('get-user-rating/<int:contenido_id>/', views.get_user_rating, name='get_user_rating'),
+    path('get-content-ratings/<int:contenido_id>/', views.get_content_ratings, name='get_content_ratings'),
     path('busqueda/', views.busqueda, name='busqueda'),
 ]

@@ -8,7 +8,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 from .forms import ContenidoForm, UserUpdateForm, PerfilUpdateForm, EpisodioForm
-from .models import Contenido, Categoria, Episodio, ContenidoCategoria, Perfil, HistorialReproduccion, Favorito
+from .models import Contenido, Categoria, Episodio, ContenidoCategoria, Perfil, HistorialReproduccion, Favorito, Comentario
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from django.template.loader import render_to_string
@@ -437,3 +437,115 @@ def busqueda(request):
         resultados = resultados[:50]  # Máximo 50 resultados
         
     return render(request, 'myapp/busqueda.html', {'query': query, 'resultados': resultados})
+
+# SISTEMA DE RATING/LIKE-DISLIKE
+@login_required
+@require_POST
+def toggle_like(request):
+    """Función para dar like a un contenido usando el modelo Comentario con calificación 4-5"""
+    contenido_id = request.POST.get('contenido_id')
+    user = request.user
+    perfil = user.perfiles.first()
+    
+    if not perfil or not contenido_id:
+        return JsonResponse({'success': False, 'error': 'Perfil o contenido no encontrado'})
+    
+    contenido = get_object_or_404(Contenido, pk=contenido_id)
+    
+    # Buscar si ya existe un comentario/rating de este usuario para este contenido
+    comentario_existente = Comentario.objects.filter(perfil=perfil, contenido=contenido).first()
+    
+    if comentario_existente:
+        # Si ya existe y es un like (calificación 4-5), lo removemos (toggle off)
+        if comentario_existente.calificacion >= 4:
+            comentario_existente.delete()
+            return JsonResponse({'success': True, 'liked': False, 'disliked': False})
+        else:
+            # Si era un dislike, lo cambiamos a like
+            comentario_existente.calificacion = 4
+            comentario_existente.comentario = "Like"
+            comentario_existente.save()
+            return JsonResponse({'success': True, 'liked': True, 'disliked': False})
+    else:
+        # Crear nuevo like
+        Comentario.objects.create(
+            perfil=perfil,
+            contenido=contenido,
+            comentario="Like",
+            calificacion=4
+        )
+        return JsonResponse({'success': True, 'liked': True, 'disliked': False})
+
+@login_required
+@require_POST
+def toggle_dislike(request):
+    """Función para dar dislike a un contenido usando el modelo Comentario con calificación 1-2"""
+    contenido_id = request.POST.get('contenido_id')
+    user = request.user
+    perfil = user.perfiles.first()
+    
+    if not perfil or not contenido_id:
+        return JsonResponse({'success': False, 'error': 'Perfil o contenido no encontrado'})
+    
+    contenido = get_object_or_404(Contenido, pk=contenido_id)
+    
+    # Buscar si ya existe un comentario/rating de este usuario para este contenido
+    comentario_existente = Comentario.objects.filter(perfil=perfil, contenido=contenido).first()
+    
+    if comentario_existente:
+        # Si ya existe y es un dislike (calificación 1-2), lo removemos (toggle off)
+        if comentario_existente.calificacion <= 2:
+            comentario_existente.delete()
+            return JsonResponse({'success': True, 'liked': False, 'disliked': False})
+        else:
+            # Si era un like, lo cambiamos a dislike
+            comentario_existente.calificacion = 2
+            comentario_existente.comentario = "Dislike"
+            comentario_existente.save()
+            return JsonResponse({'success': True, 'liked': False, 'disliked': True})
+    else:
+        # Crear nuevo dislike
+        Comentario.objects.create(
+            perfil=perfil,
+            contenido=contenido,
+            comentario="Dislike",
+            calificacion=2
+        )
+        return JsonResponse({'success': True, 'liked': False, 'disliked': True})
+
+@login_required
+def get_user_rating(request, contenido_id):
+    """Función para obtener el rating actual del usuario para un contenido específico"""
+    user = request.user
+    perfil = user.perfiles.first()
+    
+    if not perfil:
+        return JsonResponse({'success': False, 'error': 'Perfil no encontrado'})
+    
+    contenido = get_object_or_404(Contenido, pk=contenido_id)
+    comentario = Comentario.objects.filter(perfil=perfil, contenido=contenido).first()
+    
+    if comentario:
+        if comentario.calificacion >= 4:
+            return JsonResponse({'success': True, 'liked': True, 'disliked': False})
+        elif comentario.calificacion <= 2:
+            return JsonResponse({'success': True, 'liked': False, 'disliked': True})
+        else:
+            return JsonResponse({'success': True, 'liked': False, 'disliked': False})
+    else:
+        return JsonResponse({'success': True, 'liked': False, 'disliked': False})
+
+def get_content_ratings(request, contenido_id):
+    """Función para obtener estadísticas de rating de un contenido"""
+    contenido = get_object_or_404(Contenido, pk=contenido_id)
+    
+    # Contar likes (calificación 4-5) y dislikes (calificación 1-2)
+    likes = Comentario.objects.filter(contenido=contenido, calificacion__gte=4).count()
+    dislikes = Comentario.objects.filter(contenido=contenido, calificacion__lte=2).count()
+    
+    return JsonResponse({
+        'success': True, 
+        'likes': likes, 
+        'dislikes': dislikes,
+        'total_ratings': likes + dislikes
+    })

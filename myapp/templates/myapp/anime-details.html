@@ -45,8 +45,8 @@
                             style="object-fit: contain; object-position: center center; width: 100%; height: 350px; max-height: 350px; min-height: 320px; background: transparent; border-radius: 12px; display: block;" />
                         <div class="d-flex flex-column align-items-center w-100" style="position: absolute; bottom: 0; left: 0;">
                             <div class="d-flex justify-content-center gap-3 mb-2 anime-action-buttons">
-                                <button class="btn btn-action btn-success" title="Me gusta" onclick="toggleActive(this)"><i class="fa fa-thumbs-up"></i></button>
-                                <button class="btn btn-action btn-danger" title="No me gusta" onclick="toggleActive(this)"><i class="fa fa-thumbs-down"></i></button>
+                                <button id="btn-like" class="btn btn-action btn-success" title="Me gusta" onclick="toggleLike(this)" data-contenido-id="{{ contenido.id }}"><i class="fa fa-thumbs-up"></i></button>
+                                <button id="btn-dislike" class="btn btn-action btn-danger" title="No me gusta" onclick="toggleDislike(this)" data-contenido-id="{{ contenido.id }}"><i class="fa fa-thumbs-down"></i></button>
                                 <button id="btn-favorito" class="btn btn-action btn-warning text-white{% if es_favorito %} active{% endif %}" title="Favorito" onclick="toggleFavorito(this)" data-contenido-id="{{ contenido.id }}"><i class="fa fa-star"></i></button>
                             </div>
                         </div>
@@ -74,17 +74,109 @@
                             {% endif %}
                         </div>
                         <script>
-                        function toggleActive(btn) {
-                            // Solo uno activo a la vez entre like/dislike, y se puede desactivar si ya está activo
-                            if (btn.classList.contains('btn-success') || btn.classList.contains('btn-danger')) {
-                                const group = btn.parentElement.querySelectorAll('.btn-success, .btn-danger');
-                                const isActive = btn.classList.contains('active');
-                                group.forEach(b => b.classList.remove('active'));
-                                if (!isActive) btn.classList.add('active');
-                            } else {
-                                btn.classList.toggle('active');
+                        // Función helper para obtener CSRF token
+                        function getCookie(name) {
+                            let cookieValue = null;
+                            if (document.cookie && document.cookie !== '') {
+                                const cookies = document.cookie.split(';');
+                                for (let i = 0; i < cookies.length; i++) {
+                                    const cookie = cookies[i].trim();
+                                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                                        break;
+                                    }
+                                }
                             }
+                            return cookieValue;
                         }
+
+                        // SISTEMA DE RATING/LIKE-DISLIKE
+                        function toggleLike(btn) {
+                            const contenidoId = btn.getAttribute('data-contenido-id');
+                            const csrftoken = getCookie('csrftoken');
+                            
+                            fetch('{% url "toggle_like" %}', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/x-www-form-urlencoded',
+                                    'X-CSRFToken': csrftoken
+                                },
+                                body: 'contenido_id=' + encodeURIComponent(contenidoId)
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    // Actualizar botón de like
+                                    btn.classList.toggle('active', data.liked);
+                                    // Actualizar botón de dislike
+                                    const dislikeBtn = document.getElementById('btn-dislike');
+                                    dislikeBtn.classList.toggle('active', data.disliked);
+                                    
+                                    // Actualizar contadores si es necesario
+                                    updateRatingCounts(contenidoId);
+                                }
+                            })
+                            .catch(error => console.error('Error:', error));
+                        }
+
+                        function toggleDislike(btn) {
+                            const contenidoId = btn.getAttribute('data-contenido-id');
+                            const csrftoken = getCookie('csrftoken');
+                            
+                            fetch('{% url "toggle_dislike" %}', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/x-www-form-urlencoded',
+                                    'X-CSRFToken': csrftoken
+                                },
+                                body: 'contenido_id=' + encodeURIComponent(contenidoId)
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    // Actualizar botón de dislike
+                                    btn.classList.toggle('active', data.disliked);
+                                    // Actualizar botón de like
+                                    const likeBtn = document.getElementById('btn-like');
+                                    likeBtn.classList.toggle('active', data.liked);
+                                    
+                                    // Actualizar contadores si es necesario
+                                    updateRatingCounts(contenidoId);
+                                }
+                            })
+                            .catch(error => console.error('Error:', error));
+                        }
+
+                        function updateRatingCounts(contenidoId) {
+                            // Función para actualizar los contadores de likes/dislikes (opcional)
+                            fetch(`/get-content-ratings/${contenidoId}/`)
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    // Aquí se pueden mostrar los contadores si se agregan al HTML
+                                    console.log(`Likes: ${data.likes}, Dislikes: ${data.dislikes}`);
+                                }
+                            })
+                            .catch(error => console.error('Error:', error));
+                        }
+
+                        // Cargar estado inicial de ratings al cargar la página
+                        document.addEventListener('DOMContentLoaded', function() {
+                            const contenidoId = document.getElementById('btn-like').getAttribute('data-contenido-id');
+                            
+                            fetch(`/get-user-rating/${contenidoId}/`)
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    const likeBtn = document.getElementById('btn-like');
+                                    const dislikeBtn = document.getElementById('btn-dislike');
+                                    
+                                    likeBtn.classList.toggle('active', data.liked);
+                                    dislikeBtn.classList.toggle('active', data.disliked);
+                                }
+                            })
+                            .catch(error => console.error('Error:', error));
+                        });
                         </script>
                         {% if contenido.video_url %}
                         <div class="anime__details__video mt-4">
@@ -150,20 +242,6 @@
     });
 </script>
 <script>
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
-}
 function toggleFavorito(btn) {
     const contenidoId = btn.getAttribute('data-contenido-id');
     const csrftoken = getCookie('csrftoken');

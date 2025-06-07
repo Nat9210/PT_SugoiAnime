@@ -19,27 +19,12 @@
             </div>
             <div class="col-lg-8">
                 <nav class="header__menu" id="mainMenu">
-                    <ul class="flex-lg-row flex-column">
-                        <li class="active"><a href="{% url 'index' %}">Inicio</a></li>
-                        <li class="menu-item-has-children">
-                            <a href="{% url 'categories' %}">Categorías <span class="arrow_carrot-down"></span></a>
-                            <ul class="dropdown dropdown-categorias-multicol">
-                                <li><a href="{% url 'categories' %}">Catálogo completo</a></li>
-                                {% for categoria in categorias_menu %}
-                                    <li><a href="{% url 'categories' %}?cat={{ categoria.id }}">{{ categoria.nombre }}</a></li>
-                                {% endfor %}
-                            </ul>
-                        </li>
-                        <!--<li><a href="{% url 'blog' %}">Our Blog</a></li>-->
-                        <li class="header__account d-none"><a href="#">Cuenta <span class="arrow_carrot-down"></span></a></li>
-                    </ul>
                     <!-- Buscador y perfil en móvil -->
                     <div class="d-lg-none mt-3" id="mobile-extras" style="display:none;">
-                        <a href="#" class="search-switch mb-2 d-block"><span class="icon_search"></span> Buscar</a>
-                        <div class="header__profile-dropdown mt-2">
+                        <a href="#" class="search-switch mb-2 d-block"><span class="icon_search"></span> Buscar</a>                        <div class="header__profile-dropdown mt-2">
                             {% if request.user.is_authenticated %}
                                 {% with perfil=request.user.perfiles.first %}
-                                    <img src="{% if perfil and perfil.avatar %}{{ perfil.avatar.url }}{% else %}{% static 'myapp/img/default-avatar.png' %}{% endif %}" class="header-avatar" alt="Avatar">
+                                    <img src="{% if perfil and perfil.avatar %}{{ perfil.avatar.url }}{% else %}{% static 'myapp/img/avatars/avatar.png' %}{% endif %}" class="header-avatar" alt="Avatar">
                                 {% endwith %}
                             {% else %}
                                 <a href="#" class="header-profile-icon"><span class="icon_profile"></span></a>
@@ -58,15 +43,28 @@
                             </ul>
                         </div>
                     </div>
+                    <ul class="flex-lg-row flex-column">
+                        <li class="active"><a href="{% url 'index' %}">Inicio</a></li>
+                        <li class="menu-item-has-children">
+                            <a href="{% url 'categories' %}">Categorías <span class="arrow_carrot-down"></span></a>
+                            <ul class="dropdown dropdown-categorias-multicol">
+                                <li><a href="{% url 'categories' %}">Catálogo completo</a></li>
+                                {% for categoria in categorias_menu %}
+                                    <li><a href="{% url 'categories' %}?cat={{ categoria.id }}">{{ categoria.nombre }}</a></li>
+                                {% endfor %}
+                            </ul>
+                        </li>
+                        <!--<li><a href="{% url 'blog' %}">Our Blog</a></li>-->
+                        <li class="header__account d-none"><a href="#">Cuenta <span class="arrow_carrot-down"></span></a></li>
+                    </ul>                   
                 </nav>
             </div>
             <div class="col-lg-2 d-none d-lg-block">
                 <div class="header__right">
-                    <a href="#" class="search-switch"><span class="icon_search"></span></a>
-                    <div class="header__profile-dropdown" id="profileDropdown">
+                    <a href="#" class="search-switch"><span class="icon_search"></span></a>                    <div class="header__profile-dropdown" id="profileDropdown">
                         {% if request.user.is_authenticated %}
                             {% with perfil=request.user.perfiles.first %}
-                                <img src="{% if perfil and perfil.avatar %}{{ perfil.avatar.url }}{% else %}{% static 'myapp/img/default-avatar.png' %}{% endif %}" class="header-avatar" alt="Avatar" id="profileAvatar">
+                                <img src="{% if perfil and perfil.avatar %}{{ perfil.avatar.url }}{% else %}{% static 'myapp/img/avatars/avatar.png' %}{% endif %}" class="header-avatar" alt="Avatar" id="profileAvatar">
                             {% endwith %}
                         {% else %}
                             <a href="#" class="header-profile-icon"><span class="icon_profile"></span></a>

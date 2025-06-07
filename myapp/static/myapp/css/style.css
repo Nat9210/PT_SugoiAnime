@@ -378,6 +378,14 @@ ol {
 	display: inline-block;
 }
 
+.header__logo img {
+	max-width: 140px !important;
+	min-width: 140px !important;
+	width: 140px !important;
+	height: auto !important;
+	display: block !important;
+}
+
 .header__nav {
 	display: flex;
 	align-items: center;
