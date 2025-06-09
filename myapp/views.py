@@ -27,60 +27,96 @@ from django.db.models import Q
 
 # Vistas que solo renderizan plantillas estáticas, sin conexión a la base de datos
 
+# Vista principal
 @login_required
 def index(request):
     contenidos = Contenido.objects.all().order_by('-id')[:12]  # últimos 12 contenidos
     return render(request, 'myapp/index.html', {'contenidos': contenidos})
 
+# Vista detalle de contenido
 @login_required
 def render_anime_details(request):
     return render(request, 'myapp/anime-details.html')
 
+# Vista de reproducción de contenido
 @login_required
 def render_anime_watching(request):
     return render(request, 'myapp/anime-watching.html')
 
+# Vista de blog y detalles del blog, sin función
 @login_required
 def render_blog_details(request):
     return render(request, 'myapp/blog-details.html')
 
+# Vista de blog, sin función
 @login_required
 def render_blog(request):
     return render(request, 'myapp/blog.html')
 
+# Vistas de login y signup, sin conexión a la base de datos
 def render_login(request):
     return render(request, 'myapp/login.html')
 
 def render_signup(request):
     return render(request, 'myapp/signup.html')
 
+# vistas renderizadas con conexión a la base de datos
+
+# Vista para renderizar categorías con filtrado y ordenamiento
 @login_required
 def render_categories(request):
     cat_id = request.GET.get('cat')
-    ordenar = request.GET.get('ordenar', 'nombre_asc')
+    tipo = request.GET.get('tipo')
+    
+    # Parámetros de ordenamiento separados
+    orden_titulo = request.GET.get('orden_titulo') 
+    orden_año = request.GET.get('orden_año')
+    
     qs = Contenido.objects.all()
+    
+    # Filtros
     if cat_id:
         qs = qs.filter(categorias__id=cat_id)
-    # Ordenamiento
-    if ordenar == 'nombre_asc':
-        qs = qs.order_by('titulo')
-    elif ordenar == 'nombre_desc':
-        qs = qs.order_by('-titulo')
-    elif ordenar == 'anio_asc':
-        qs = qs.order_by('año')  # corregido: el campo es 'año'
-    elif ordenar == 'anio_desc':
-        qs = qs.order_by('-año')  # corregido: el campo es 'año'
-    else:
-        qs = qs.order_by('-id')
-    categorias = Categoria.objects.all()
-    return render(request, 'myapp/categories.html', {'contenidos': qs, 'categorias': categorias})
+    if tipo:
+        qs = qs.filter(tipo=tipo)
 
+    # Orden dinámico
+    order_fields = []
+
+    # Orden por título
+    if orden_titulo == 'asc':
+        order_fields.append('titulo')
+    elif orden_titulo == 'desc':
+        order_fields.append('-titulo')
+
+    # Orden por año
+    if orden_año == 'asc':
+        order_fields.append('año')  
+    elif orden_año == 'desc':
+        order_fields.append('-año')
+    
+    # Aplicar ordenamiento
+    if order_fields:
+        qs = qs.order_by(*order_fields)
+    else:
+        qs = qs.order_by('-id')  # lo más reciente por defecto
+
+    categorias = Categoria.objects.all()
+    return render(request, 'myapp/categories.html', {
+        'contenidos': qs, 
+        'categorias': categorias,
+        'orden_titulo': orden_titulo,  
+        'orden_año': orden_año
+    })
+
+# Vista del catálogo
 @login_required
 def render_catalogo(request):
     return render(request, 'myapp/catalogo.html')
 
 #vistas conectadas a la base de datos
-@login_required
+## Vista del perfil del usuario
+@login_required 
 def perfil_view(request):
     user = request.user
     seccion = request.GET.get('seccion', 'datos')
@@ -93,7 +129,7 @@ def perfil_view(request):
     perfil_form = PerfilUpdateForm(instance=perfil)
     contenidos = None
     favoritos = None
-    if seccion == 'gestion' and user.is_staff:
+    if seccion == 'gestion' and user.is_staff: # solo admin.
         contenidos = Contenido.objects.all()
     if seccion == 'favoritos':
         favoritos = Favorito.objects.filter(perfil=perfil).select_related('contenido').order_by('-fecha_agregado')
@@ -115,6 +151,7 @@ def perfil_view(request):
         'favoritos': favoritos,
     })
 
+# Función para manejar la vista de inicio de sesión
 def login_view(request):
     if request.method == 'POST':
         username = request.POST['username']
@@ -127,6 +164,7 @@ def login_view(request):
             return render(request, 'myapp/login.html', {'error': 'Usuario o contraseña incorrectas'})
     return render(request, 'myapp/login.html')
 
+# Validacion de contraseña
 def validate_password_strength(password):
     if len(password) < 8:
         return 'La contraseña debe tener al menos 8 caracteres.'
@@ -140,6 +178,7 @@ def validate_password_strength(password):
         return 'La contraseña debe contener al menos un carácter especial.'
     return None
 
+# Función para manejar la vista de registro de nuevos usuarios
 def signup_view(request):
     if request.method == 'POST':
         username = request.POST['username']
@@ -157,14 +196,17 @@ def signup_view(request):
         if password_error:
             return render(request, 'myapp/signup.html', {'error': password_error})
         user = User.objects.create_user(username=username, email=email, password=password)
-        user.is_active = False
+        user.is_active =  False  # El usuario INACTIVO hasta confirmacion con email
         user.save()
+        
         # Enviar email de activación
         current_site = get_current_site(request)
         subject = 'Activa tu cuenta en SugoiAnime'
+        # token de activación de nuevo usuario
         token = default_token_generator.make_token(user)
         uid = urlsafe_base64_encode(force_bytes(user.pk))
-        activation_link = f"http://{current_site.domain}/activar/{uid}/{token}/"
+        # link para activar la cuenta
+        activation_link = f"http://{current_site.domain}/activar/{uid}/{token}/" # URL de activación unica
         message = render_to_string('myapp/activation_email.html', {
             'user': user,
             'activation_link': activation_link,
@@ -173,19 +215,22 @@ def signup_view(request):
         return render(request, 'myapp/signup.html', {'success': 'Revisa tu correo para activar tu cuenta.'})
     return render(request, 'myapp/signup.html')
 
+# Función para activar la cuenta del usuario
 def activate_account(request, uidb64, token):
     try:
         uid = force_str(urlsafe_base64_decode(uidb64))
         user = User.objects.get(pk=uid)
     except (TypeError, ValueError, OverflowError, User.DoesNotExist):
         user = None
+    # Verificar el token de activación
     if user is not None and default_token_generator.check_token(user, token):
-        user.is_active = True
+        user.is_active = True # ACTIVA la cuenta del usuario
         user.save()
         return redirect('login')
     else:
         return render(request, 'myapp/activation_invalid.html')
 
+# Función para cerrar sesión
 def logout_view(request):
     logout(request)
     return redirect('login')
@@ -251,6 +296,7 @@ def contenido_delete(request, pk):
         return redirect('contenido_list')
     return render(request, 'myapp/contenido_confirm_delete.html', {'contenido': contenido})
 
+# Función de solicitud el restablecimiento de contraseña
 def password_reset_request(request):
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -262,9 +308,10 @@ def password_reset_request(request):
             return render(request, 'myapp/password_reset_request.html', {'error': 'Usuario o email incorrecto'})
         current_site = get_current_site(request)
         subject = 'Recupera tu contraseña en SugoiAnime'
+        # token de restablecimiento de contraseña
         token = default_token_generator.make_token(user)
         uid = urlsafe_base64_encode(force_bytes(user.pk))
-        reset_link = f"http://{current_site.domain}{reverse('password_reset_confirm', kwargs={'uidb64': uid, 'token': token})}"
+        reset_link = f"http://{current_site.domain}{reverse('password_reset_confirm', kwargs={'uidb64': uid, 'token': token})}" # URL de restablecimiento de contraseña
         message = render_to_string('myapp/password_reset_email.html', {
             'user': user,
             'reset_link': reset_link,
@@ -273,21 +320,28 @@ def password_reset_request(request):
         return render(request, 'myapp/password_reset_request.html', {'success': 'Revisa tu correo para restablecer tu contraseña.'})
     return render(request, 'myapp/password_reset_request.html')
 
-
+# Confirmación de restablecimiento de contraseña
 def password_reset_confirm(request, uidb64, token):
     User = get_user_model()
+    # Intentar decodificar el uidb64 para obtener el ID del usuario
     try:
         uid = force_str(urlsafe_base64_decode(uidb64))
         user = User.objects.get(pk=uid)
+    # Si el usuario no existe o el token es inválido, mostrar un mensaje de error  
     except (TypeError, ValueError, OverflowError, User.DoesNotExist):
-        user = None
+        user = None  
+    # Verificar el token de restablecimiento de contraseña
     if user is not None and default_token_generator.check_token(user, token):
         if request.method == 'POST':
+            # Si el token es válido, permitir al usuario restablecer su contraseña
             password1 = request.POST.get('password1')
             password2 = request.POST.get('password2')
+            # Validar que las contraseñas coincidan y sean fuertes
             if password1 != password2:
-                return render(request, 'myapp/password_reset_confirm.html', {'validlink': True, 'error': 'Las contraseñas no coinciden.'})
+                return render(request, 'myapp/password_reset_confirm.html', 
+                            {'validlink': True, 'error': 'Las contraseñas no coinciden.'})
             password_error = validate_password_strength(password1)
+            # Validar la fortaleza de la contraseña
             if password_error:
                 return render(request, 'myapp/password_reset_confirm.html', {'validlink': True, 'error': password_error})
             user.set_password(password1)

@@ -99,7 +99,6 @@ class Favorito(models.Model):
 class Comentario(models.Model):
     perfil = models.ForeignKey(Perfil, on_delete=models.CASCADE)
     contenido = models.ForeignKey(Contenido, on_delete=models.CASCADE)
-    comentario = models.TextField()
     calificacion = models.IntegerField(choices=[(i, str(i)) for i in range(1, 6)])
     fecha = models.DateTimeField(auto_now_add=True)
 

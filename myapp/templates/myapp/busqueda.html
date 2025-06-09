@@ -4,39 +4,34 @@
 {% block content %}
 <div class="container mt-5">
     <h2 class="text-purple mb-4">Resultados de búsqueda</h2>
-    <form method="get" action="{% url 'busqueda' %}" class="mb-4">
+    <!--<form method="get" action="{% url 'busqueda' %}" class="mb-4">
         <input type="text" name="q" value="{{ query }}" placeholder="Buscar anime, película..." class="form-control form-control-lg" style="max-width:400px;display:inline-block;">
         <button type="submit" class="btn btn-purple ms-2">Buscar</button>
-    </form>
-    {% if query and resultados %}
+    </form>-->
+    {% if query %>
         <div class="row g-4">
             {% for contenido in resultados %}
             <div class="col-12 col-sm-6 col-md-4 col-lg-3">
                 <div class="product__item">
-                    <div class="product__item__pic set-bg position-relative" data-setbg="{% if contenido.imagen_portada %}{{ contenido.imagen_portada.url }}{% else %}{% static 'myapp/img/default-cover.jpg' %}{% endif %}" style="background-image:url('{% if contenido.imagen_portada %}{{ contenido.imagen_portada.url }}{% else %}{% static 'myapp/img/default-cover.jpg' %}{% endif %}'); background-size:cover; background-position:center; height:370px; border-radius:14px;">
-                        <div class="ep bg-purple text-white px-3 py-1 rounded position-absolute" style="top:16px; left:16px; font-size:1em; font-weight:600;">{{ contenido.duracion|default_if_none:'?' }} min</div>
+                    <div class="product__item__pic set-bg position-relative" data-setbg="{% if contenido.imagen_portada %}{{ contenido.imagen_portada.url }}{% else %}{% static 'myapp/img/anime/details-pic.jpg' %}{% endif %}">
+                        <div class="ep">{{ contenido.duracion|default_if_none:'?' }} min</div>
                     </div>
-                    <div class="product__item__text text-center" style="background:none; padding:18px 0 10px 0;">
-                        <h5 class="mb-0" style="font-size:1.2em; font-weight:700;"><a href="{% url 'anime_details' contenido.id %}" class="text-white text-decoration-none">{{ contenido.titulo }}</a></h5>
-                    </div>
-                </div>
+                    <div class="product__item__text text-center">
+                        <h5 class="mb-0">
+                            <a href="{% url 'anime_details' contenido.id %}" class="text-white text-decoration-none">
+                                {{ contenido.titulo }}
+                            </a>
+                        </h5>
+                    </div>                </div>
             </div>
             {% empty %}
-            <div class="col-12"><p class="text-center">No se encontraron resultados para "{{ query }}".</p></div>
+            <div class="col-12">
+                <p class="text-center text-muted">No se encontraron resultados para "{{ query }}".</p>
+            </div>
             {% endfor %}
         </div>
-        <style>
-        .product__item { border-radius:14px; overflow:hidden; background:none; }
-        .product__item__pic { border-radius:14px; }
-        .product__item__text { border-radius:0 0 14px 14px; background:none; }
-        .ep { z-index:2; }
-        .product__item__pic.set-bg { background-repeat:no-repeat; }
-        .product__item__text h5 a { color: #fff; text-shadow: 0 2px 8px #000b; }
-        </style>
-    {% elif query %}
-        <p class="text-muted">No se encontraron resultados para "{{ query }}".</p>
     {% else %}
-        <p class="text-muted">Introduce un término de búsqueda.</p>
+        <p class="text-muted text-center">Introduce un término de búsqueda.</p>
     {% endif %}
 </div>
 {% endblock %}

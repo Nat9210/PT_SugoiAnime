@@ -90,7 +90,8 @@
                         {% for contenido in contenidos %}
                         <div class="col-lg-4 col-md-6 col-sm-6">
                             <div class="product__item">
-                                <div class="product__item__pic set-bg" data-setbg="{% if contenido.imagen_portada %}{{ contenido.imagen_portada.url }}{% else %}{% static 'myapp/img/default-cover.jpg' %}{% endif %}">
+                                <div class="product__item__pic set-bg" data-setbg="{% if contenido.imagen_portada %}{{ contenido.imagen_portada.url }}
+                                {% else %}{% static 'myapp/img/default-cover.jpg' %}{% endif %}">
                                     <div class="ep">{{ contenido.duracion|default_if_none:'?' }} min</div>
                                 </div>
                                 <div class="product__item__text">

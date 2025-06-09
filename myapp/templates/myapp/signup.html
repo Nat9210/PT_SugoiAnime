@@ -1,6 +1,6 @@
 {% extends 'myapp/base.html' %}
 {% load static %}
-{% block title %}Registro | Anime{% endblock %}
+{% block title %}Registro | SugoiAnime{% endblock %}
 {% block header %}{% endblock %}
 {% block content %}
 <!-- Normal Breadcrumb Begin -->
@@ -11,7 +11,7 @@
                 <div class="normal__breadcrumb__text">
                     <img src="{% static 'myapp/img/4.png' %}" alt="Jujutsu Kaisen" width="300" height="200">                    
                     <!--<h2>Registrate</h2>-->
-                    <p>Registrate en SugoiAnime</p>
+                    <!--<p>Registrate en SugoiAnime</p>-->
                 </div>
             </div>
         </div>
@@ -19,41 +19,59 @@
 </section>
 <!-- Normal Breadcrumb End -->
 
-<!-- Signup Section Begin -->
+<!-- registro usuario nuevo -->
 <section class="signup spad">
     <div class="container">
         <div class="row">
             <div class="col-lg-6 offset-lg-3">
                 <div class="login__form">                    
                     <h3>Registro</h3>
+                    <!-- mensaje de exito/error creacion de usuario -->
+                    {% if success %}
+                    <div class="alert alert-success">
+                        <i class="fa fa-check-circle"></i> {{ success }}
+                    </div>
+                    {% endif %}
+
+                    {% if error %}
+                        <div class="alert alert-danger">
+                            <i class="fa fa-exclamation-triangle"></i> {{ error }}
+                        </div>
+                    {% endif %}
+
+                    <!-- Formulario de registro -->
                     <form method="post">
                         {% csrf_token %}
+                        <!-- Email -->
                         <div class="input__item">
                             <input type="text" name="email" placeholder="Dirección de correo electrónico">
                             <span class="icon_mail"></span>
                         </div>
+                        <!-- Nombre de usuario -->
                         <div class="input__item">
                             <input type="text" name="username" placeholder="Nombre de usuario">
                             <span class="icon_profile"></span>
                         </div>
+                        <!-- Contraseña -->
                         <div class="input__item">
                             <input type="password" name="password" placeholder="Contraseña">
                             <span class="icon_lock"></span>
                             <ul class="text-muted mt-2" style="font-size:0.95em; padding-left: 18px;">
                                 <li>La contraseña debe tener al menos:</li>
-                                <li>8 caracteres</li>
-                                <li>1 letra mayúscula</li>
-                                <li>1 letra minúscula</li>
-                                <li>1 número</li>
+                                <li>8 caracteres</li> <li>1 letra mayúscula</li>
+                                <li>1 letra minúscula</li> <li>1 número</li>
                                 <li>1 símbolo permitido ( ! @ # $ % ^ &amp; * _ + - = , . ? )</li>
                             </ul>
                         </div>
+                        <!-- Confirmacion para crear cuenta -->
                         <button type="submit" class="site-btn">Registrate Ahora</button>
                         {% if error %}<p class="text-purple">{{ error }}</p>{% endif %}
                     </form>
+                    <!-- Mensaje de redirección a login -->
                     <h5>Ya tienes una cuenta? <a href="{% url 'login' %}">Acceder aqui</a></h5>
                 </div>
             </div>
+            
             <!--<div class="col-lg-6">
                 <div class="login__social__links">
                     <h3>Registrate con:</h3>

@@ -141,14 +141,23 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 LOGIN_URL = '/login/'
 
-# Configuración para enviar emails a la consola en desarrollo
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# Configuración para enviar emails
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend' 
+# Cambiar a 'django.core.mail.backends.smtp.EmailBackend' en producción
 EMAIL_HOST = 'localhost'
 EMAIL_PORT = 1025
 EMAIL_USE_TLS = False
 EMAIL_HOST_USER = ''
 EMAIL_HOST_PASSWORD = ''
-DEFAULT_FROM_EMAIL = 'noreply@sugoianime.com'
+DEFAULT_FROM_EMAIL = 'noreply@sugoianime.com' # solo para pruebas
+
+# Configuración de tokens
+password_reset_timeout = 60  # 1 minutos en segundos para pruebas
+
+# Configuración de cookies para desarrollo local
+SESSION_COOKIE_SECURE = False  # ← Para desarrollo local
+CSRF_COOKIE_SECURE = False     # ← Para desarrollo local
+
 
 # Eliminar o comentar la siguiente línea para usar el modelo User estándar de Django
 # AUTH_USER_MODEL = 'myapp.User'
