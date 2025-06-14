@@ -15,10 +15,9 @@
                 <div class="row">
                     <div class="col-lg-6">
                         <div class="hero__text">
-                            <!--<h2>Da Da Dan</h2>-->
-                            <img src="{% static 'myapp/img/hero/Dadadan_logo-1.png' %}" alt="Jujutsu Kaisen" width="300" height="200">
+                            <h2>Da Da Dan</h2>
                             <div class="label">Acción</div> <div class="label">Comedia</div> <div class="label">Sobrenatural</div>
-                            <p>...</p> 
+                            <p>Una historia extraordinaria llena de acción, comedia y elementos sobrenaturales que te mantendrá entretenido.</p> 
                             <a href="{% url 'anime_details' %}"><span>Ver Ahora</span> <i class="fa fa-angle-right"></i></a>
                         </div>
                     </div>
@@ -28,10 +27,9 @@
                 <div class="row">
                     <div class="col-lg-6">
                         <div class="hero__text">
-                            <!--<h2>My Hero Academia</h2>-->
-                            <img src="{% static 'myapp/img/hero/My_Hero_Academia_logo.png' %}" alt="Jujutsu Kaisen" width="300" height="200">
-                            <div class="label">Superheroes</div> <div class="label">Acción</div>
-                            <p>...</p>
+                            <h2>My Hero Academia</h2>
+                            <div class="label">Superhéroes</div> <div class="label">Acción</div>
+                            <p>En un mundo donde la mayoría de las personas tienen superpoderes, sigue la historia de un joven héroe.</p>
                             <a href="{% url 'anime_details' %}"><span>Ver Ahora</span> <i class="fa fa-angle-right"></i></a>
                         </div>
                     </div>
@@ -41,10 +39,9 @@
                 <div class="row">
                     <div class="col-lg-6">
                         <div class="hero__text">
-                            <!--<h2>Oshi No Ko</h2>-->
-                            <img src="{% static 'myapp/img/hero/susume_logo.png' %}" alt="Jujutsu Kaisen" width="300" height="200">
-                            <div class="label">Sobrenatural</div> <div class="label">Shounen</div>
-                            <p>...</p>
+                            <h2>Oshi No Ko</h2>
+                            <div class="label">Drama</div> <div class="label">Sobrenatural</div>
+                            <p>Una historia fascinante sobre la industria del entretenimiento con elementos misteriosos.</p>
                             <a href="{% url 'anime_details' %}"><span>Ver Ahora</span> <i class="fa fa-angle-right"></i></a>
                         </div>
                     </div>
@@ -54,10 +51,10 @@
                 <div class="row">
                     <div class="col-lg-6">
                         <div class="hero__text">
+                            <img src="{% static 'myapp/img/hero/jujutsu_kaisen_logo.png' %}" alt="">
                             <!--<h2>Jujutsu Kaisen</h2>-->
-                            <img src="{% static 'myapp/img/hero/Jujutsu_Kaisen_logo.png' %}" alt="Jujutsu Kaisen" width="300" height="200">
                             <div class="label">Sobrenatural</div> <div class="label">Shounen</div>
-                            <p>...</p>
+                            <p>Una emocionante aventura sobrenatural llena de batallas épicas y personajes memorables.</p>
                             <a href="{% url 'anime_details' %}"><span>Ver Ahora</span> <i class="fa fa-angle-right"></i></a>
                         </div>
                     </div>
@@ -126,102 +123,29 @@
                         </div>
                     </div>
                     <div class="row">
+                        {% for contenido in contenido_mas_gustado|slice:":6" %}
                         <div class="col-lg-4 col-md-6 col-sm-6">
                             <div class="product__item">
-                                <div class="product__item__pic set-bg" data-setbg="{% static 'myapp/img/popular/popular-1.jpg' %}">
-                                    <div class="ep">18 / 18</div>
-                                    <div class="comment"><i class="fa fa-comments"></i> 11</div>
-                                    <div class="view"><i class="fa fa-eye"></i> 9141</div>
+                                <div class="product__item__pic set-bg" data-setbg="{% if contenido.imagen_portada %}{{ contenido.imagen_portada.url }}{% else %}{% static 'myapp/img/default-cover.jpg' %}{% endif %}">
+                                    <div class="ep">{{ contenido.duracion|default_if_none:'?' }} min</div>
+                                    <div class="comment"><i class="fa fa-heart"></i> {{ contenido.total_likes|default:'0' }}</div>
+                                    <div class="view"><i class="fa fa-star"></i> {{ contenido.rating_promedio|floatformat:1|default:'N/A' }}</div>
                                 </div>
                                 <div class="product__item__text">
-                                    <ul>
-                                        <li>Active</li>
-                                        <li>Movie</li>
+                                    <ul style="display:none;">
+                                        {% for categoria in contenido.categorias.all|slice:":2" %}
+                                            <li>{{ categoria.nombre }}</li>
+                                        {% endfor %}
                                     </ul>
-                                    <h5><a href="{% url 'anime_details' %}">Sen to Chihiro no Kamikakushi</a></h5>
+                                    <h5><a href="{% url 'anime_details' %}">{{ contenido.titulo }}</a></h5>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-lg-4 col-md-6 col-sm-6">
-                            <div class="product__item">
-                                <div class="product__item__pic set-bg" data-setbg="{% static 'myapp/img/popular/popular-2.jpg' %}">
-                                    <div class="ep">18 / 18</div>
-                                    <div class="comment"><i class="fa fa-comments"></i> 11</div>
-                                    <div class="view"><i class="fa fa-eye"></i> 9141</div>
-                                </div>
-                                <div class="product__item__text">
-                                    <ul>
-                                        <li>Active</li>
-                                        <li>Movie</li>
-                                    </ul>
-                                    <h5><a href="{% url 'anime_details' %}">Kizumonogatari III: Reiket su-hen</a></h5>
-                                </div>
-                            </div>
+                        {% empty %}
+                        <div class="col-12">
+                            <p class="text-center">No hay contenido con suficientes valoraciones aún.</p>
                         </div>
-                        <div class="col-lg-4 col-md-6 col-sm-6">
-                            <div class="product__item">
-                                <div class="product__item__pic set-bg" data-setbg="{% static 'myapp/img/popular/popular-3.jpg' %}">
-                                    <div class="ep">18 / 18</div>
-                                    <div class="comment"><i class="fa fa-comments"></i> 11</div>
-                                    <div class="view"><i class="fa fa-eye"></i> 9141</div>
-                                </div>
-                                <div class="product__item__text">
-                                    <ul>
-                                        <li>Active</li>
-                                        <li>Movie</li>
-                                    </ul>
-                                    <h5><a href="{% url 'anime_details' %}">Shirogane Tamashii hen Kouhan sen</a></h5>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-4 col-md-6 col-sm-6">
-                            <div class="product__item">
-                                <div class="product__item__pic set-bg" data-setbg="{% static 'myapp/img/popular/popular-4.jpg' %}">
-                                    <div class="ep">18 / 18</div>
-                                    <div class="comment"><i class="fa fa-comments"></i> 11</div>
-                                    <div class="view"><i class="fa fa-eye"></i> 9141</div>
-                                </div>
-                                <div class="product__item__text">
-                                    <ul>
-                                        <li>Active</li>
-                                        <li>Movie</li>
-                                    </ul>
-                                    <h5><a href="{% url 'anime_details' %}">Rurouni Kenshin: Meiji Kenkaku Romantan</a></h5>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-4 col-md-6 col-sm-6">
-                            <div class="product__item">
-                                <div class="product__item__pic set-bg" data-setbg="{% static 'myapp/img/popular/popular-5.jpg' %}">
-                                    <div class="ep">18 / 18</div>
-                                    <div class="comment"><i class="fa fa-comments"></i> 11</div>
-                                    <div class="view"><i class="fa fa-eye"></i> 9141</div>
-                                </div>
-                                <div class="product__item__text">
-                                    <ul>
-                                        <li>Active</li>
-                                        <li>Movie</li>
-                                    </ul>
-                                    <h5><a href="{% url 'anime_details' %}">Mushishi Zoku Shou 2nd Season</a></h5>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-4 col-md-6 col-sm-6">
-                            <div class="product__item">
-                                <div class="product__item__pic set-bg" data-setbg="{% static 'myapp/img/popular/popular-6.jpg' %}">
-                                    <div class="ep">18 / 18</div>
-                                    <div class="comment"><i class="fa fa-comments"></i> 11</div>
-                                    <div class="view"><i class="fa fa-eye"></i> 9141</div>
-                                </div>
-                                <div class="product__item__text">
-                                    <ul>
-                                        <li>Active</li>
-                                        <li>Movie</li>
-                                    </ul>
-                                    <h5><a href="{% url 'anime_details' %}">Monogatari Series: Second Season</a></h5>
-                                </div>
-                            </div>
-                        </div>
+                        {% endfor %}
                     </div>
                 </div>
                 <!-- Recomendaciones Personalizadas Section -->
@@ -230,7 +154,7 @@
                     <div class="row">
                         <div class="col-lg-8 col-md-8 col-sm-8">
                             <div class="section-title">
-                                <h4>🎯 Recomendado para Ti</h4>
+                                <h4>Recomendado para Ti</h4>
                             </div>
                         </div>
                         <div class="col-lg-4 col-md-4 col-sm-4">
@@ -266,7 +190,7 @@
                     <div class="row">
                         <div class="col-lg-8 col-md-8 col-sm-8">
                             <div class="section-title">
-                                <h4>Con mas me gusta</h4>
+                                <h4>Mejor Valorado</h4>
                             </div>
                         </div>
                         <div class="col-lg-4 col-md-4 col-sm-4">
@@ -276,104 +200,198 @@
                         </div>
                     </div>
                     <div class="row">
+                        {% for contenido in contenido_mejor_valorado|slice:":6" %}
                         <div class="col-lg-4 col-md-6 col-sm-6">
                             <div class="product__item">
-                                <div class="product__item__pic set-bg" data-setbg="{% static 'myapp/img/popular/popular-1.jpg' %}">
-                                    <div class="ep">18 / 18</div>
-                                    <div class="comment"><i class="fa fa-comments"></i> 11</div>
-                                    <div class="view"><i class="fa fa-eye"></i> 9141</div>
+                                <div class="product__item__pic set-bg" data-setbg="{% if contenido.imagen_portada %}{{ contenido.imagen_portada.url }}{% else %}{% static 'myapp/img/default-cover.jpg' %}{% endif %}">
+                                    <div class="ep">{{ contenido.duracion|default_if_none:'?' }} min</div>
+                                    <div class="comment"><i class="fa fa-star"></i> {{ contenido.rating_promedio|floatformat:1|default:'N/A' }}</div>
+                                    <div class="view"><i class="fa fa-users"></i> {{ contenido.total_calificaciones|default:'0' }}</div>
                                 </div>
                                 <div class="product__item__text">
-                                    <ul>
-                                        <li>Active</li>
-                                        <li>Movie</li>
+                                    <ul style="display:none;">
+                                        {% for categoria in contenido.categorias.all|slice:":2" %}
+                                            <li>{{ categoria.nombre }}</li>
+                                        {% endfor %}
                                     </ul>
-                                    <h5><a href="{% url 'anime_details' %}">Sen to Chihiro no Kamikakushi</a></h5>
+                                    <h5><a href="{% url 'anime_details' %}">{{ contenido.titulo }}</a></h5>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-lg-4 col-md-6 col-sm-6">
-                            <div class="product__item">
-                                <div class="product__item__pic set-bg" data-setbg="{% static 'myapp/img/popular/popular-2.jpg' %}">
-                                    <div class="ep">18 / 18</div>
-                                    <div class="comment"><i class="fa fa-comments"></i> 11</div>
-                                    <div class="view"><i class="fa fa-eye"></i> 9141</div>
-                                </div>
-                                <div class="product__item__text">
-                                    <ul>
-                                        <li>Active</li>
-                                        <li>Movie</li>
-                                    </ul>
-                                    <h5><a href="{% url 'anime_details' %}">Kizumonogatari III: Reiket su-hen</a></h5>
-                                </div>
+                        {% empty %}
+                        <div class="col-12">
+                            <p class="text-center">No hay contenido con suficientes valoraciones aún.</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <!-- Sección: Más Visto (con estadísticas) -->
+                {% if contenido_mas_visto %}
+                <div class="trending__product mt-5">
+                    <div class="row">
+                        <div class="col-lg-8 col-md-8 col-sm-8">
+                            <div class="section-title">
+                                <h4>Más Visto</h4>
                             </div>
                         </div>
-                        <div class="col-lg-4 col-md-6 col-sm-6">
-                            <div class="product__item">
-                                <div class="product__item__pic set-bg" data-setbg="{% static 'myapp/img/popular/popular-3.jpg' %}">
-                                    <div class="ep">18 / 18</div>
-                                    <div class="comment"><i class="fa fa-comments"></i> 11</div>
-                                    <div class="view"><i class="fa fa-eye"></i> 9141</div>
-                                </div>
-                                <div class="product__item__text">
-                                    <ul>
-                                        <li>Active</li>
-                                        <li>Movie</li>
-                                    </ul>
-                                    <h5><a href="{% url 'anime_details' %}">Shirogane Tamashii hen Kouhan sen</a></h5>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-4 col-md-6 col-sm-6">
-                            <div class="product__item">
-                                <div class="product__item__pic set-bg" data-setbg="{% static 'myapp/img/popular/popular-4.jpg' %}">
-                                    <div class="ep">18 / 18</div>
-                                    <div class="comment"><i class="fa fa-comments"></i> 11</div>
-                                    <div class="view"><i class="fa fa-eye"></i> 9141</div>
-                                </div>
-                                <div class="product__item__text">
-                                    <ul>
-                                        <li>Active</li>
-                                        <li>Movie</li>
-                                    </ul>
-                                    <h5><a href="{% url 'anime_details' %}">Rurouni Kenshin: Meiji Kenkaku Romantan</a></h5>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-4 col-md-6 col-sm-6">
-                            <div class="product__item">
-                                <div class="product__item__pic set-bg" data-setbg="{% static 'myapp/img/popular/popular-5.jpg' %}">
-                                    <div class="ep">18 / 18</div>
-                                    <div class="comment"><i class="fa fa-comments"></i> 11</div>
-                                    <div class="view"><i class="fa fa-eye"></i> 9141</div>
-                                </div>
-                                <div class="product__item__text">
-                                    <ul>
-                                        <li>Active</li>
-                                        <li>Movie</li>
-                                    </ul>
-                                    <h5><a href="{% url 'anime_details' %}">Mushishi Zoku Shou 2nd Season</a></h5>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-4 col-md-6 col-sm-6">
-                            <div class="product__item">
-                                <div class="product__item__pic set-bg" data-setbg="{% static 'myapp/img/popular/popular-6.jpg' %}">
-                                    <div class="ep">18 / 18</div>
-                                    <div class="comment"><i class="fa fa-comments"></i> 11</div>
-                                    <div class="view"><i class="fa fa-eye"></i> 9141</div>
-                                </div>
-                                <div class="product__item__text">
-                                    <ul>
-                                        <li>Active</li>
-                                        <li>Movie</li>
-                                    </ul>
-                                    <h5><a href="{% url 'anime_details' %}">Monogatari Series: Second Season</a></h5>
-                                </div>
+                        <div class="col-lg-4 col-md-4 col-sm-4">
+                            <div class="btn__all">
+                                <a href="{% url 'categories' %}" class="primary-btn">Ver Todo <span class="arrow_right"></span></a>
                             </div>
                         </div>
                     </div>
+                    <div class="row">
+                        {% load rating_extras %}
+                        {% for contenido in contenido_mas_visto %}
+                        <div class="col-lg-4 col-md-6 col-sm-6">
+                            <div class="product__item">
+                                <div class="product__item__pic set-bg" data-setbg="{% if contenido.imagen_portada %}{{ contenido.imagen_portada.url }}{% else %}{% static 'myapp/img/default-cover.jpg' %}{% endif %}">
+                                    <div class="ep">{{ contenido.duracion|default_if_none:'?' }} min</div>
+                                    <div class="comment"><i class="fa fa-eye"></i> {{ contenido.total_reproducciones|format_number }}</div>
+                                    {% if contenido.rating_promedio %}
+                                        <div class="view"><i class="fa fa-star"></i> {{ contenido.rating_promedio|floatformat:1 }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="product__item__text">
+                                    <ul style="display:none;">
+                                        <li>{{ contenido.get_tipo_display }}</li>
+                                        {% for categoria in contenido.categorias.all %}
+                                            <li>{{ categoria.nombre }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                    <h5><a href="{% url 'anime_details' contenido.id %}">{{ contenido.titulo }}</a></h5>
+                                    <div class="product__item__stats mt-2">
+                                        <div class="rating-info">
+                                            {% if contenido.rating_promedio %}
+                                                {{ contenido.rating_promedio|rating_stars }}
+                                            {% else %}
+                                                <span class="text-muted">Sin calificar</span>
+                                            {% endif %}
+                                        </div>
+                                        <div class="view-count mt-1">
+                                            <i class="fa fa-eye text-info"></i> 
+                                            <span class="text-info">{{ contenido.total_reproducciones|format_number }} reproducciones</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
                 </div>
+                {% endif %}
+                
+                <!-- Sección: Con Más Me Gusta -->
+                {% if contenido_mas_gustado %}
+                <div class="trending__product mt-5">
+                    <div class="row">
+                        <div class="col-lg-8 col-md-8 col-sm-8">
+                            <div class="section-title">
+                                <h4>Con Más Me Gusta</h4>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-4">
+                            <div class="btn__all">
+                                <a href="{% url 'categories' %}" class="primary-btn">Ver Todo <span class="arrow_right"></span></a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        {% for contenido in contenido_mas_gustado %}
+                        <div class="col-lg-4 col-md-6 col-sm-6">
+                            <div class="product__item">
+                                <div class="product__item__pic set-bg" data-setbg="{% if contenido.imagen_portada %}{{ contenido.imagen_portada.url }}{% else %}{% static 'myapp/img/default-cover.jpg' %}{% endif %}">
+                                    <div class="ep">{{ contenido.duracion|default_if_none:'?' }} min</div>
+                                    <div class="comment"><i class="fa fa-heart text-danger"></i> {{ contenido.total_likes|format_number }}</div>
+                                    {% if contenido.rating_promedio %}
+                                        <div class="view"><i class="fa fa-star"></i> {{ contenido.rating_promedio|floatformat:1 }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="product__item__text">
+                                    <ul style="display:none;">
+                                        <li>{{ contenido.get_tipo_display }}</li>
+                                        {% for categoria in contenido.categorias.all %}
+                                            <li>{{ categoria.nombre }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                    <h5><a href="{% url 'anime_details' contenido.id %}">{{ contenido.titulo }}</a></h5>
+                                    <div class="product__item__stats mt-2">
+                                        <div class="rating-info">
+                                            {% if contenido.rating_promedio %}
+                                                {{ contenido.rating_promedio|rating_stars }}
+                                            {% else %}
+                                                <span class="text-muted">Sin calificar</span>
+                                            {% endif %}
+                                        </div>
+                                        <div class="likes-info mt-1">
+                                            <i class="fa fa-heart text-danger"></i> 
+                                            <span class="text-success">{{ contenido.total_likes|format_number }} me gusta</span>
+                                            {% if contenido.total_dislikes %}
+                                                <span class="text-muted">| {{ contenido.total_dislikes|format_number }} no me gusta</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Sección: Mejor Valorado -->
+                {% if contenido_mejor_valorado %}
+                <div class="trending__product mt-5">
+                    <div class="row">
+                        <div class="col-lg-8 col-md-8 col-sm-8">
+                            <div class="section-title">
+                                <h4>Mejor Valorado</h4>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-4">
+                            <div class="btn__all">
+                                <a href="{% url 'categories' %}" class="primary-btn">Ver Todo <span class="arrow_right"></span></a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        {% for contenido in contenido_mejor_valorado %}
+                        <div class="col-lg-4 col-md-6 col-sm-6">
+                            <div class="product__item">
+                                <div class="product__item__pic set-bg" data-setbg="{% if contenido.imagen_portada %}{{ contenido.imagen_portada.url }}{% else %}{% static 'myapp/img/default-cover.jpg' %}{% endif %}">
+                                    <div class="ep">{{ contenido.duracion|default_if_none:'?' }} min</div>
+                                    <div class="comment"><i class="fa fa-star text-warning"></i> {{ contenido.rating_promedio|floatformat:1 }}</div>
+                                    <div class="view"><i class="fa fa-users"></i> {{ contenido.total_calificaciones|format_number }}</div>
+                                </div>
+                                <div class="product__item__text">
+                                    <ul style="display:none;">
+                                        <li>{{ contenido.get_tipo_display }}</li>
+                                        {% for categoria in contenido.categorias.all %}
+                                            <li>{{ categoria.nombre }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                    <h5><a href="{% url 'anime_details' contenido.id %}">{{ contenido.titulo }}</a></h5>
+                                    <div class="product__item__stats mt-2">
+                                        <div class="rating-info">
+                                            {{ contenido.rating_promedio|rating_stars }}
+                                        </div>
+                                        <div class="rating-details mt-1">
+                                            <i class="fa fa-users text-info"></i> 
+                                            <span class="text-info">{{ contenido.total_calificaciones|format_number }} valoraciones</span>
+                                            {% if contenido.total_likes %}
+                                                <span class="text-success">| {{ contenido.total_likes|format_number }} likes</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                
                 <div class="recent__product">
                     <div class="row">
                         <div class="col-lg-8 col-md-8 col-sm-8">
@@ -388,102 +406,29 @@
                         </div>
                     </div>
                     <div class="row">
+                        {% for contenido in contenido_agregado_recientemente %}
                         <div class="col-lg-4 col-md-6 col-sm-6">
                             <div class="product__item">
-                                <div class="product__item__pic set-bg" data-setbg="{% static 'myapp/img/recent/recent-1.jpg' %}">
-                                    <div class="ep">18 / 18</div>
-                                    <div class="comment"><i class="fa fa-comments"></i> 11</div>
-                                    <div class="view"><i class="fa fa-eye"></i> 9141</div>
+                                <div class="product__item__pic set-bg" data-setbg="{% if contenido.imagen_portada %}{{ contenido.imagen_portada.url }}{% else %}{% static 'myapp/img/default-cover.jpg' %}{% endif %}">
+                                    <div class="ep">{{ contenido.duracion|default_if_none:'?' }} min</div>
+                                    <div class="comment"><i class="fa fa-calendar"></i> Nuevo</div>
+                                    <div class="view"><i class="fa fa-eye"></i> {{ contenido.historialreproduccion_set.count|default:'0' }}</div>
                                 </div>
                                 <div class="product__item__text">
-                                    <ul>
-                                        <li>Active</li>
-                                        <li>Movie</li>
+                                    <ul style="display:none;">
+                                        {% for categoria in contenido.categorias.all|slice:":2" %}
+                                            <li>{{ categoria.nombre }}</li>
+                                        {% endfor %}
                                     </ul>
-                                    <h5><a href="{% url 'anime_details' %}">Great Teacher Onizuka</a></h5>
+                                    <h5><a href="{% url 'anime_details' %}">{{ contenido.titulo }}</a></h5>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-lg-4 col-md-6 col-sm-6">
-                            <div class="product__item">
-                                <div class="product__item__pic set-bg" data-setbg="{% static 'myapp/img/recent/recent-2.jpg' %}">
-                                    <div class="ep">18 / 18</div>
-                                    <div class="comment"><i class="fa fa-comments"></i> 11</div>
-                                    <div class="view"><i class="fa fa-eye"></i> 9141</div>
-                                </div>
-                                <div class="product__item__text">
-                                    <ul>
-                                        <li>Active</li>
-                                        <li>Movie</li>
-                                    </ul>
-                                    <h5><a href="{% url 'anime_details' %}">Fate/stay night Movie: Heaven's Feel - II. Lost</a></h5>
-                                </div>
-                            </div>
+                        {% empty %}
+                        <div class="col-12">
+                            <p class="text-center">No hay contenido agregado recientemente.</p>
                         </div>
-                        <div class="col-lg-4 col-md-6 col-sm-6">
-                            <div class="product__item">
-                                <div class="product__item__pic set-bg" data-setbg="{% static 'myapp/img/recent/recent-3.jpg' %}">
-                                    <div class="ep">18 / 18</div>
-                                    <div class="comment"><i class="fa fa-comments"></i> 11</div>
-                                    <div class="view"><i class="fa fa-eye"></i> 9141</div>
-                                </div>
-                                <div class="product__item__text">
-                                    <ul>
-                                        <li>Active</li>
-                                        <li>Movie</li>
-                                    </ul>
-                                    <h5><a href="{% url 'anime_details' %}">Mushishi Zoku Shou: Suzu no Shizuku</a></h5>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-4 col-md-6 col-sm-6">
-                            <div class="product__item">
-                                <div class="product__item__pic set-bg" data-setbg="{% static 'myapp/img/recent/recent-4.jpg' %}">
-                                    <div class="ep">18 / 18</div>
-                                    <div class="comment"><i class="fa fa-comments"></i> 11</div>
-                                    <div class="view"><i class="fa fa-eye"></i> 9141</div>
-                                </div>
-                                <div class="product__item__text">
-                                    <ul>
-                                        <li>Active</li>
-                                        <li>Movie</li>
-                                    </ul>
-                                    <h5><a href="{% url 'anime_details' %}">Fate/Zero 2nd Season</a></h5>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-4 col-md-6 col-sm-6">
-                            <div class="product__item">
-                                <div class="product__item__pic set-bg" data-setbg="{% static 'myapp/img/recent/recent-5.jpg' %}">
-                                    <div class="ep">18 / 18</div>
-                                    <div class="comment"><i class="fa fa-comments"></i> 11</div>
-                                    <div class="view"><i class="fa fa-eye"></i> 9141</div>
-                                </div>
-                                <div class="product__item__text">
-                                    <ul>
-                                        <li>Active</li>
-                                        <li>Movie</li>
-                                    </ul>
-                                    <h5><a href="{% url 'anime_details' %}">Kizumonogatari II: Nekket su-hen</a></h5>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-4 col-md-6 col-sm-6">
-                            <div class="product__item">
-                                <div class="product__item__pic set-bg" data-setbg="{% static 'myapp/img/recent/recent-6.jpg' %}">
-                                    <div class="ep">18 / 18</div>
-                                    <div class="comment"><i class="fa fa-comments"></i> 11</div>
-                                    <div class="view"><i class="fa fa-eye"></i> 9141</div>
-                                </div>
-                                <div class="product__item__text">
-                                    <ul>
-                                        <li>Active</li>
-                                        <li>Movie</li>
-                                    </ul>
-                                    <h5><a href="{% url 'anime_details' %}">The Seven Deadly Sins: Wrath of the Gods</a></h5>
-                                </div>
-                            </div>
-                        </div>
+                        {% endfor %}
                     </div>
                 </div>
                 <div class="live__product">
@@ -500,22 +445,29 @@
                         </div>
                     </div>
                     <div class="row">
+                        {% for contenido in contenido_live_action %}
                         <div class="col-lg-4 col-md-6 col-sm-6">
                             <div class="product__item">
-                                <div class="product__item__pic set-bg" data-setbg="{% static 'myapp/img/live/live-1.jpg' %}">
-                                    <div class="ep">18 / 18</div>
-                                    <div class="comment"><i class="fa fa-comments"></i> 11</div>
-                                    <div class="view"><i class="fa fa-eye"></i> 9141</div>
+                                <div class="product__item__pic set-bg" data-setbg="{% if contenido.imagen_portada %}{{ contenido.imagen_portada.url }}{% else %}{% static 'myapp/img/default-cover.jpg' %}{% endif %}">
+                                    <div class="ep">{{ contenido.duracion|default_if_none:'?' }} min</div>
+                                    <div class="comment"><i class="fa fa-film"></i> {{ contenido.tipo|capfirst }}</div>
+                                    <div class="view"><i class="fa fa-eye"></i> {{ contenido.total_reproducciones|default:'0' }}</div>
                                 </div>
                                 <div class="product__item__text">
-                                    <ul>
-                                        <li>Active</li>
-                                        <li>Movie</li>
+                                    <ul style="display:none;">
+                                        {% for categoria in contenido.categorias.all|slice:":2" %}
+                                            <li>{{ categoria.nombre }}</li>
+                                        {% endfor %}
                                     </ul>
-                                    <h5><a href="{% url 'anime_details' %}">Shouwa Genroku Rakugo Shinjuu</a></h5>
+                                    <h5><a href="{% url 'anime_details' %}">{{ contenido.titulo }}</a></h5>
                                 </div>
                             </div>
                         </div>
+                        {% empty %}
+                        <div class="col-12">
+                            <p class="text-center">No hay contenido de Live Action disponible.</p>
+                        </div>
+                        {% endfor %}
                         <div class="col-lg-4 col-md-6 col-sm-6">
                             <div class="product__item">
                                 <div class="product__item__pic set-bg" data-setbg="{% static 'myapp/img/live/live-2.jpg' %}">
@@ -612,36 +564,18 @@
                             <li data-filter=".years">Año</li>
                         </ul>
                         <div class="filter__gallery">
+                            {% for contenido in contenido_sidebar_mas_visto %}
                             <div class="product__sidebar__view__item set-bg mix day years"
-                            data-setbg="{% static 'myapp/img/sidebar/tv-1.jpg' %}">
-                            <div class="ep">18 / ?</div>
-                            <div class="view"><i class="fa fa-eye"></i> 9141</div>
-                            <h5><a href="{% url 'anime_details' %}">Boruto: Naruto next generations</a></h5>
-                        </div>
-                        <div class="product__sidebar__view__item set-bg mix month week"
-                        data-setbg="{% static 'myapp/img/sidebar/tv-2.jpg' %}">
-                        <div class="ep">18 / ?</div>
-                        <div class="view"><i class="fa fa-eye"></i> 9141</div>
-                        <h5><a href="{% url 'anime_details' %}">The Seven Deadly Sins: Wrath of the Gods</a></h5>
-                    </div>
-                    <div class="product__sidebar__view__item set-bg mix week years"
-                    data-setbg="{% static 'myapp/img/sidebar/tv-3.jpg' %}">
-                    <div class="ep">18 / ?</div>
-                    <div class="view"><i class="fa fa-eye"></i> 9141</div>
-                    <h5><a href="{% url 'anime_details' %}">Sword art online alicization war of underworld</a></h5>
-                </div>
-                <div class="product__sidebar__view__item set-bg mix years month"
-                data-setbg="{% static 'myapp/img/sidebar/tv-4.jpg' %}">
-                <div class="ep">18 / ?</div>
-                <div class="view"><i class="fa fa-eye"></i> 9141</div>
-                <h5><a href="{% url 'anime_details' %}">Fate/stay night: Heaven's Feel I. presage flower</a></h5>
-            </div>
-            <div class="product__sidebar__view__item set-bg mix day"
-            data-setbg="{% static 'myapp/img/sidebar/tv-5.jpg' %}">
-            <div class="ep">18 / ?</div>
-            <div class="view"><i class="fa fa-eye"></i> 9141</div>
-            <h5><a href="{% url 'anime_details' %}">Fate stay night unlimited blade works</a></h5>
-        </div>
+                            data-setbg="{% if contenido.imagen_portada %}{{ contenido.imagen_portada.url }}{% else %}{% static 'myapp/img/default-cover.jpg' %}{% endif %}">
+                                <div class="ep">{{ contenido.duracion|default_if_none:'?' }} min</div>
+                                <div class="view"><i class="fa fa-eye"></i> {{ contenido.total_reproducciones|default:'0' }}</div>
+                                <h5><a href="{% url 'anime_details' %}">{{ contenido.titulo|truncatechars:40 }}</a></h5>
+                            </div>
+                            {% empty %}
+                            <div class="text-center p-3">
+                                <p>No hay contenido más visto disponible.</p>
+                            </div>
+                            {% endfor %}
     </div>
 </div>
 <div class="product__sidebar__comment">
@@ -649,58 +583,50 @@
         <h5>Nuevo Contenido</h5>
     </div>
     <div class="product__sidebar__comment__item">
-        <div class="product__sidebar__comment__item__pic">
-            <img src="{% static 'myapp/img/sidebar/comment-1.jpg' %}" alt="">
+        {% for contenido in nuevo_contenido_sidebar %}
+        <div class="product__sidebar__comment__item">
+            <div class="product__sidebar__comment__item__pic">
+                <img src="{% if contenido.imagen_portada %}{{ contenido.imagen_portada.url }}{% else %}{% static 'myapp/img/default-cover.jpg' %}{% endif %}" alt="{{ contenido.titulo }}">
+            </div>
+            <div class="product__sidebar__comment__item__text">
+                <ul style="display:none;">
+                    {% for categoria in contenido.categorias.all|slice:":2" %}
+                        <li>{{ categoria.nombre }}</li>
+                    {% endfor %}
+                </ul>
+                <h5><a href="{% url 'anime_details' %}">{{ contenido.titulo|truncatechars:35 }}</a></h5>
+                <span><i class="fa fa-calendar"></i> Recién agregado</span>
+            </div>
         </div>
-        <div class="product__sidebar__comment__item__text">
-            <ul>
-                <li>Active</li>
-                <li>Movie</li>
-            </ul>
-            <h5><a href="{% url 'anime_details' %}">The Seven Deadly Sins: Wrath of the Gods</a></h5>
-            <span><i class="fa fa-eye"></i> 19.141 Viewes</span>
+        {% empty %}
+        <div class="text-center p-3">
+            <p>No hay contenido nuevo disponible.</p>
         </div>
+        {% endfor %}
+</div>
+
+<!-- Sección de términos más buscados -->
+{% if terminos_mas_buscados %}
+<div class="product__sidebar__search">
+    <div class="section-title">
+        <h5>Búsquedas Populares</h5>
     </div>
-    <div class="product__sidebar__comment__item">
-        <div class="product__sidebar__comment__item__pic">
-            <img src="{% static 'myapp/img/sidebar/comment-2.jpg' %}" alt="">
+    <div class="search-trends">
+        {% for termino_data in terminos_mas_buscados|slice:":6" %}
+        <div class="search-trend-item">
+            <a href="{% url 'busqueda' %}?q={{ termino_data.ultimo_termino_original|urlencode }}" class="search-trend-link">
+                <span class="trend-term">{{ termino_data.ultimo_termino_original|capfirst }}</span>
+                <span class="trend-count">{{ termino_data.total_busquedas }} búsqueda{% if termino_data.total_busquedas != 1 %}s{% endif %}</span>
+            </a>
         </div>
-        <div class="product__sidebar__comment__item__text">
-            <ul>
-                <li>Active</li>
-                <li>Movie</li>
-            </ul>
-            <h5><a href="{% url 'anime_details' %}">Shirogane Tamashii hen Kouhan sen</a></h5>
-            <span><i class="fa fa-eye"></i> 19.141 Viewes</span>
-        </div>
+        {% endfor %}
     </div>
-    <div class="product__sidebar__comment__item">
-        <div class="product__sidebar__comment__item__pic">
-            <img src="{% static 'myapp/img/sidebar/comment-3.jpg' %}" alt="">
-        </div>
-        <div class="product__sidebar__comment__item__text">
-            <ul>
-                <li>Active</li>
-                <li>Movie</li>
-            </ul>
-            <h5><a href="{% url 'anime_details' %}">Kizumonogatari III: Reiket su-hen</a></h5>
-            <span><i class="fa fa-eye"></i> 19.141 Viewes</span>
-        </div>
-    </div>
-    <div class="product__sidebar__comment__item">
-        <div class="product__sidebar__comment__item__pic">
-            <img src="{% static 'myapp/img/sidebar/comment-4.jpg' %}" alt="">
-        </div>
-        <div class="product__sidebar__comment__item__text">
-            <ul>
-                <li>Active</li>
-                <li>Movie</li>
-            </ul>
-            <h5><a href="{% url 'anime_details' %}">Monogatari Series: Second Season</a></h5>
-            <span><i class="fa fa-eye"></i> 19.141 Viewes</span>
-        </div>
+    <div class="search-trends-footer">
+        <small class="text-muted">Últimos 30 días</small>
     </div>
 </div>
+{% endif %}
+
 </div>
 </div>
 </section>

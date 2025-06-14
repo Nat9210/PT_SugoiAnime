@@ -70,8 +70,7 @@ def index(request):    # Contenido reciente
     # Términos más buscados (basado en historial de búsqueda)
     from .models import HistorialBusqueda
     terminos_mas_buscados = HistorialBusqueda.obtener_mas_buscados(limite=8, dias=30)
-    
-    # Contenido más buscado basado en los términos populares
+      # Contenido más buscado basado en los términos populares
     contenido_mas_buscado = []
     if terminos_mas_buscados:
         # Obtener contenido que coincida con los términos más buscados
@@ -90,14 +89,117 @@ def index(request):    # Contenido reciente
             if len(contenido_mas_buscado) >= 8:
                 break
     
+    # Contenido más visto (con rating promedio y cantidad de reproducciones)
+    from django.db.models import Avg
+    contenido_mas_visto = Contenido.objects.annotate(
+        total_reproducciones=Count('historialreproduccion'),
+        rating_promedio=Avg('calificacion__calificacion'),
+        total_calificaciones=Count('calificacion')
+    ).filter(
+        total_reproducciones__gt=0
+    ).order_by('-total_reproducciones')[:8]
+    
+    # Contenido con más me gusta (calificaciones 4-5)
+    contenido_mas_gustado = Contenido.objects.annotate(
+        total_likes=Count('calificacion', filter=Q(calificacion__calificacion__gte=4)),
+        total_dislikes=Count('calificacion', filter=Q(calificacion__calificacion__lte=2)),
+        rating_promedio=Avg('calificacion__calificacion'),
+        total_calificaciones=Count('calificacion')
+    ).filter(
+        total_likes__gt=0
+    ).order_by('-total_likes', '-rating_promedio')[:8]
+      # Contenido mejor valorado (por rating promedio)
+    contenido_mejor_valorado = Contenido.objects.annotate(
+        rating_promedio=Avg('calificacion__calificacion'),
+        total_calificaciones=Count('calificacion'),
+        total_likes=Count('calificacion', filter=Q(calificacion__calificacion__gte=4))
+    ).filter(
+        total_calificaciones__gte=3  # Al menos 3 calificaciones para ser considerado
+    ).order_by('-rating_promedio', '-total_calificaciones')[:8]
+    
+    # Contenido destacado para hero slider (mejor valorado + popular)
+    contenido_destacado = Contenido.objects.annotate(
+        rating_promedio=Avg('calificacion__calificacion'),
+        total_calificaciones=Count('calificacion'),
+        total_reproducciones=Count('historialreproduccion'),
+        score_combinado=(
+            Avg('calificacion__calificacion') * 0.6 + 
+            Count('historialreproduccion') * 0.0001 +  # Factor pequeño para popularidad
+            Count('calificacion') * 0.01  # Factor pequeño para cantidad de reviews
+        )
+    ).filter(
+        rating_promedio__gte=4.0,  # Solo contenido bien valorado
+        total_calificaciones__gte=1,
+        imagen_portada__isnull=False  # Solo contenido con imagen
+    ).order_by('-score_combinado', '-rating_promedio')[:4]
+    
+    # Si no hay suficiente contenido bien valorado, rellenar con popular
+    if len(contenido_destacado) < 4:
+        contenido_adicional = Contenido.objects.annotate(
+            total_reproducciones=Count('historialreproduccion')
+        ).filter(
+            imagen_portada__isnull=False
+        ).exclude(
+            id__in=[c.id for c in contenido_destacado]
+        ).order_by('-total_reproducciones')[:4-len(contenido_destacado)]
+        
+        contenido_destacado = list(contenido_destacado) + list(contenido_adicional)
+    
+    # Contenido agregado recientemente (últimos añadidos por fecha de creación)
+    contenido_agregado_recientemente = Contenido.objects.filter(
+        imagen_portada__isnull=False
+    ).order_by('-id')[:6]
+    
+    # Contenido de Live Action (películas principalmente)
+    contenido_live_action = Contenido.objects.filter(
+        tipo='pelicula',
+        imagen_portada__isnull=False
+    ).annotate(
+        total_reproducciones=Count('historialreproduccion')
+    ).order_by('-total_reproducciones', '-id')[:6]
+    
+    # Si no hay suficientes películas, agregar series
+    if len(contenido_live_action) < 6:
+        contenido_adicional_live = Contenido.objects.filter(
+            imagen_portada__isnull=False
+        ).exclude(
+            id__in=[c.id for c in contenido_live_action]
+        ).order_by('-id')[:6-len(contenido_live_action)]
+        contenido_live_action = list(contenido_live_action) + list(contenido_adicional_live)
+    
+    # Contenido más visto (sidebar)
+    contenido_sidebar_mas_visto = Contenido.objects.annotate(
+        total_reproducciones=Count('historialreproduccion')
+    ).filter(
+        total_reproducciones__gt=0,
+        imagen_portada__isnull=False
+    ).order_by('-total_reproducciones')[:4]
+    
+    # Nuevo contenido (sidebar) - similar a recientes pero limitado
+    nuevo_contenido_sidebar = Contenido.objects.filter(
+        imagen_portada__isnull=False
+    ).order_by('-id')[:4]
+    
     context = {
         'contenidos_recientes': contenidos_recientes,
         'recomendaciones_personalizadas': recomendaciones_personalizadas,
         'contenido_popular': contenido_popular,
         'categorias_populares': categorias_populares,
         'contenido_mas_buscado': contenido_mas_buscado,
+        'contenido_mas_visto': contenido_mas_visto,
+        'contenido_mas_gustado': contenido_mas_gustado,
+        'contenido_mejor_valorado': contenido_mejor_valorado,
+        'contenido_destacado': contenido_destacado,
+        'contenido_agregado_recientemente': contenido_agregado_recientemente,
+        'contenido_live_action': contenido_live_action,
+        'contenido_sidebar_mas_visto': contenido_sidebar_mas_visto,
+        'nuevo_contenido_sidebar': nuevo_contenido_sidebar,
         'terminos_mas_buscados': terminos_mas_buscados,
-        'tiene_perfil': bool(perfil)
+        'tiene_perfil': bool(perfil),
+        'contenido_agregado_recientemente': contenido_agregado_recientemente,
+        'contenido_live_action': contenido_live_action,
+        'contenido_sidebar_mas_visto': contenido_sidebar_mas_visto,
+        'nuevo_contenido_sidebar': nuevo_contenido_sidebar
     }
     
     return render(request, 'myapp/index.html', context)

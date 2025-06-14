@@ -47,6 +47,13 @@ class Contenido(models.Model):
     imagen_portada = models.ImageField(upload_to='portadas/', null=True, blank=True)
     video_url = models.URLField(max_length=1000, null=True, blank=True)
     categorias = models.ManyToManyField(Categoria, through='ContenidoCategoria', related_name='contenidos')
+    
+    # Campos de AniList
+    anilist_id = models.PositiveIntegerField(null=True, blank=True, unique=True, db_index=True)
+    anilist_score = models.DecimalField(max_digits=4, decimal_places=2, null=True, blank=True)
+    anilist_popularity = models.PositiveIntegerField(null=True, blank=True)
+    anilist_url = models.URLField(max_length=500, null=True, blank=True)
+    fecha_importacion = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         indexes = [

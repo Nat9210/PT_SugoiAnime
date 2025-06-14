@@ -3869,3 +3869,222 @@ select:focus, select:active {
         margin-right: 0;
     }
 }
+
+/* ==============================================
+   BÚSQUEDAS POPULARES - SIDEBAR
+   ============================================== */
+
+/* Contenedor principal de búsquedas populares */
+.product__sidebar__search {
+    margin-bottom: 50px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    padding: 25px 20px;
+    border: 1px solid rgba(140, 82, 255, 0.2);
+    transition: all 0.3s ease;
+}
+
+.product__sidebar__search:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(140, 82, 255, 0.4);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(140, 82, 255, 0.15);
+}
+
+/* Título de la sección */
+.product__sidebar__search .section-title h5 {
+    color: #ffffff;
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    position: relative;
+    padding-bottom: 10px;
+}
+
+.product__sidebar__search .section-title h5:after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 40px;
+    height: 2px;
+    background: linear-gradient(45deg, var(--main-purple), #b366ff);
+}
+
+/* Contenedor de tendencias de búsqueda */
+.search-trends {
+    margin-bottom: 15px;
+}
+
+/* Cada elemento de tendencia */
+.search-trend-item {
+    margin-bottom: 12px;
+    border-radius: 6px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.search-trend-item:last-child {
+    margin-bottom: 0;
+}
+
+.search-trend-item:hover {
+    transform: translateX(5px);
+}
+
+/* Enlaces de tendencias */
+.search-trend-link {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 6px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+}
+
+.search-trend-link:hover {
+    background: rgba(140, 82, 255, 0.15);
+    border-color: rgba(140, 82, 255, 0.3);
+    text-decoration: none;
+}
+
+.search-trend-link:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(140, 82, 255, 0.5);
+}
+
+/* Término de búsqueda */
+.trend-term {
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 500;
+    flex: 1;
+    margin-right: 10px;
+    text-transform: capitalize;
+    line-height: 1.4;
+}
+
+.search-trend-link:hover .trend-term {
+    color: #ffffff;
+}
+
+/* Contador de búsquedas */
+.trend-count {
+    color: #b7b7b7;
+    font-size: 12px;
+    font-weight: 400;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 4px 8px;
+    border-radius: 12px;
+    white-space: nowrap;
+    transition: all 0.3s ease;
+}
+
+.search-trend-link:hover .trend-count {
+    background: rgba(140, 82, 255, 0.3);
+    color: #ffffff;
+}
+
+/* Pie de la sección */
+.search-trends-footer {
+    text-align: center;
+    padding-top: 15px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.search-trends-footer .text-muted {
+    color: #888888 !important;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 500;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .product__sidebar__search {
+        margin-bottom: 30px;
+        padding: 20px 15px;
+    }
+    
+    .search-trend-link {
+        padding: 10px 12px;
+    }
+    
+    .trend-term {
+        font-size: 13px;
+    }
+    
+    .trend-count {
+        font-size: 11px;
+        padding: 3px 6px;
+    }
+}
+
+/* Animación de aparición para los elementos */
+.search-trend-item {
+    animation: fadeInUp 0.5s ease forwards;
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+.search-trend-item:nth-child(1) { animation-delay: 0.1s; }
+.search-trend-item:nth-child(2) { animation-delay: 0.2s; }
+.search-trend-item:nth-child(3) { animation-delay: 0.3s; }
+.search-trend-item:nth-child(4) { animation-delay: 0.4s; }
+.search-trend-item:nth-child(5) { animation-delay: 0.5s; }
+.search-trend-item:nth-child(6) { animation-delay: 0.6s; }
+
+@keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Efecto de pulso sutil para destacar la sección */
+.product__sidebar__search {
+    position: relative;
+}
+
+.product__sidebar__search::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, 
+        rgba(140, 82, 255, 0.3), 
+        rgba(179, 102, 255, 0.3), 
+        rgba(140, 82, 255, 0.3)
+    );
+    border-radius: 10px;
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.product__sidebar__search:hover::before {
+    opacity: 1;
+}
+
+/* Estado vacío (cuando no hay búsquedas) */
+.search-trends-empty {
+    text-align: center;
+    padding: 30px 15px;
+    color: #888888;
+    font-style: italic;
+}
+
+.search-trends-empty i {
+    font-size: 24px;
+    color: #666666;
+    margin-bottom: 10px;
+    display: block;
+}

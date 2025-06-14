@@ -1,0 +1,61 @@
+{% extends "admin/index.html" %}
+{% load i18n static %}
+
+{% block content %}
+{{ block.super }}
+
+<div class="module">
+    <table>
+        <caption>
+            <a href="{% url 'custom_admin:estadisticas_recomendaciones' %}" class="section">
+                📊 Estadísticas y Recomendaciones
+            </a>
+        </caption>
+        <tbody>
+            <tr>
+                <td>
+                    <a href="{% url 'custom_admin:estadisticas_recomendaciones' %}">
+                        Ver estadísticas completas del sistema, contenido más popular, términos más buscados y recomendaciones
+                    </a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="module">
+    <table>
+        <caption>
+            <a href="{% url 'custom_admin:anilist_dashboard' %}" class="section">
+                🌐 Integración AniList
+            </a>
+        </caption>
+        <tbody>
+            <tr>
+                <td>
+                    <a href="{% url 'custom_admin:anilist_dashboard' %}">
+                        Importar contenido de anime desde AniList - Base de datos completa con información en español
+                    </a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<style>
+    .module table caption a.section {
+        font-size: 16px;
+        font-weight: bold;
+        color: #417690;
+        text-decoration: none;
+    }
+    
+    .module table caption a.section:hover {
+        color: #205067;
+    }
+    
+    .module table tbody tr td a {
+        color: #666;
+        font-size: 13px;
+    }
+</style>{% endblock %}

@@ -1,0 +1,274 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block title %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
+
+{% block extrahead %}
+    <style>
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .stat-card {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .stat-card h3 {
+            color: #417690;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #417690;
+            padding-bottom: 5px;
+        }
+        
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+        
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #417690;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .ranking-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .ranking-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            margin-bottom: 5px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            border-left: 4px solid #417690;
+        }
+        
+        .ranking-number {
+            background: #417690;
+            color: white;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 12px;
+            margin-right: 10px;
+        }
+        
+        .ranking-info {
+            flex: 1;
+        }
+        
+        .ranking-title {
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .ranking-stats {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .stars {
+            color: #ffa500;
+        }
+        
+        .likes {
+            color: #28a745;
+        }
+        
+        .views {
+            color: #007bff;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<h1>📊 Estadísticas y Recomendaciones del Sistema</h1>
+
+<!-- Estadísticas Generales -->
+<div class="stat-card">
+    <h3>📈 Estadísticas Generales</h3>
+    <div class="stat-grid">
+        <div class="stat-item">
+            <div class="stat-number">{{ estadisticas_generales.total_contenidos }}</div>
+            <div class="stat-label">Contenidos</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">{{ estadisticas_generales.total_usuarios }}</div>
+            <div class="stat-label">Perfiles de Usuario</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">{{ estadisticas_generales.total_reproducciones }}</div>
+            <div class="stat-label">Reproducciones</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">{{ estadisticas_generales.total_calificaciones }}</div>
+            <div class="stat-label">Calificaciones</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">{{ estadisticas_generales.total_busquedas }}</div>
+            <div class="stat-label">Búsquedas</div>
+        </div>
+    </div>
+</div>
+
+<div class="dashboard">
+    <!-- Contenido Más Visto -->
+    <div class="stat-card">
+        <h3>👁️ Contenido Más Visto</h3>
+        <ul class="ranking-list">
+            {% for contenido in contenido_mas_visto %}
+            <li class="ranking-item">
+                <div class="ranking-number">{{ forloop.counter }}</div>
+                <div class="ranking-info">
+                    <div class="ranking-title">{{ contenido.titulo }}</div>
+                    <div class="ranking-stats">
+                        <span class="views">👁️ {{ contenido.total_reproducciones }} views</span>
+                        {% if contenido.rating_promedio %}
+                            | <span class="stars">⭐ {{ contenido.rating_promedio|floatformat:1 }}</span>
+                        {% endif %}
+                        {% if contenido.total_calificaciones %}
+                            | <span>📊 {{ contenido.total_calificaciones }} calificaciones</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </li>
+            {% empty %}
+            <li>No hay datos de reproducciones disponibles.</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- Contenido Mejor Valorado -->
+    <div class="stat-card">
+        <h3>⭐ Contenido Mejor Valorado</h3>
+        <ul class="ranking-list">
+            {% for contenido in contenido_mejor_valorado %}
+            <li class="ranking-item">
+                <div class="ranking-number">{{ forloop.counter }}</div>
+                <div class="ranking-info">
+                    <div class="ranking-title">{{ contenido.titulo }}</div>
+                    <div class="ranking-stats">
+                        <span class="stars">⭐ {{ contenido.rating_promedio|floatformat:1 }}</span>
+                        | <span>📊 {{ contenido.total_calificaciones }} calificaciones</span>
+                        {% if contenido.total_likes %}
+                            | <span class="likes">👍 {{ contenido.total_likes }} likes</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </li>
+            {% empty %}
+            <li>No hay datos de calificaciones disponibles.</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- Contenido Más Gustado -->
+    <div class="stat-card">
+        <h3>❤️ Contenido Con Más Me Gusta</h3>
+        <ul class="ranking-list">
+            {% for contenido in contenido_mas_gustado %}
+            <li class="ranking-item">
+                <div class="ranking-number">{{ forloop.counter }}</div>
+                <div class="ranking-info">
+                    <div class="ranking-title">{{ contenido.titulo }}</div>
+                    <div class="ranking-stats">
+                        <span class="likes">👍 {{ contenido.total_likes }} likes</span>
+                        {% if contenido.total_dislikes %}
+                            | <span>👎 {{ contenido.total_dislikes }} dislikes</span>
+                        {% endif %}
+                        {% if contenido.rating_promedio %}
+                            | <span class="stars">⭐ {{ contenido.rating_promedio|floatformat:1 }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </li>
+            {% empty %}
+            <li>No hay datos de me gusta disponibles.</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- Términos Más Buscados -->
+    <div class="stat-card">
+        <h3>🔍 Términos Más Buscados</h3>
+        <ul class="ranking-list">
+            {% for termino in terminos_mas_buscados %}
+            <li class="ranking-item">
+                <div class="ranking-number">{{ forloop.counter }}</div>
+                <div class="ranking-info">
+                    <div class="ranking-title">"{{ termino.termino_normalizado }}"</div>
+                    <div class="ranking-stats">
+                        <span>🔍 {{ termino.total_busquedas }} búsquedas</span>
+                    </div>
+                </div>
+            </li>
+            {% empty %}
+            <li>No hay datos de búsquedas disponibles.</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- Categorías Más Populares -->
+    <div class="stat-card">
+        <h3>📁 Categorías Más Populares</h3>
+        <ul class="ranking-list">
+            {% for categoria in categorias_populares %}
+            <li class="ranking-item">
+                <div class="ranking-number">{{ forloop.counter }}</div>
+                <div class="ranking-info">
+                    <div class="ranking-title">{{ categoria.nombre }}</div>
+                    <div class="ranking-stats">
+                        <span>📺 {{ categoria.total_contenido }} contenidos</span>
+                        | <span class="views">👁️ {{ categoria.total_reproducciones }} reproducciones</span>
+                    </div>
+                </div>
+            </li>
+            {% empty %}
+            <li>No hay datos de categorías disponibles.</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+
+<div style="margin-top: 30px; padding: 20px; background: #e3f2fd; border-radius: 8px;">
+    <h3>💡 Recomendaciones del Sistema</h3>
+    <ul>
+        <li><strong>Promocionar contenido popular:</strong> Los contenidos más vistos generan más engagement.</li>
+        <li><strong>Mejorar contenido mal valorado:</strong> Revisar contenidos con rating bajo para posibles mejoras.</li>
+        <li><strong>Aprovechar búsquedas populares:</strong> Crear más contenido basado en los términos más buscados.</li>
+        <li><strong>Diversificar categorías:</strong> Expandir categorías menos populares para atraer nuevas audiencias.</li>
+        <li><strong>Sistema de recomendaciones:</strong> Usar estos datos para mejorar las recomendaciones personalizadas.</li>
+    </ul>
+</div>
+
+{% endblock %}

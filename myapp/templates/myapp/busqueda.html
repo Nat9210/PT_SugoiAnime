@@ -4,11 +4,7 @@
 {% block content %}
 <div class="container mt-5">
     <h2 class="text-purple mb-4">Resultados de búsqueda</h2>
-    <!--<form method="get" action="{% url 'busqueda' %}" class="mb-4">
-        <input type="text" name="q" value="{{ query }}" placeholder="Buscar anime, película..." class="form-control form-control-lg" style="max-width:400px;display:inline-block;">
-        <button type="submit" class="btn btn-purple ms-2">Buscar</button>
-    </form>-->
-    {% if query %>
+    {% if query %}
         <div class="row g-4">
             {% for contenido in resultados %}
             <div class="col-12 col-sm-6 col-md-4 col-lg-3">
@@ -22,7 +18,8 @@
                                 {{ contenido.titulo }}
                             </a>
                         </h5>
-                    </div>                </div>
+                    </div>
+                </div>
             </div>
             {% empty %}
             <div class="col-12">

@@ -3,8 +3,11 @@ from .models import (Contenido, Categoria, Episodio, ContenidoCategoria, Perfil,
                      HistorialReproduccion, Favorito, Calificacion, AuditLog, 
                      SesionUsuario, AccesoFallido, HistorialBusqueda)
 from django.utils.html import format_html
-from django.urls import reverse
+from django.urls import reverse, path
 from django.utils.safestring import mark_safe
+from django.shortcuts import render
+from django.contrib.admin.views.decorators import staff_member_required
+from django.db.models import Count, Avg, Q
 import json
 
 class ContenidoCategoriaInline(admin.TabularInline):
@@ -146,3 +149,115 @@ class HistorialBusquedaAdmin(admin.ModelAdmin):
 admin.site.site_header = "SugoiAnime - Panel de Administración"
 admin.site.site_title = "SugoiAnime Admin"
 admin.site.index_title = "Panel de Control - Sistema de Auditoría Incluido"
+
+# Vista personalizada para estadísticas y recomendaciones
+@staff_member_required
+def estadisticas_recomendaciones(request):
+    """Vista para mostrar estadísticas del sistema y recomendaciones"""
+    
+    # Estadísticas generales
+    total_contenidos = Contenido.objects.count()
+    total_usuarios = Perfil.objects.count()
+    total_reproducciones = HistorialReproduccion.objects.count()
+    total_calificaciones = Calificacion.objects.count()
+    total_busquedas = HistorialBusqueda.objects.count()
+    
+    # Contenido más popular (por reproducciones)
+    contenido_mas_visto = Contenido.objects.annotate(
+        total_reproducciones=Count('historialreproduccion'),
+        rating_promedio=Avg('calificacion__calificacion'),
+        total_calificaciones=Count('calificacion')
+    ).filter(
+        total_reproducciones__gt=0
+    ).order_by('-total_reproducciones')[:10]
+    
+    # Contenido mejor valorado
+    contenido_mejor_valorado = Contenido.objects.annotate(
+        rating_promedio=Avg('calificacion__calificacion'),
+        total_calificaciones=Count('calificacion'),
+        total_likes=Count('calificacion', filter=Q(calificacion__calificacion__gte=4))
+    ).filter(
+        total_calificaciones__gte=3
+    ).order_by('-rating_promedio', '-total_calificaciones')[:10]
+    
+    # Contenido con más me gusta
+    contenido_mas_gustado = Contenido.objects.annotate(
+        total_likes=Count('calificacion', filter=Q(calificacion__calificacion__gte=4)),
+        total_dislikes=Count('calificacion', filter=Q(calificacion__calificacion__lte=2)),
+        rating_promedio=Avg('calificacion__calificacion')
+    ).filter(
+        total_likes__gt=0
+    ).order_by('-total_likes', '-rating_promedio')[:10]
+    
+    # Términos más buscados
+    terminos_mas_buscados = HistorialBusqueda.obtener_mas_buscados(limite=10, dias=30)
+    
+    # Categorías más populares
+    categorias_populares = Categoria.objects.annotate(
+        total_contenido=Count('contenidos'),
+        total_reproducciones=Count('contenidos__historialreproduccion')
+    ).filter(
+        total_contenido__gt=0
+    ).order_by('-total_reproducciones', '-total_contenido')[:10]
+    
+    context = {
+        'title': 'Estadísticas y Recomendaciones',
+        'estadisticas_generales': {
+            'total_contenidos': total_contenidos,
+            'total_usuarios': total_usuarios,
+            'total_reproducciones': total_reproducciones,
+            'total_calificaciones': total_calificaciones,
+            'total_busquedas': total_busquedas,
+        },
+        'contenido_mas_visto': contenido_mas_visto,
+        'contenido_mejor_valorado': contenido_mejor_valorado,
+        'contenido_mas_gustado': contenido_mas_gustado,
+        'terminos_mas_buscados': terminos_mas_buscados,
+        'categorias_populares': categorias_populares,
+    }
+    
+    return render(request, 'admin/estadisticas_recomendaciones.html', context)
+
+# Personalizar el AdminSite para agregar la vista personalizada
+class CustomAdminSite(admin.AdminSite):
+    def get_urls(self):
+        urls = super().get_urls()
+        from .anilist_views import (
+            anilist_dashboard, importar_populares_anilist, 
+            importar_temporada_anilist, buscar_importar_anilist,
+            buscar_anilist_ajax, importar_anime_especifico,
+            buscar_e_importar_español_anilist
+        )
+        custom_urls = [
+            path('estadisticas-recomendaciones/', estadisticas_recomendaciones, name='estadisticas_recomendaciones'),
+            path('anilist/', anilist_dashboard, name='anilist_dashboard'),
+            path('anilist/importar-populares/', importar_populares_anilist, name='importar_populares_anilist'),
+            path('anilist/importar-temporada/', importar_temporada_anilist, name='importar_temporada_anilist'),
+            path('anilist/buscar-importar/', buscar_importar_anilist, name='buscar_importar_anilist'),
+            path('anilist/buscar-importar-español/', buscar_e_importar_español_anilist, name='buscar_e_importar_español_anilist'),
+            path('anilist/buscar-ajax/', buscar_anilist_ajax, name='buscar_anilist_ajax'),
+            path('anilist/importar-especifico/', importar_anime_especifico, name='importar_anime_especifico'),
+        ]
+        return custom_urls + urls
+
+# Reemplazar el sitio de admin por defecto
+admin_site = CustomAdminSite(name='custom_admin')
+
+# Re-registrar todos los modelos en el sitio personalizado
+admin_site.register(Contenido, ContenidoAdmin)
+admin_site.register(Categoria)
+admin_site.register(Episodio, EpisodioAdmin)
+admin_site.register(ContenidoCategoria)
+admin_site.register(Perfil)
+admin_site.register(HistorialReproduccion)
+admin_site.register(Favorito)
+admin_site.register(Calificacion)
+admin_site.register(AuditLog, AuditLogAdmin)
+admin_site.register(SesionUsuario, SesionUsuarioAdmin)
+admin_site.register(AccesoFallido, AccesoFallidoAdmin)
+admin_site.register(HistorialBusqueda, HistorialBusquedaAdmin)
+
+# Configurar títulos del sitio personalizado
+admin_site.site_header = "SugoiAnime - Panel de Administración"
+admin_site.site_title = "SugoiAnime Admin"
+admin_site.index_title = "Panel de Control - Sistema de Auditoría Incluido"

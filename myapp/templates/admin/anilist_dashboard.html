@@ -1,0 +1,462 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block title %}Integración AniList | {{ site_title|default:_('Django site admin') }}{% endblock %}
+
+{% block extrahead %}
+    <style>
+        .anilist-dashboard {
+            padding: 20px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .stat-number {
+            font-size: 36px;
+            font-weight: bold;
+            color: #02A9FF;
+            margin-bottom: 10px;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .action-section {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .action-section h3 {
+            color: #02A9FF;
+            margin-bottom: 15px;
+            font-size: 18px;
+            border-bottom: 2px solid #02A9FF;
+            padding-bottom: 8px;
+        }
+        
+        .action-form {
+            display: flex;
+            gap: 15px;
+            align-items: end;
+            flex-wrap: wrap;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .form-group label {
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .form-group input, .form-group select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .btn-anilist {
+            background: #02A9FF;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+        
+        .btn-anilist:hover {
+            background: #0187CC;
+        }
+        
+        .btn-search {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-left: 10px;
+        }
+        
+        .btn-search:hover {
+            background: #218838;
+        }
+        
+        .search-results {
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .anime-card {
+            display: flex;
+            gap: 15px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            background: #f9f9f9;
+        }
+        
+        .anime-image {
+            width: 80px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+        
+        .anime-info {
+            flex: 1;
+        }
+        
+        .anime-title {
+            font-weight: bold;
+            color: #02A9FF;
+            margin-bottom: 5px;
+        }
+        
+        .anime-meta {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        .anime-description {
+            font-size: 13px;
+            color: #333;
+            line-height: 1.4;
+        }
+        
+        .anime-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            min-width: 120px;
+        }
+        
+        .btn-import {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        
+        .btn-imported {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-size: 12px;
+            cursor: not-allowed;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+        
+        .genre-tags {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+            margin-top: 5px;
+        }
+        
+        .genre-tag {
+            background: #02A9FF;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 10px;
+        }
+        
+        .anilist-logo {
+            color: #02A9FF;
+            font-weight: bold;
+            font-size: 24px;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="anilist-dashboard">
+    <h1><span class="anilist-logo">AniList</span> Integración</h1>
+    <p>Importa contenido de anime directamente desde la base de datos de AniList.</p>
+    
+    <!-- Estadísticas -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-number">{{ total_contenidos }}</div>
+            <div class="stat-label">Total Contenidos</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ contenidos_anilist }}</div>
+            <div class="stat-label">Desde AniList</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ contenidos_locales }}</div>
+            <div class="stat-label">Creados Manualmente</div>
+        </div>
+    </div>
+    
+    <!-- Importar Populares -->
+    <div class="action-section">
+        <h3>🔥 Importar Anime Populares</h3>
+        <p>Importa los animes más populares actualmente en AniList.</p>
+        <form method="post" action="{% url 'custom_admin:importar_populares_anilist' %}" class="action-form">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="cantidad_populares">Cantidad:</label>
+                <select name="cantidad" id="cantidad_populares">
+                    <option value="10">10 animes</option>
+                    <option value="20" selected>20 animes</option>
+                    <option value="30">30 animes</option>
+                    <option value="50">50 animes</option>
+                </select>
+            </div>
+            <button type="submit" class="btn-anilist">Importar Populares</button>
+        </form>
+    </div>
+    
+    <!-- Importar Temporada Actual -->
+    <div class="action-section">
+        <h3>📺 Importar Temporada Actual</h3>
+        <p>Importa animes de la temporada actual (en emisión).</p>
+        <form method="post" action="{% url 'custom_admin:importar_temporada_anilist' %}" class="action-form">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="cantidad_temporada">Cantidad:</label>
+                <select name="cantidad" id="cantidad_temporada">
+                    <option value="10">10 animes</option>
+                    <option value="20" selected>20 animes</option>
+                    <option value="30">30 animes</option>
+                    <option value="50">50 animes</option>
+                </select>
+            </div>
+            <button type="submit" class="btn-anilist">Importar Temporada</button>
+        </form>
+    </div>
+    
+    <!-- Búsqueda Específica -->
+    <div class="action-section">
+        <h3>🔍 Buscar e Importar</h3>
+        <p>Busca animes específicos en AniList y selecciona cuáles importar.</p>
+        
+        <div class="action-form">
+            <div class="form-group">
+                <label for="termino_busqueda">Término de búsqueda:</label>
+                <input type="text" id="termino_busqueda" placeholder="Ej: Attack on Titan, Naruto..." style="min-width: 250px;">
+            </div>
+            <button type="button" id="btn_buscar" class="btn-search">Buscar</button>
+        </div>
+        
+        <!-- Resultados de búsqueda -->
+        <div id="search_results" class="search-results">
+            <h4>Resultados de búsqueda:</h4>
+            <div id="results_container"></div>
+        </div>
+    </div>
+    
+    <!-- Importación Masiva -->
+    <div class="action-section">
+        <h3>📦 Importación Masiva por Búsqueda</h3>
+        <p>Importa múltiples resultados de una búsqueda automáticamente.</p>
+        <form method="post" action="{% url 'custom_admin:buscar_importar_anilist' %}" class="action-form">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="termino_masivo">Término de búsqueda:</label>
+                <input type="text" name="termino" id="termino_masivo" placeholder="Ej: Studio Ghibli, Shounen..." style="min-width: 250px;" required>
+            </div>
+            <div class="form-group">
+                <label for="cantidad_masiva">Cantidad máxima:</label>
+                <select name="cantidad" id="cantidad_masiva">
+                    <option value="5">5 animes</option>
+                    <option value="10" selected>10 animes</option>
+                    <option value="15">15 animes</option>
+                    <option value="20">20 animes</option>
+                </select>
+            </div>
+            <button type="submit" class="btn-anilist">Importar Búsqueda</button>
+        </form>
+    </div>
+    
+    <!-- Búsqueda Específica en Español -->
+    <div class="action-section">
+        <h3>🇪🇸 Buscar e Importar Contenido en Español</h3>
+        <p>Búsqueda especializada que prioriza contenido con títulos, descripciones o disponibilidad en español.</p>
+        <form method="post" action="{% url 'custom_admin:buscar_e_importar_español_anilist' %}" class="action-form">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="termino_español">Término de búsqueda en español:</label>
+                <input type="text" name="termino" id="termino_español" placeholder="Ej: El Ataque de los Titanes, Naruto en español..." style="min-width: 250px;" required>
+            </div>
+            <div class="form-group">
+                <label for="cantidad_español">Cantidad máxima:</label>
+                <select name="cantidad" id="cantidad_español">
+                    <option value="5">5 animes</option>
+                    <option value="10" selected>10 animes</option>
+                    <option value="15">15 animes</option>
+                    <option value="20">20 animes</option>
+                </select>
+            </div>
+            <button type="submit" class="btn-anilist" style="background: #dc3545;">🇪🇸 Importar en Español</button>
+        </form>
+        <small style="color: #666; margin-top: 10px; display: block;">
+            <strong>Nota:</strong> Esta búsqueda prioriza contenido que tenga títulos en español, sinónimos en español, 
+            o disponibilidad en plataformas de streaming hispanohablantes.
+        </small>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchBtn = document.getElementById('btn_buscar');
+    const searchInput = document.getElementById('termino_busqueda');
+    const resultsDiv = document.getElementById('search_results');
+    const resultsContainer = document.getElementById('results_container');
+    
+    searchBtn.addEventListener('click', function() {
+        const termino = searchInput.value.trim();
+        if (!termino) {
+            alert('Por favor ingresa un término de búsqueda');
+            return;
+        }
+        
+        // Mostrar loading
+        resultsContainer.innerHTML = '<div class="loading">🔍 Buscando en AniList...</div>';
+        resultsDiv.style.display = 'block';
+        
+        // Realizar búsqueda AJAX
+        fetch('{% url "custom_admin:buscar_anilist_ajax" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({
+                termino: termino
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                displayResults(data.resultados);
+            } else {
+                resultsContainer.innerHTML = `<div class="loading">❌ Error: ${data.error}</div>`;
+            }
+        })
+        .catch(error => {
+            resultsContainer.innerHTML = `<div class="loading">❌ Error de conexión: ${error}</div>`;
+        });
+    });
+    
+    function displayResults(animes) {
+        if (animes.length === 0) {
+            resultsContainer.innerHTML = '<div class="loading">😅 No se encontraron resultados</div>';
+            return;
+        }
+        
+        let html = '';
+        animes.forEach(anime => {
+            const imageUrl = anime.imagen || '{% static "myapp/img/default-cover.jpg" %}';
+            const genres = anime.generos.slice(0, 3).map(g => `<span class="genre-tag">${g}</span>`).join('');
+            const isImported = anime.ya_importado;
+            
+            html += `
+                <div class="anime-card">
+                    <img src="${imageUrl}" alt="${anime.titulo}" class="anime-image" onerror="this.src='{% static "myapp/img/default-cover.jpg" %}'">
+                    <div class="anime-info">
+                        <div class="anime-title">${anime.titulo}</div>
+                        <div class="anime-meta">
+                            ${anime.año || 'N/A'} • ${anime.episodios || '?'} eps • Score: ${anime.score || 'N/A'}/100
+                        </div>
+                        <div class="anime-description">${anime.descripcion || 'Sin descripción disponible.'}</div>
+                        <div class="genre-tags">${genres}</div>
+                    </div>
+                    <div class="anime-actions">
+                        ${isImported ? 
+                            '<button class="btn-imported" disabled>Ya Importado</button>' : 
+                            `<button class="btn-import" onclick="importarAnime(${anime.id}, this)">Importar</button>`
+                        }
+                    </div>
+                </div>
+            `;
+        });
+        
+        resultsContainer.innerHTML = html;
+    }
+    
+    // Función global para importar anime específico
+    window.importarAnime = function(anilistId, button) {
+        button.textContent = 'Importando...';
+        button.disabled = true;
+        
+        fetch('{% url "custom_admin:importar_anime_especifico" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({
+                anilist_id: anilistId
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                button.textContent = 'Importado ✓';
+                button.className = 'btn-imported';
+                alert(data.mensaje);
+            } else {
+                button.textContent = 'Importar';
+                button.disabled = false;
+                alert('Error: ' + data.error);
+            }
+        })
+        .catch(error => {
+            button.textContent = 'Importar';
+            button.disabled = false;
+            alert('Error de conexión: ' + error);
+        });
+    };
+    
+    // Enter key para búsqueda
+    searchInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            searchBtn.click();
+        }
+    });
+});
+</script>
+{% endblock %}
