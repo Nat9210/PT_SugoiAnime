@@ -1,53 +1,245 @@
 {% extends "admin/index.html" %}
 {% load i18n static %}
 
+{% block extrahead %}
+{{ block.super }}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<style>
+/* Dashboard moderno para SugoiAnime */
+.dashboard-container {
+    margin: 20px 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.dashboard-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 15px;
+    padding: 25px;
+    color: white;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: none;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+}
+
+.dashboard-card h3 {
+    margin: 0 0 15px 0;
+    font-size: 1.4em;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.dashboard-card .icon {
+    font-size: 2em;
+    opacity: 0.8;
+}
+
+.dashboard-card p {
+    margin: 0 0 20px 0;
+    opacity: 0.9;
+    line-height: 1.5;
+}
+
+.dashboard-card a {
+    display: inline-block;
+    background: rgba(255,255,255,0.2);
+    color: white;
+    padding: 12px 24px;
+    text-decoration: none;
+    border-radius: 25px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.dashboard-card a:hover {
+    background: rgba(255,255,255,0.3);
+    transform: scale(1.05);
+}
+
+/* Colores específicos para cada tarjeta */
+.card-stats { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+.card-anilist { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
+.card-audit { background: linear-gradient(135deg, #fd746c 0%, #ff9068 100%); }
+.card-security { background: linear-gradient(135deg, #2d1b69 0%, #11998e 100%); }
+.card-content { background: linear-gradient(135deg, #ff6b6b 0%, #feca57 100%); }
+.card-users { background: linear-gradient(135deg, #4834d4 0%, #686de0 100%); }
+
+/* Métricas rápidas */
+.quick-metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.metric-box {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+.metric-number {
+    font-size: 2.5em;
+    font-weight: bold;
+    color: #417690;
+    margin: 0;
+}
+
+.metric-label {
+    color: #666;
+    margin: 5px 0 0 0;
+    font-size: 0.9em;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .dashboard-container {
+        grid-template-columns: 1fr;
+    }
+    .quick-metrics {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Animaciones */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.dashboard-card {
+    animation: fadeInUp 0.6s ease forwards;
+}
+
+.dashboard-card:nth-child(2) { animation-delay: 0.1s; }
+.dashboard-card:nth-child(3) { animation-delay: 0.2s; }
+.dashboard-card:nth-child(4) { animation-delay: 0.3s; }
+.dashboard-card:nth-child(5) { animation-delay: 0.4s; }
+.dashboard-card:nth-child(6) { animation-delay: 0.5s; }
+</style>
+{% endblock %}
+
 {% block content %}
 {{ block.super }}
 
-<div class="module">
-    <table>
-        <caption>
-            <a href="{% url 'custom_admin:estadisticas_recomendaciones' %}" class="section">
-                📊 Estadísticas y Recomendaciones
-            </a>
-        </caption>
-        <tbody>
-            <tr>
-                <td>
-                    <a href="{% url 'custom_admin:estadisticas_recomendaciones' %}">
-                        Ver estadísticas completas del sistema, contenido más popular, términos más buscados y recomendaciones
-                    </a>
-                </td>
-            </tr>
-        </tbody>
-    </table>
+<!-- Métricas rápidas -->
+<div class="quick-metrics">
+    <div class="metric-box">
+        <div class="metric-number">{{ total_contenidos|default:"..." }}</div>
+        <div class="metric-label">Contenidos Total</div>
+    </div>
+    <div class="metric-box">
+        <div class="metric-number">{{ total_usuarios|default:"..." }}</div>
+        <div class="metric-label">Usuarios Activos</div>
+    </div>
+    <div class="metric-box">
+        <div class="metric-number">{{ total_reproducciones|default:"..." }}</div>
+        <div class="metric-label">Reproducciones</div>
+    </div>
+    <div class="metric-box">
+        <div class="metric-number">{{ total_calificaciones|default:"..." }}</div>
+        <div class="metric-label">Calificaciones</div>
+    </div>
 </div>
 
-<div class="module">
-    <table>
-        <caption>
-            <a href="{% url 'custom_admin:anilist_dashboard' %}" class="section">
-                🌐 Integración AniList
-            </a>
-        </caption>
-        <tbody>
-            <tr>
-                <td>
-                    <a href="{% url 'custom_admin:anilist_dashboard' %}">
-                        Importar contenido de anime desde AniList - Base de datos completa con información en español
-                    </a>
-                </td>
-            </tr>
-        </tbody>
-    </table>
+<!-- Dashboard principal -->
+<div class="dashboard-container">
+    <div class="dashboard-card card-stats">
+        <h3>
+            <i class="fas fa-chart-line icon"></i>
+            Estadísticas y Analytics
+        </h3>
+        <p>📈 Dashboard completo con métricas de contenido, usuarios y recomendaciones del sistema. Analiza tendencias y performance.</p>
+        <a href="{% url 'custom_admin:estadisticas_recomendaciones' %}">
+            <i class="fas fa-external-link-alt"></i> Ver Dashboard
+        </a>
+    </div>
+
+    <div class="dashboard-card card-anilist">
+        <h3>
+            <i class="fas fa-cloud-download-alt icon"></i>
+            Integración AniList
+        </h3>
+        <p>🌐 Importa contenido de anime desde AniList con información completa en español. Base de datos actualizada automáticamente.</p>
+        <a href="{% url 'custom_admin:anilist_dashboard' %}">
+            <i class="fas fa-download"></i> Importar Contenido
+        </a>
+    </div>
+
+    <div class="dashboard-card card-audit">
+        <h3>
+            <i class="fas fa-shield-alt icon"></i>
+            Sistema de Auditoría
+        </h3>
+        <p>🔍 Monitorea todas las acciones del sistema, cambios en datos y actividad de usuarios para mantener la seguridad.</p>
+        <a href="/admin/myapp/auditlog/">
+            <i class="fas fa-list"></i> Ver Logs
+        </a>
+    </div>
+
+    <div class="dashboard-card card-security">
+        <h3>
+            <i class="fas fa-user-shield icon"></i>
+            Seguridad y Accesos
+        </h3>
+        <p>🛡️ Controla sesiones de usuario, intentos de acceso fallidos y mantén la seguridad del sistema.</p>
+        <a href="/admin/myapp/sesionusuario/">
+            <i class="fas fa-users"></i> Gestionar Sesiones
+        </a>
+    </div>
+
+    <div class="dashboard-card card-content">
+        <h3>
+            <i class="fas fa-video icon"></i>
+            Gestión de Contenido
+        </h3>
+        <p>🎬 Administra animes, episodios, categorías y toda la biblioteca de contenido de manera eficiente.</p>
+        <a href="/admin/myapp/contenido/">
+            <i class="fas fa-edit"></i> Gestionar Contenido
+        </a>
+    </div>
+
+    <div class="dashboard-card card-users">
+        <h3>
+            <i class="fas fa-users-cog icon"></i>
+            Usuarios y Perfiles
+        </h3>
+        <p>👥 Administra perfiles de usuario, historial de reproducciones, favoritos y calificaciones del sistema.</p>
+        <a href="/admin/myapp/perfil/">
+            <i class="fas fa-user-edit"></i> Gestionar Usuarios
+        </a>
+    </div>
 </div>
 
-<style>
-    .module table caption a.section {
-        font-size: 16px;
-        font-weight: bold;
-        color: #417690;
-        text-decoration: none;
+<script>
+// Cargar métricas dinámicamente
+document.addEventListener('DOMContentLoaded', function() {
+    // Aquí puedes agregar llamadas AJAX para cargar métricas en tiempo real
+    // Por ejemplo:
+    // fetch('/admin/api/metrics/')
+    //     .then(response => response.json())
+    //     .then(data => {
+    //         document.querySelector('.metric-number').textContent = data.total_contenidos;
+    //     });
+});
+</script>
     }
     
     .module table caption a.section:hover {

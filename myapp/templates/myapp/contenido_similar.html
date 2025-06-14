@@ -48,14 +48,19 @@
                                     <div class="ep">{{ similar.duracion|default_if_none:'?' }} min</div>
                                     <div class="comment"><i class="fa fa-{{ similar.tipo }}"></i> {{ similar.get_tipo_display }}</div>
                                     <div class="view"><i class="fa fa-eye"></i> {{ similar.total_reproducciones|default:'0' }}</div>
-                                </div>
-                                <div class="product__item__text">
+                                </div>                                <div class="product__item__text">
                                     <ul>
                                         {% for categoria in similar.categorias.all|slice:":3" %}
                                             <li>{{ categoria.nombre }}</li>
                                         {% endfor %}
                                     </ul>
-                                    <h5><a href="{% url 'anime_details' similar.id %}">{{ similar.titulo }}</a></h5>
+                                    <h5>
+                                        {% if similar.id %}
+                                            <a href="{% url 'anime_details' similar.id %}">{{ similar.titulo }}</a>
+                                        {% else %}
+                                            {{ similar.titulo }}
+                                        {% endif %}
+                                    </h5>
                                 </div>
                             </div>
                         </div>
@@ -81,11 +86,16 @@
                         <div class="section-title">
                             <h5>Contenido de Referencia</h5>
                         </div>
-                        <div class="filter__gallery">
-                            <div class="product__sidebar__view__item set-bg" data-setbg="{% if contenido.imagen_portada %}{{ contenido.imagen_portada.url }}{% else %}{% static 'myapp/img/default-cover.jpg' %}{% endif %}">
+                        <div class="filter__gallery">                            <div class="product__sidebar__view__item set-bg" data-setbg="{% if contenido.imagen_portada %}{{ contenido.imagen_portada.url }}{% else %}{% static 'myapp/img/default-cover.jpg' %}{% endif %}">
                                 <div class="ep">{{ contenido.duracion|default_if_none:'?' }} min</div>
                                 <div class="view"><i class="fa fa-eye"></i> {{ contenido.total_reproducciones|default:'0' }}</div>
-                                <h5><a href="{% url 'anime_details' contenido.id %}">{{ contenido.titulo|truncatechars:30 }}</a></h5>
+                                <h5>
+                                    {% if contenido.id %}
+                                        <a href="{% url 'anime_details' contenido.id %}">{{ contenido.titulo|truncatechars:30 }}</a>
+                                    {% else %}
+                                        {{ contenido.titulo|truncatechars:30 }}
+                                    {% endif %}
+                                </h5>
                             </div>
                         </div>
                         <div class="mt-3">

@@ -1,0 +1,236 @@
+// =====================================================
+// ESQUEMA PARA DBDIAGRAM.IO - SUGOIANIME
+// Copia este código en https://dbdiagram.io/
+// =====================================================
+
+Table auth_user {
+  id int [pk, increment]
+  username varchar(150) [unique, not null]
+  email varchar(254)
+  password varchar(128) [not null]
+  first_name varchar(150)
+  last_name varchar(150)
+  is_active boolean [default: true]
+  is_staff boolean [default: false]
+  is_superuser boolean [default: false]
+  date_joined datetime [not null]
+  last_login datetime
+}
+
+Table myapp_perfil {
+  id bigint [pk, increment]
+  nombre varchar(100) [not null]
+  tipo varchar(10) [not null] // 'adulto' o 'infantil'
+  avatar varchar(100)
+  usuario_id int [not null, ref: > auth_user.id]
+  
+  indexes {
+    usuario_id
+    tipo
+  }
+}
+
+Table myapp_categoria {
+  id bigint [pk, increment]
+  nombre varchar(100) [unique, not null]
+  descripcion text
+  
+  indexes {
+    nombre
+  }
+}
+
+Table myapp_contenido {
+  id bigint [pk, increment]
+  titulo varchar(255) [not null]
+  descripcion text
+  tipo varchar(10) [not null] // 'anime' o 'manga'
+  anio int
+  idioma varchar(50)
+  duracion int
+  imagen_portada varchar(100)
+  video_url varchar(500)
+  anilist_id int [unique]
+  anilist_url varchar(500)
+  anilist_score decimal(3,2)
+  anilist_popularity int
+  fecha_importacion datetime
+  
+  indexes {
+    titulo
+    tipo
+    anio
+    anilist_id
+    anilist_popularity
+  }
+}
+
+Table myapp_contenidocategoria {
+  id bigint [pk, increment]
+  contenido_id bigint [not null, ref: > myapp_contenido.id]
+  categoria_id bigint [not null, ref: > myapp_categoria.id]
+  
+  indexes {
+    (contenido_id, categoria_id) [unique]
+    contenido_id
+    categoria_id
+  }
+}
+
+Table myapp_episodio {
+  id bigint [pk, increment]
+  contenido_id bigint [not null, ref: > myapp_contenido.id]
+  temporada int [not null, default: 1]
+  numero_episodio int [not null]
+  titulo varchar(255)
+  descripcion text
+  duracion int
+  video_url varchar(500)
+  video_file varchar(100)
+  
+  indexes {
+    contenido_id
+    temporada
+    numero_episodio
+  }
+}
+
+Table myapp_historialreproduccion {
+  id bigint [pk, increment]
+  perfil_id bigint [not null, ref: > myapp_perfil.id]
+  contenido_id bigint [not null, ref: > myapp_contenido.id]
+  episodio_id bigint [ref: > myapp_episodio.id]
+  fecha_reproduccion datetime [not null]
+  tiempo_reproducido int [default: 0]
+  completado boolean [not null, default: false]
+  
+  indexes {
+    perfil_id
+    contenido_id
+    fecha_reproduccion
+    completado
+  }
+}
+
+Table myapp_favorito {
+  id bigint [pk, increment]
+  perfil_id bigint [not null, ref: > myapp_perfil.id]
+  contenido_id bigint [not null, ref: > myapp_contenido.id]
+  fecha_agregado datetime [not null]
+  
+  indexes {
+    (perfil_id, contenido_id) [unique]
+    perfil_id
+    contenido_id
+    fecha_agregado
+  }
+}
+
+Table myapp_calificacion {
+  id bigint [pk, increment]
+  perfil_id bigint [not null, ref: > myapp_perfil.id]
+  contenido_id bigint [not null, ref: > myapp_contenido.id]
+  calificacion int [not null] // 1=no me gusta, 5=me gusta
+  fecha_calificacion datetime [not null]
+  
+  indexes {
+    (perfil_id, contenido_id) [unique]
+    perfil_id
+    contenido_id
+    calificacion
+    fecha_calificacion
+  }
+}
+
+Table myapp_historialbusqueda {
+  id bigint [pk, increment]
+  perfil_id bigint [not null, ref: > myapp_perfil.id]
+  termino varchar(255) [not null]
+  fecha_busqueda datetime [not null]
+  resultados_encontrados int [default: 0]
+  
+  indexes {
+    perfil_id
+    termino
+    fecha_busqueda
+  }
+}
+
+Table myapp_sesionusuario {
+  id bigint [pk, increment]
+  usuario_id int [not null, ref: > auth_user.id]
+  ip_address varchar(45)
+  user_agent text
+  fecha_inicio datetime [not null]
+  fecha_fin datetime
+  activa boolean [not null, default: true]
+  
+  indexes {
+    usuario_id
+    activa
+    fecha_inicio
+  }
+}
+
+Table myapp_accesofallido {
+  id bigint [pk, increment]
+  ip_address varchar(45) [not null]
+  username varchar(150)
+  fecha_intento datetime [not null]
+  user_agent text
+  
+  indexes {
+    ip_address
+    fecha_intento
+    username
+  }
+}
+
+Table myapp_auditlog {
+  id bigint [pk, increment]
+  usuario_id int [ref: > auth_user.id]
+  accion varchar(100) [not null]
+  modelo varchar(100)
+  objeto_id varchar(100)
+  detalles text
+  ip_address varchar(45)
+  timestamp_log datetime [not null]
+  
+  indexes {
+    usuario_id
+    accion
+    modelo
+    timestamp_log
+    ip_address
+  }
+}
+
+// =====================================================
+// NOTAS SOBRE LAS RELACIONES
+// =====================================================
+
+/*
+RELACIONES PRINCIPALES:
+
+1. Usuario → Perfil (1:N)
+   Un usuario puede tener múltiples perfiles
+
+2. Contenido ↔ Categoría (N:M)
+   Relación muchos a muchos a través de contenidocategoria
+
+3. Contenido → Episodio (1:N)
+   Un contenido puede tener múltiples episodios
+
+4. Perfil → Calificación/Favorito/Historial (1:N)
+   Un perfil puede tener múltiples interacciones
+
+LÓGICA DE CALIFICACIONES:
+- calificacion = 5: "Me gusta" (5 estrellas)
+- calificacion = 1: "No me gusta" (1 estrella)
+- Promedio calculado automáticamente
+
+AUDITORÍA Y SEGURIDAD:
+- Sesiones de usuario rastreadas
+- Accesos fallidos registrados  
+- Logs de auditoría completos
+*/

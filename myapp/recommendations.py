@@ -190,11 +190,10 @@ class SistemaRecomendaciones:
             rating_promedio=Avg('calificacion__calificacion'),
             total_ratings=Count('calificacion')
         ).exclude(
-            id__in=self._obtener_contenido_ya_visto()
-        ).order_by('-rating_promedio', '-total_ratings', '?')[:limite]
+            id__in=self._obtener_contenido_ya_visto()        ).order_by('-rating_promedio', '-total_ratings', '?')[:limite]
         
         return list(contenido_categoria)
-    
+
     def obtener_contenido_similar(self, contenido, limite=6):
         """
         Obtiene contenido similar a uno específico
@@ -202,17 +201,30 @@ class SistemaRecomendaciones:
         # Buscar contenido con categorías similares
         categorias_contenido = contenido.categorias.all()
         
+        if not categorias_contenido.exists():
+            # Si no tiene categorías, devolver contenido popular
+            return list(Contenido.objects.annotate(
+                rating_promedio=Avg('calificacion__calificacion')
+            ).exclude(id=contenido.id).order_by('-rating_promedio', '?')[:limite])
+        
         contenido_similar = Contenido.objects.filter(
             categorias__in=categorias_contenido
         ).exclude(
             id=contenido.id
         ).exclude(
-            id__in=self._obtener_contenido_ya_visto()        ).annotate(
+            id__in=self._obtener_contenido_ya_visto()
+        ).annotate(
             categorias_compartidas=Count('categorias', filter=Q(categorias__in=categorias_contenido)),
             rating_promedio=Avg('calificacion__calificacion')
         ).order_by('-categorias_compartidas', '-rating_promedio', '?')[:limite]
         
-        return list(contenido_similar)
+        # Convertir a lista y verificar que todos los objetos tengan ID válido
+        resultado = []
+        for item in contenido_similar:
+            if item and item.id:
+                resultado.append(item)
+        
+        return resultado
 
 
 def obtener_recomendaciones_para_perfil(perfil, limite=10):

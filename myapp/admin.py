@@ -21,25 +21,312 @@ class EpisodioInline(admin.TabularInline):
 
 class ContenidoAdmin(admin.ModelAdmin):
     inlines = [ContenidoCategoriaInline, EpisodioInline]
-    list_display = ('titulo', 'tipo', 'año')
-    search_fields = ('titulo',)
-    list_filter = ('tipo', 'categorias')
+    list_display = ('titulo', 'tipo', 'año', 'imagen_preview', 'total_episodios', 'popularidad_score', 'tiene_video')
+    search_fields = ('titulo', 'descripcion')
+    list_filter = ('tipo', 'categorias', 'año', 'idioma')
+    list_per_page = 25
+    readonly_fields = ('imagen_preview_large', 'fecha_importacion', 'estadisticas_content')
+    
+    fieldsets = (
+        ('Información Básica', {
+            'fields': ('titulo', 'tipo', 'año', 'idioma', 'descripcion')
+        }),
+        ('Multimedia', {
+            'fields': ('imagen_portada', 'imagen_preview_large', 'video_url'),
+            'classes': ('collapse',)
+        }),
+        ('Datos Técnicos', {
+            'fields': ('duracion', 'anilist_id', 'anilist_url', 'anilist_score', 'anilist_popularity'),
+            'classes': ('collapse',)
+        }),
+        ('Estadísticas', {
+            'fields': ('estadisticas_content',),
+            'classes': ('collapse',)
+        }),
+        ('Metadatos', {
+            'fields': ('fecha_importacion',),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def imagen_preview(self, obj):
+        if obj.imagen_portada:
+            return format_html(
+                '<img src="{}" style="width: 50px; height: 70px; object-fit: cover; border-radius: 5px;" />',
+                obj.imagen_portada.url
+            )
+        return "Sin imagen"
+    imagen_preview.short_description = "Portada"
+    
+    def imagen_preview_large(self, obj):
+        if obj.imagen_portada:
+            return format_html(
+                '<img src="{}" style="max-width: 200px; max-height: 300px; object-fit: cover; border-radius: 10px;" />',
+                obj.imagen_portada.url
+            )
+        return "Sin imagen disponible"
+    imagen_preview_large.short_description = "Vista previa de portada"
+    
+    def total_episodios(self, obj):
+        count = obj.episodio_set.count()
+        if count > 0:
+            return format_html('<span style="color: green; font-weight: bold;">{}</span>', count)
+        return format_html('<span style="color: orange;">0</span>')
+    total_episodios.short_description = "Episodios"
+    
+    def popularidad_score(self, obj):
+        score = getattr(obj, 'anilist_popularity', 0) or 0
+        if score > 50000:
+            color = "green"
+        elif score > 10000:
+            color = "orange"
+        else:
+            color = "gray"
+        return format_html('<span style="color: {}; font-weight: bold;">{}</span>', color, score)
+    popularidad_score.short_description = "Popularidad"
+    
+    def tiene_video(self, obj):
+        has_video = obj.video_url or obj.episodio_set.filter(
+            Q(video_url__isnull=False) | Q(video_file__isnull=False)
+        ).exists()
+        if has_video:
+            return format_html('<span style="color: green;">✓ Sí</span>')
+        return format_html('<span style="color: red;">✗ No</span>')
+    tiene_video.short_description = "Tiene Video"
+    tiene_video.boolean = True
+    
+    def estadisticas_content(self, obj):
+        try:
+            reproducciones = obj.historialreproduccion_set.count()
+            calificaciones = obj.calificacion_set.count()
+            favoritos = obj.favorito_set.count()
+            rating = obj.calificacion_set.aggregate(promedio=Avg('calificacion'))['promedio']
+            
+            return format_html(
+                '''
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; line-height: 1.6;">
+                    <strong>📊 Estadísticas de Contenido:</strong><br>
+                    🔥 Reproducciones: <strong style="color: #007cba;">{}</strong><br>
+                    ⭐ Calificaciones: <strong style="color: #007cba;">{}</strong><br>
+                    ❤️ Favoritos: <strong style="color: #007cba;">{}</strong><br>
+                    📈 Rating promedio: <strong style="color: #007cba;">{}</strong>
+                </div>
+                ''',
+                reproducciones,
+                calificaciones, 
+                favoritos,
+                f"{rating:.1f}" if rating else "Sin calificar"
+            )
+        except:
+            return "Estadísticas no disponibles"
+    estadisticas_content.short_description = "Estadísticas de uso"
 
 class EpisodioAdmin(admin.ModelAdmin):
-    list_display = ('titulo', 'serie', 'temporada', 'numero_episodio', 'duracion', 'has_video')
-    list_filter = ('serie', 'temporada')
-    search_fields = ('titulo', 'serie__titulo')
+    list_display = ('titulo', 'serie', 'temporada', 'numero_episodio', 'duracion', 'video_status', 'reproductions_count')
+    list_filter = ('serie', 'temporada', 'serie__tipo')
+    search_fields = ('titulo', 'serie__titulo', 'descripcion')
+    list_per_page = 50
+    autocomplete_fields = ['serie']
     
-    def has_video(self, obj):
-        return bool(obj.video_file) or bool(obj.video_url)
-    has_video.short_description = "Tiene video"
-    has_video.boolean = True
+    fieldsets = (
+        ('Información del Episodio', {
+            'fields': ('serie', 'temporada', 'numero_episodio', 'titulo', 'descripcion')
+        }),
+        ('Contenido', {
+            'fields': ('duracion', 'video_url', 'video_file'),
+        }),
+        ('Estadísticas', {
+            'fields': ('episode_stats',),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    readonly_fields = ('episode_stats',)
+    
+    def video_status(self, obj):
+        if obj.video_file:
+            return format_html('<span style="color: green; font-weight: bold;">📁 Archivo Local</span>')
+        elif obj.video_url:
+            return format_html('<span style="color: blue; font-weight: bold;">🔗 URL Externa</span>')
+        else:
+            return format_html('<span style="color: red;">❌ Sin Video</span>')
+    video_status.short_description = "Estado del Video"
+    
+    def reproductions_count(self, obj):
+        count = obj.historialreproduccion_set.count()
+        if count > 100:
+            color = "green"
+        elif count > 10:
+            color = "orange"
+        else:
+            color = "gray"
+        return format_html('<span style="color: {}; font-weight: bold;">{}</span>', color, count)
+    reproductions_count.short_description = "Reproducciones"
+    
+    def episode_stats(self, obj):
+        try:
+            reproducciones = obj.historialreproduccion_set.count()
+            usuarios_unicos = obj.historialreproduccion_set.values('perfil').distinct().count()
+            
+            return format_html(
+                '''
+                <div style="background: #f0f8ff; padding: 15px; border-radius: 8px; border-left: 4px solid #007cba;">
+                    <strong>📺 Estadísticas del Episodio:</strong><br>
+                    👁️ Total reproducciones: <strong>{}</strong><br>
+                    👥 Usuarios únicos: <strong>{}</strong><br>
+                    📊 Promedio por usuario: <strong>{:.1f}</strong>
+                </div>
+                ''',
+                reproducciones,
+                usuarios_unicos,
+                reproducciones / usuarios_unicos if usuarios_unicos > 0 else 0
+            )
+        except:
+            return "Estadísticas no disponibles"
+    episode_stats.short_description = "Estadísticas detalladas"
 
 admin.site.register(Contenido, ContenidoAdmin)
 admin.site.register(Categoria)
 admin.site.register(Episodio, EpisodioAdmin)
 admin.site.register(ContenidoCategoria)
-admin.site.register(Perfil)
+@admin.register(Perfil)
+class PerfilAdmin(admin.ModelAdmin):
+    list_display = ('nombre', 'usuario', 'avatar_preview', 'tipo', 'actividad_stats', 'favoritos_count')
+    search_fields = ('nombre', 'usuario__username', 'usuario__email')
+    list_filter = ('tipo', 'usuario__is_active')
+    readonly_fields = ('avatar_preview_large', 'user_activity_summary', 'recommendations_summary')
+    
+    fieldsets = (
+        ('Información Básica', {
+            'fields': ('usuario', 'nombre', 'avatar', 'avatar_preview_large')
+        }),
+        ('Actividad del Usuario', {
+            'fields': ('user_activity_summary',),
+            'classes': ('collapse',)
+        }),
+        ('Sistema de Recomendaciones', {
+            'fields': ('recommendations_summary',),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def avatar_preview(self, obj):
+        if obj.avatar:
+            return format_html(
+                '<img src="{}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;" />',
+                obj.avatar.url
+            )
+        return "👤"
+    avatar_preview.short_description = "Avatar"
+    
+    def avatar_preview_large(self, obj):
+        if obj.avatar:
+            return format_html(
+                '<img src="{}" style="width: 150px; height: 150px; border-radius: 50%; object-fit: cover; border: 3px solid #ddd;" />',
+                obj.avatar.url
+            )
+        return "No hay avatar configurado"
+    avatar_preview_large.short_description = "Avatar del usuario"
+    
+    def actividad_stats(self, obj):
+        reproducciones = obj.historialreproduccion_set.count()
+        calificaciones = obj.calificacion_set.count()
+        
+        if reproducciones > 100:
+            badge = "🔥 Usuario Activo"
+            color = "green"
+        elif reproducciones > 20:
+            badge = "📺 Usuario Regular" 
+            color = "orange"
+        else:
+            badge = "👤 Usuario Nuevo"
+            color = "gray"
+            
+        return format_html('<span style="color: {}; font-weight: bold;">{}</span>', color, badge)
+    actividad_stats.short_description = "Nivel de Actividad"
+    
+    def favoritos_count(self, obj):
+        count = obj.favorito_set.count()
+        return format_html('<span style="color: red;">❤️ {}</span>', count)
+    favoritos_count.short_description = "Favoritos"
+    
+    def user_activity_summary(self, obj):
+        try:
+            reproducciones = obj.historialreproduccion_set.count()
+            calificaciones = obj.calificacion_set.count()
+            favoritos = obj.favorito_set.count()
+            busquedas = obj.historialbusqueda_set.count()
+            
+            # Contenido más visto
+            top_content = obj.historialreproduccion_set.values('contenido__titulo').annotate(
+                count=Count('contenido')
+            ).order_by('-count')[:3]
+            
+            top_content_html = ""
+            for item in top_content:
+                top_content_html += f"• {item['contenido__titulo']} ({item['count']} veces)<br>"
+            
+            return format_html(
+                '''
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; line-height: 1.8;">
+                    <h3 style="color: #333; margin-top: 0;">📊 Resumen de Actividad</h3>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin: 15px 0;">
+                        <div>
+                            <strong>📺 Reproducciones:</strong> {}<br>
+                            <strong>⭐ Calificaciones:</strong> {}<br>
+                        </div>
+                        <div>
+                            <strong>❤️ Favoritos:</strong> {}<br>
+                            <strong>🔍 Búsquedas:</strong> {}<br>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 15px;">
+                        <strong>🏆 Contenido más visto:</strong><br>
+                        <div style="margin-left: 10px; color: #666;">
+                            {}
+                        </div>
+                    </div>
+                </div>
+                ''',
+                reproducciones, calificaciones, favoritos, busquedas,
+                top_content_html if top_content_html else "No hay actividad registrada"
+            )
+        except:
+            return "Resumen no disponible"
+    user_activity_summary.short_description = "Actividad completa del usuario"
+    
+    def recommendations_summary(self, obj):
+        try:
+            from .recommendations import obtener_recomendaciones_para_perfil
+            recomendaciones = obtener_recomendaciones_para_perfil(obj, limite=5)
+            
+            if recomendaciones:
+                rec_html = ""
+                for rec in recomendaciones:
+                    rec_html += f"• {rec.titulo}<br>"
+                
+                return format_html(
+                    '''
+                    <div style="background: #e8f4fd; padding: 15px; border-radius: 8px; border-left: 4px solid #007cba;">
+                        <strong>🎯 Recomendaciones Actuales:</strong><br>
+                        <div style="margin-left: 10px; margin-top: 10px; color: #333;">
+                            {}
+                        </div>
+                    </div>
+                    ''',
+                    rec_html
+                )
+            else:
+                return format_html(
+                    '<div style="background: #fff3cd; padding: 15px; border-radius: 8px; border-left: 4px solid #856404;">'
+                    'No hay recomendaciones disponibles. El usuario necesita más actividad.'
+                    '</div>'
+                )
+        except:
+            return "Sistema de recomendaciones no disponible"
+    recommendations_summary.short_description = "Estado del sistema de recomendaciones"
 admin.site.register(HistorialReproduccion)
 admin.site.register(Favorito)
 admin.site.register(Calificacion)
@@ -51,8 +338,8 @@ class AuditLogAdmin(admin.ModelAdmin):
     list_filter = ('accion', 'nivel', 'timestamp', 'tabla_afectada')
     search_fields = ('usuario__username', 'perfil__nombre', 'descripcion', 'ip_address')
     readonly_fields = ('timestamp', 'usuario', 'perfil', 'accion', 'tabla_afectada', 
-                      'objeto_id', 'descripcion', 'nivel', 'ip_address', 'user_agent', 
-                      'datos_adicionales_formatted')
+                    'objeto_id', 'descripcion', 'nivel', 'ip_address', 'user_agent', 
+                    'datos_adicionales_formatted')
     date_hierarchy = 'timestamp'
     ordering = ('-timestamp',)
     
@@ -239,6 +526,36 @@ class CustomAdminSite(admin.AdminSite):
             path('anilist/importar-especifico/', importar_anime_especifico, name='importar_anime_especifico'),
         ]
         return custom_urls + urls
+    
+    def index(self, request, extra_context=None):
+        """
+        Personalizar la página principal del admin con métricas
+        """
+        # Métricas básicas para el dashboard
+        try:
+            total_contenidos = Contenido.objects.count()
+            total_usuarios = Perfil.objects.count()
+            total_reproducciones = HistorialReproduccion.objects.count()
+            total_calificaciones = Calificacion.objects.count()
+            total_busquedas = HistorialBusqueda.objects.count()
+        except:
+            # En caso de error (ej: base de datos no inicializada)
+            total_contenidos = 0
+            total_usuarios = 0
+            total_reproducciones = 0
+            total_calificaciones = 0
+            total_busquedas = 0
+        
+        extra_context = extra_context or {}
+        extra_context.update({
+            'total_contenidos': total_contenidos,
+            'total_usuarios': total_usuarios,
+            'total_reproducciones': total_reproducciones,
+            'total_calificaciones': total_calificaciones,
+            'total_busquedas': total_busquedas,
+        })
+        
+        return super().index(request, extra_context)
 
 # Reemplazar el sitio de admin por defecto
 admin_site = CustomAdminSite(name='custom_admin')
@@ -248,7 +565,7 @@ admin_site.register(Contenido, ContenidoAdmin)
 admin_site.register(Categoria)
 admin_site.register(Episodio, EpisodioAdmin)
 admin_site.register(ContenidoCategoria)
-admin_site.register(Perfil)
+admin_site.register(Perfil, PerfilAdmin)
 admin_site.register(HistorialReproduccion)
 admin_site.register(Favorito)
 admin_site.register(Calificacion)
