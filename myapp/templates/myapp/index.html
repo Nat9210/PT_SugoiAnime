@@ -1,5 +1,6 @@
 {% extends 'myapp/base.html' %}
 {% load static %}
+{% load rating_extras %}
 {% block title %}Inicio | Anime{% endblock %}
 {% block content %}
 <!-- Page Preloder -->
@@ -109,6 +110,74 @@
                         {% endfor %}
                     </div>
                 </div>
+                
+                <!-- Sección de Recomendaciones Prominente -->
+                <div class="popular__product">
+                    <div class="row">
+                        <div class="col-lg-8 col-md-8 col-sm-8">
+                            <div class="section-title">
+                                {% if tiene_perfil and recomendaciones_personalizadas %}
+                                    <h4><i class="fa fa-magic text-primary"></i> Especialmente para Ti</h4>
+                                    <p class="text-muted">Recomendaciones basadas en tus gustos</p>
+                                {% else %}
+                                    <h4><i class="fa fa-fire text-danger"></i> Recomendaciones del Editor</h4>
+                                    <p class="text-muted">Lo mejor que tenemos para ofrecerte</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-4">
+                            <div class="btn__all">
+                                {% if tiene_perfil and recomendaciones_personalizadas %}
+                                    <a href="{% url 'recomendaciones_personalizadas' %}" class="primary-btn">Ver Todo <span class="arrow_right"></span></a>
+                                {% else %}
+                                    <a href="{% url 'categories' %}" class="primary-btn">Ver Todo <span class="arrow_right"></span></a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        {% if tiene_perfil and recomendaciones_personalizadas %}
+                            {% for contenido in recomendaciones_personalizadas|slice:":6" %}
+                            <div class="col-lg-4 col-md-6 col-sm-6">
+                                <div class="product__item">
+                                    <div class="product__item__pic set-bg" data-setbg="{% if contenido.imagen_portada %}{{ contenido.imagen_portada.url }}{% else %}{% static 'myapp/img/default-cover.jpg' %}{% endif %}">
+                                        <div class="ep">{{ contenido.duracion|default_if_none:'?' }} min</div>
+                                        <div class="comment"><i class="fa fa-magic text-primary"></i> Para Ti</div>
+                                        <div class="view"><i class="fa fa-eye"></i> {{ contenido.historialreproduccion_set.count|default:'0' }}</div>
+                                    </div>
+                                    <div class="product__item__text">
+                                        <ul style="display:none;">
+                                            <li>{{ contenido.get_tipo_display }}</li>
+                                            {% for cat in contenido.categorias.all|slice:":2" %}<li>{{ cat.nombre }}</li>{% endfor %}
+                                        </ul>
+                                        <h5><a href="{% url 'anime_details' contenido.id %}">{{ contenido.titulo }}</a></h5>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            {% for contenido in contenido_mejor_valorado|slice:":6" %}
+                            <div class="col-lg-4 col-md-6 col-sm-6">
+                                <div class="product__item">
+                                    <div class="product__item__pic set-bg" data-setbg="{% if contenido.imagen_portada %}{{ contenido.imagen_portada.url }}{% else %}{% static 'myapp/img/default-cover.jpg' %}{% endif %}">
+                                        <div class="ep">{{ contenido.duracion|default_if_none:'?' }} min</div>
+                                        <div class="comment"><i class="fa fa-star text-warning"></i> {{ contenido.rating_promedio|floatformat:1 }}</div>
+                                        <div class="view"><i class="fa fa-users"></i> {{ contenido.total_calificaciones|default:'0' }}</div>
+                                    </div>
+                                    <div class="product__item__text">
+                                        <ul style="display:none;">
+                                            <li>{{ contenido.get_tipo_display }}</li>
+                                            {% for cat in contenido.categorias.all|slice:":2" %}<li>{{ cat.nombre }}</li>{% endfor %}
+                                        </ul>
+                                        <h5><a href="{% url 'anime_details' contenido.id %}">{{ contenido.titulo }}</a></h5>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                </div>
+                
                 <div class="popular__product">
                     <div class="row">
                         <div class="col-lg-8 col-md-8 col-sm-8">
@@ -137,7 +206,7 @@
                                             <li>{{ categoria.nombre }}</li>
                                         {% endfor %}
                                     </ul>
-                                    <h5><a href="{% url 'anime_details' %}">{{ contenido.titulo }}</a></h5>
+                                    <h5><a href="{% url 'anime_details' contenido.id %}">{{ contenido.titulo }}</a></h5>
                                 </div>
                             </div>
                         </div>
@@ -154,7 +223,8 @@
                     <div class="row">
                         <div class="col-lg-8 col-md-8 col-sm-8">
                             <div class="section-title">
-                                <h4>Recomendado para Ti</h4>
+                                <h4><i class="fa fa-star text-warning"></i> Recomendado para Ti</h4>
+                                <p class="text-muted">Basado en tus gustos y preferencias</p>
                             </div>
                         </div>
                         <div class="col-lg-4 col-md-4 col-sm-4">
@@ -169,16 +239,28 @@
                             <div class="product__item">
                                 <div class="product__item__pic set-bg" data-setbg="{% if contenido.imagen_portada %}{{ contenido.imagen_portada.url }}{% else %}{% static 'myapp/img/default-cover.jpg' %}{% endif %}">
                                     <div class="ep">{{ contenido.duracion|default_if_none:'?' }} min</div>
-                                    <div class="view"><i class="fa fa-eye"></i> Recomendado</div>
+                                    <div class="comment"><i class="fa fa-magic text-info"></i> Recomendado</div>
+                                    <div class="view"><i class="fa fa-eye"></i> {{ contenido.historialreproduccion_set.count|default:'0' }}</div>
                                 </div>
                                 <div class="product__item__text">
                                     <ul style="display:none;">
                                         <li>{{ contenido.get_tipo_display }}</li>
-                                        {% for cat in contenido.categorias.all %}<li>{{ cat.nombre }}</li>{% endfor %}
+                                        {% for cat in contenido.categorias.all|slice:":2" %}<li>{{ cat.nombre }}</li>{% endfor %}
                                     </ul>
                                     <h5><a href="{% url 'anime_details' contenido.id %}">{{ contenido.titulo }}</a></h5>
+                                    {% if contenido.rating_promedio %}
+                                    <div class="product__item__rating mt-1">
+                                        <small class="text-warning">
+                                            <i class="fa fa-star"></i> {{ contenido.rating_promedio|floatformat:1 }}
+                                        </small>
+                                    </div>
+                                    {% endif %}
                                 </div>
                             </div>
+                        </div>
+                        {% empty %}
+                        <div class="col-12">
+                            <p class="text-center">No hay recomendaciones disponibles aún. Califica algunos contenidos para obtener recomendaciones personalizadas.</p>
                         </div>
                         {% endfor %}
                     </div>
@@ -186,11 +268,14 @@
                 {% endif %}
                 <!-- Fin Recomendaciones Personalizadas Section -->
                 
-                <div class="popular__product">
+                <!-- Recomendaciones Generales para usuarios sin perfil -->
+                {% if not tiene_perfil %}
+                <div class="trending__product mt-5">
                     <div class="row">
                         <div class="col-lg-8 col-md-8 col-sm-8">
                             <div class="section-title">
-                                <h4>Mejor Valorado</h4>
+                                <h4><i class="fa fa-thumbs-up text-info"></i> Contenido Recomendado</h4>
+                                <p class="text-muted">Lo mejor valorado por nuestra comunidad</p>
                             </div>
                         </div>
                         <div class="col-lg-4 col-md-4 col-sm-4">
@@ -205,26 +290,33 @@
                             <div class="product__item">
                                 <div class="product__item__pic set-bg" data-setbg="{% if contenido.imagen_portada %}{{ contenido.imagen_portada.url }}{% else %}{% static 'myapp/img/default-cover.jpg' %}{% endif %}">
                                     <div class="ep">{{ contenido.duracion|default_if_none:'?' }} min</div>
-                                    <div class="comment"><i class="fa fa-star"></i> {{ contenido.rating_promedio|floatformat:1|default:'N/A' }}</div>
+                                    <div class="comment"><i class="fa fa-star text-warning"></i> {{ contenido.rating_promedio|floatformat:1 }}</div>
                                     <div class="view"><i class="fa fa-users"></i> {{ contenido.total_calificaciones|default:'0' }}</div>
                                 </div>
                                 <div class="product__item__text">
                                     <ul style="display:none;">
-                                        {% for categoria in contenido.categorias.all|slice:":2" %}
-                                            <li>{{ categoria.nombre }}</li>
-                                        {% endfor %}
+                                        <li>{{ contenido.get_tipo_display }}</li>
+                                        {% for cat in contenido.categorias.all|slice:":2" %}<li>{{ cat.nombre }}</li>{% endfor %}
                                     </ul>
-                                    <h5><a href="{% url 'anime_details' %}">{{ contenido.titulo }}</a></h5>
+                                    <h5><a href="{% url 'anime_details' contenido.id %}">{{ contenido.titulo }}</a></h5>
+                                    <div class="product__item__rating mt-1">
+                                        <small class="text-warning">
+                                            <i class="fa fa-star"></i> {{ contenido.rating_promedio|floatformat:1 }}
+                                            <span class="text-muted">| {{ contenido.total_calificaciones }} votos</span>
+                                        </small>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                         {% empty %}
                         <div class="col-12">
-                            <p class="text-center">No hay contenido con suficientes valoraciones aún.</p>
+                            <p class="text-center">No hay contenido recomendado disponible.</p>
                         </div>
                         {% endfor %}
                     </div>
                 </div>
+                {% endif %}
+                <!-- Fin Recomendaciones Generales Section -->
                 
                 <!-- Sección: Más Visto (con estadísticas) -->
                 {% if contenido_mas_visto %}
@@ -340,13 +432,14 @@
                 </div>
                 {% endif %}
                 
-                <!-- Sección: Mejor Valorado -->
+                <!-- Sección: Destacados de la Semana -->
                 {% if contenido_mejor_valorado %}
                 <div class="trending__product mt-5">
                     <div class="row">
                         <div class="col-lg-8 col-md-8 col-sm-8">
                             <div class="section-title">
-                                <h4>Mejor Valorado</h4>
+                                <h4><i class="fa fa-trophy text-warning"></i> Destacados de la Semana</h4>
+                                <p class="text-muted">Los animes con mejor puntuación</p>
                             </div>
                         </div>
                         <div class="col-lg-4 col-md-4 col-sm-4">
@@ -362,7 +455,7 @@
                                 <div class="product__item__pic set-bg" data-setbg="{% if contenido.imagen_portada %}{{ contenido.imagen_portada.url }}{% else %}{% static 'myapp/img/default-cover.jpg' %}{% endif %}">
                                     <div class="ep">{{ contenido.duracion|default_if_none:'?' }} min</div>
                                     <div class="comment"><i class="fa fa-star text-warning"></i> {{ contenido.rating_promedio|floatformat:1 }}</div>
-                                    <div class="view"><i class="fa fa-users"></i> {{ contenido.total_calificaciones|format_number }}</div>
+                                    <div class="view"><i class="fa fa-users"></i> {{ contenido.total_calificaciones|default:'0' }}</div>
                                 </div>
                                 <div class="product__item__text">
                                     <ul style="display:none;">
@@ -378,14 +471,18 @@
                                         </div>
                                         <div class="rating-details mt-1">
                                             <i class="fa fa-users text-info"></i> 
-                                            <span class="text-info">{{ contenido.total_calificaciones|format_number }} valoraciones</span>
+                                            <span class="text-info">{{ contenido.total_calificaciones|default:'0' }} valoraciones</span>
                                             {% if contenido.total_likes %}
-                                                <span class="text-success">| {{ contenido.total_likes|format_number }} likes</span>
+                                                <span class="text-success">| {{ contenido.total_likes|default:'0' }} likes</span>
                                             {% endif %}
                                         </div>
                                     </div>
                                 </div>
                             </div>
+                        </div>
+                        {% empty %}
+                        <div class="col-12">
+                            <p class="text-center">No hay contenido mejor valorado disponible.</p>
                         </div>
                         {% endfor %}
                     </div>
@@ -420,7 +517,7 @@
                                             <li>{{ categoria.nombre }}</li>
                                         {% endfor %}
                                     </ul>
-                                    <h5><a href="{% url 'anime_details' %}">{{ contenido.titulo }}</a></h5>
+                                    <h5><a href="{% url 'anime_details' contenido.id %}">{{ contenido.titulo }}</a></h5>
                                 </div>
                             </div>
                         </div>
@@ -459,7 +556,7 @@
                                             <li>{{ categoria.nombre }}</li>
                                         {% endfor %}
                                     </ul>
-                                    <h5><a href="{% url 'anime_details' %}">{{ contenido.titulo }}</a></h5>
+                                    <h5><a href="{% url 'anime_details' contenido.id %}">{{ contenido.titulo }}</a></h5>
                                 </div>
                             </div>
                         </div>
@@ -468,86 +565,6 @@
                             <p class="text-center">No hay contenido de Live Action disponible.</p>
                         </div>
                         {% endfor %}
-                        <div class="col-lg-4 col-md-6 col-sm-6">
-                            <div class="product__item">
-                                <div class="product__item__pic set-bg" data-setbg="{% static 'myapp/img/live/live-2.jpg' %}">
-                                    <div class="ep">18 / 18</div>
-                                    <div class="comment"><i class="fa fa-comments"></i> 11</div>
-                                    <div class="view"><i class="fa fa-eye"></i> 9141</div>
-                                </div>
-                                <div class="product__item__text">
-                                    <ul>
-                                        <li>Active</li>
-                                        <li>Movie</li>
-                                    </ul>
-                                    <h5><a href="{% url 'anime_details' %}">Mushishi Zoku Shou 2nd Season</a></h5>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-4 col-md-6 col-sm-6">
-                            <div class="product__item">
-                                <div class="product__item__pic set-bg" data-setbg="{% static 'myapp/img/live/live-3.jpg' %}">
-                                    <div class="ep">18 / 18</div>
-                                    <div class="comment"><i class="fa fa-comments"></i> 11</div>
-                                    <div class="view"><i class="fa fa-eye"></i> 9141</div>
-                                </div>
-                                <div class="product__item__text">
-                                    <ul>
-                                        <li>Active</li>
-                                        <li>Movie</li>
-                                    </ul>
-                                    <h5><a href="{% url 'anime_details' %}">Mushishi Zoku Shou: Suzu no Shizuku</a></h5>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-4 col-md-6 col-sm-6">
-                            <div class="product__item">
-                                <div class="product__item__pic set-bg" data-setbg="{% static 'myapp/img/live/live-4.jpg' %}">
-                                    <div class="ep">18 / 18</div>
-                                    <div class="comment"><i class="fa fa-comments"></i> 11</div>
-                                    <div class="view"><i class="fa fa-eye"></i> 9141</div>
-                                </div>
-                                <div class="product__item__text">
-                                    <ul>
-                                        <li>Active</li>
-                                        <li>Movie</li>
-                                    </ul>
-                                    <h5><a href="{% url 'anime_details' %}">The Seven Deadly Sins: Wrath of the Gods</a></h5>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-4 col-md-6 col-sm-6">
-                            <div class="product__item">
-                                <div class="product__item__pic set-bg" data-setbg="{% static 'myapp/img/live/live-5.jpg' %}">
-                                    <div class="ep">18 / 18</div>
-                                    <div class="comment"><i class="fa fa-comments"></i> 11</div>
-                                    <div class="view"><i class="fa fa-eye"></i> 9141</div>
-                                </div>
-                                <div class="product__item__text">
-                                    <ul>
-                                        <li>Active</li>
-                                        <li>Movie</li>
-                                    </ul>
-                                    <h5><a href="{% url 'anime_details' %}">Fate/stay night Movie: Heaven's Feel - II. Lost</a></h5>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-4 col-md-6 col-sm-6">
-                            <div class="product__item">
-                                <div class="product__item__pic set-bg" data-setbg="{% static 'myapp/img/live/live-6.jpg' %}">
-                                    <div class="ep">18 / 18</div>
-                                    <div class="comment"><i class="fa fa-comments"></i> 11</div>
-                                    <div class="view"><i class="fa fa-eye"></i> 9141</div>
-                                </div>
-                                <div class="product__item__text">
-                                    <ul>
-                                        <li>Active</li>
-                                        <li>Movie</li>
-                                    </ul>
-                                    <h5><a href="{% url 'anime_details' %}">Kizumonogatari II: Nekketsu-hen</a></h5>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -569,7 +586,7 @@
                             data-setbg="{% if contenido.imagen_portada %}{{ contenido.imagen_portada.url }}{% else %}{% static 'myapp/img/default-cover.jpg' %}{% endif %}">
                                 <div class="ep">{{ contenido.duracion|default_if_none:'?' }} min</div>
                                 <div class="view"><i class="fa fa-eye"></i> {{ contenido.total_reproducciones|default:'0' }}</div>
-                                <h5><a href="{% url 'anime_details' %}">{{ contenido.titulo|truncatechars:40 }}</a></h5>
+                                <h5><a href="{% url 'anime_details' contenido.id %}">{{ contenido.titulo|truncatechars:40 }}</a></h5>
                             </div>
                             {% empty %}
                             <div class="text-center p-3">
@@ -594,7 +611,7 @@
                         <li>{{ categoria.nombre }}</li>
                     {% endfor %}
                 </ul>
-                <h5><a href="{% url 'anime_details' %}">{{ contenido.titulo|truncatechars:35 }}</a></h5>
+                <h5><a href="{% url 'anime_details' contenido.id %}">{{ contenido.titulo|truncatechars:35 }}</a></h5>
                 <span><i class="fa fa-calendar"></i> Recién agregado</span>
             </div>
         </div>
