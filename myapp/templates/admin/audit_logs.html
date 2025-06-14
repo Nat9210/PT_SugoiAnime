@@ -1,0 +1,274 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block title %}Logs de Auditoría - {{ site_title|default:"Django Admin" }}{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<style>
+.audit-logs {
+    margin: 20px;
+}
+.filters-container {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+.filters-form {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    align-items: end;
+}
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+.form-group label {
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #495057;
+}
+.form-group input, .form-group select {
+    padding: 8px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+}
+.btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+}
+.btn-primary {
+    background-color: #007bff;
+    color: white;
+}
+.btn-secondary {
+    background-color: #6c757d;
+    color: white;
+}
+.btn-success {
+    background-color: #28a745;
+    color: white;
+}
+.logs-table {
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    overflow: hidden;
+}
+.logs-table table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.logs-table th, .logs-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #dee2e6;
+}
+.logs-table th {
+    background-color: #f8f9fa;
+    font-weight: bold;
+}
+.logs-table tr:hover {
+    background-color: #f5f5f5;
+}
+.log-level {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.8em;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+.level-info {
+    background-color: #d1ecf1;
+    color: #0c5460;
+}
+.level-warning {
+    background-color: #fff3cd;
+    color: #856404;
+}
+.level-error {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+.level-critical {
+    background-color: #f5c6cb;
+    color: #721c24;
+}
+.pagination {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+}
+.pagination a, .pagination span {
+    padding: 8px 12px;
+    margin: 0 2px;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    text-decoration: none;
+    color: #007bff;
+}
+.pagination .current {
+    background-color: #007bff;
+    color: white;
+}
+.export-section {
+    margin: 20px 0;
+    text-align: right;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="audit-logs">
+    <h1>Logs de Auditoría</h1>
+    
+    <!-- Filtros -->
+    <div class="filters-container">
+        <form method="get" class="filters-form">
+            <div class="form-group">
+                <label for="usuario">Usuario:</label>
+                <input type="text" id="usuario" name="usuario" value="{{ request.GET.usuario }}" placeholder="Nombre de usuario">
+            </div>
+            <div class="form-group">
+                <label for="accion">Acción:</label>
+                <select id="accion" name="accion">
+                    <option value="">Todas las acciones</option>
+                    <option value="LOGIN" {% if request.GET.accion == 'LOGIN' %}selected{% endif %}>Login</option>
+                    <option value="LOGOUT" {% if request.GET.accion == 'LOGOUT' %}selected{% endif %}>Logout</option>
+                    <option value="CREATE" {% if request.GET.accion == 'CREATE' %}selected{% endif %}>Crear</option>
+                    <option value="UPDATE" {% if request.GET.accion == 'UPDATE' %}selected{% endif %}>Actualizar</option>
+                    <option value="DELETE" {% if request.GET.accion == 'DELETE' %}selected{% endif %}>Eliminar</option>
+                    <option value="VIEW" {% if request.GET.accion == 'VIEW' %}selected{% endif %}>Ver</option>
+                    <option value="SEARCH" {% if request.GET.accion == 'SEARCH' %}selected{% endif %}>Buscar</option>
+                    <option value="WATCH" {% if request.GET.accion == 'WATCH' %}selected{% endif %}>Ver Video</option>
+                    <option value="FAVORITE" {% if request.GET.accion == 'FAVORITE' %}selected{% endif %}>Favorito</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="nivel">Nivel:</label>
+                <select id="nivel" name="nivel">
+                    <option value="">Todos los niveles</option>
+                    <option value="INFO" {% if request.GET.nivel == 'INFO' %}selected{% endif %}>Info</option>
+                    <option value="WARNING" {% if request.GET.nivel == 'WARNING' %}selected{% endif %}>Warning</option>
+                    <option value="ERROR" {% if request.GET.nivel == 'ERROR' %}selected{% endif %}>Error</option>
+                    <option value="CRITICAL" {% if request.GET.nivel == 'CRITICAL' %}selected{% endif %}>Critical</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="fecha_desde">Desde:</label>
+                <input type="date" id="fecha_desde" name="fecha_desde" value="{{ request.GET.fecha_desde }}">
+            </div>
+            <div class="form-group">
+                <label for="fecha_hasta">Hasta:</label>
+                <input type="date" id="fecha_hasta" name="fecha_hasta" value="{{ request.GET.fecha_hasta }}">
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">Filtrar</button>
+            </div>
+            <div class="form-group">
+                <a href="{% url 'admin:audit_logs' %}" class="btn btn-secondary">Limpiar</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Botón de exportación -->
+    <div class="export-section">
+        <a href="{% url 'admin:audit_logs' %}?{% for key, value in request.GET.items %}{{ key }}={{ value }}&{% endfor %}export=csv" 
+           class="btn btn-success">Exportar a CSV</a>
+    </div>
+
+    <!-- Tabla de logs -->
+    <div class="logs-table">
+        <table>
+            <thead>
+                <tr>
+                    <th>Fecha/Hora</th>
+                    <th>Usuario</th>
+                    <th>Acción</th>
+                    <th>Descripción</th>
+                    <th>IP</th>
+                    <th>Nivel</th>
+                    <th>User Agent</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                <tr>
+                    <td>{{ log.fecha_hora|date:"d/m/Y H:i:s" }}</td>
+                    <td>
+                        {% if log.usuario %}
+                            {{ log.usuario.username }}
+                        {% else %}
+                            <em>Anónimo</em>
+                        {% endif %}
+                    </td>
+                    <td>{{ log.accion }}</td>
+                    <td>{{ log.descripcion|truncatechars:80 }}</td>
+                    <td>{{ log.ip_address }}</td>
+                    <td>
+                        <span class="log-level level-{{ log.nivel|lower }}">
+                            {{ log.nivel }}
+                        </span>
+                    </td>
+                    <td title="{{ log.user_agent }}">
+                        {{ log.user_agent|truncatechars:50 }}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" style="text-align: center; padding: 40px; color: #6c757d;">
+                        No se encontraron logs con los filtros aplicados.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Paginación -->
+    {% if logs.has_other_pages %}
+    <div class="pagination">
+        {% if logs.has_previous %}
+            <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page=1">&laquo; Primera</a>
+            <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ logs.previous_page_number }}">Anterior</a>
+        {% endif %}
+        
+        {% for num in logs.paginator.page_range %}
+            {% if logs.number == num %}
+                <span class="current">{{ num }}</span>
+            {% elif num > logs.number|add:'-3' and num < logs.number|add:'3' %}
+                <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ num }}">{{ num }}</a>
+            {% endif %}
+        {% endfor %}
+        
+        {% if logs.has_next %}
+            <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ logs.next_page_number }}">Siguiente</a>
+            <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ logs.paginator.num_pages }}">Última &raquo;</a>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <div style="margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 8px;">
+        <h4>Información de la página:</h4>
+        <p>
+            Mostrando {% if logs %}{{ logs.start_index }} - {{ logs.end_index }} de {{ logs.paginator.count }}{% else %}0{% endif %} registros.
+            {% if request.GET.items %}
+                <br><strong>Filtros aplicados:</strong>
+                {% for key, value in request.GET.items %}
+                    {% if key != 'page' and value %}
+                        {{ key|capfirst }}: {{ value }}{% if not forloop.last %}, {% endif %}
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        </p>
+    </div>
+</div>
+{% endblock %}

@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from . import audit_views
 
 urlpatterns = [
     # Rutas de la aplicación
@@ -37,4 +38,16 @@ urlpatterns = [
     path('get-user-rating/<int:contenido_id>/', views.get_user_rating, name='get_user_rating'),
     path('get-content-ratings/<int:contenido_id>/', views.get_content_ratings, name='get_content_ratings'), 
     path('busqueda/', views.busqueda, name='busqueda'),
+    # Sistema de Recomendaciones
+    path('recomendaciones/', views.recomendaciones_personalizadas, name='recomendaciones_personalizadas'),
+    path('recomendaciones/categoria/<int:categoria_id>/', views.recomendaciones_categoria, name='recomendaciones_categoria'),    path('contenido/<int:contenido_id>/similar/', views.contenido_similar, name='contenido_similar'),
+    path('api/recomendaciones/', views.api_recomendaciones, name='api_recomendaciones'),
+    path('admin/estadisticas-recomendaciones/', views.estadisticas_recomendaciones, name='estadisticas_recomendaciones'),
+    # Sistema de Auditoría y Logs
+    path('admin/audit-dashboard/', audit_views.audit_dashboard, name='audit_dashboard'),
+    path('admin/audit-logs/', audit_views.audit_logs_view, name='audit_logs'),
+    path('admin/session-monitoring/', audit_views.session_monitoring, name='session_monitoring'),
+    path('admin/security-alerts/', audit_views.security_alerts, name='security_alerts'),
+    path('admin/export-audit-logs/', audit_views.export_audit_logs, name='export_audit_logs'),
+    path('api/audit-stats/', audit_views.audit_stats_api, name='audit_stats_api'),
 ]

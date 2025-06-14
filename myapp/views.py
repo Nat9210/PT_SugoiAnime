@@ -8,7 +8,9 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 from .forms import ContenidoForm, UserUpdateForm, PerfilUpdateForm, EpisodioForm
-from .models import Contenido, Categoria, Episodio, ContenidoCategoria, Perfil, HistorialReproduccion, Favorito, Comentario
+from .models import (Contenido, Categoria, Episodio, ContenidoCategoria, Perfil, 
+                     HistorialReproduccion, Favorito, Calificacion, AuditLog)
+from .recommendations import obtener_recomendaciones_para_perfil, obtener_recomendaciones_por_categoria, obtener_contenido_similar
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from django.template.loader import render_to_string
@@ -23,15 +25,82 @@ from django.forms import modelformset_factory
 import re
 from django.contrib import messages
 from django.views.decorators.http import require_POST
-from django.db.models import Q
+from django.db.models import Q, Count
+import logging
 
-# Vistas que solo renderizan plantillas estáticas, sin conexión a la base de datos
+# Logger para vistas
+logger = logging.getLogger('myapp.views')
+
+def get_client_ip(request):
+    """Función auxiliar para obtener la IP del cliente"""
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[0]
+    else:
+        ip = request.META.get('REMOTE_ADDR')
+    return ip
+
 
 # Vista principal
 @login_required
-def index(request):
-    contenidos = Contenido.objects.all().order_by('-id')[:12]  # últimos 12 contenidos
-    return render(request, 'myapp/index.html', {'contenidos': contenidos})
+def index(request):    # Contenido reciente
+    contenidos_recientes = Contenido.objects.all().order_by('-id')[:8]
+    
+    # Recomendaciones personalizadas si el usuario tiene perfil
+    recomendaciones_personalizadas = []
+    perfil = request.user.perfiles.first() if request.user.is_authenticated else None
+    
+    if perfil:
+        recomendaciones_personalizadas = obtener_recomendaciones_para_perfil(perfil, limite=8)
+    
+    # Contenido popular (más reproducido)
+    contenido_popular = Contenido.objects.annotate(
+        total_reproducciones=Count('historialreproduccion')
+    ).filter(
+        total_reproducciones__gt=0
+    ).order_by('-total_reproducciones')[:6]
+    
+    # Categorías más populares
+    categorias_populares = Categoria.objects.annotate(
+        total_contenido=Count('contenidos')
+    ).filter(
+        total_contenido__gt=0
+    ).order_by('-total_contenido')[:6]
+    
+    # Términos más buscados (basado en historial de búsqueda)
+    from .models import HistorialBusqueda
+    terminos_mas_buscados = HistorialBusqueda.obtener_mas_buscados(limite=8, dias=30)
+    
+    # Contenido más buscado basado en los términos populares
+    contenido_mas_buscado = []
+    if terminos_mas_buscados:
+        # Obtener contenido que coincida con los términos más buscados
+        for termino_data in terminos_mas_buscados[:6]:
+            termino = termino_data['termino_normalizado']
+            contenidos_relacionados = Contenido.objects.filter(
+                Q(titulo__icontains=termino) | 
+                Q(descripcion__icontains=termino) | 
+                Q(categorias__nombre__icontains=termino)
+            ).distinct()[:3]
+            for contenido in contenidos_relacionados:
+                if contenido not in contenido_mas_buscado:
+                    contenido_mas_buscado.append(contenido)
+                if len(contenido_mas_buscado) >= 8:
+                    break
+            if len(contenido_mas_buscado) >= 8:
+                break
+    
+    context = {
+        'contenidos_recientes': contenidos_recientes,
+        'recomendaciones_personalizadas': recomendaciones_personalizadas,
+        'contenido_popular': contenido_popular,
+        'categorias_populares': categorias_populares,
+        'contenido_mas_buscado': contenido_mas_buscado,
+        'terminos_mas_buscados': terminos_mas_buscados,
+        'tiene_perfil': bool(perfil)
+    }
+    
+    return render(request, 'myapp/index.html', context)
 
 # Vista detalle de contenido
 @login_required
@@ -121,6 +190,7 @@ def perfil_view(request):
     user = request.user
     seccion = request.GET.get('seccion', 'datos')
     perfil = user.perfiles.first()
+    
     if not perfil:
         # Si el usuario no tiene perfil, crear uno por defecto
         perfil = Perfil.objects.create(usuario=user, nombre=user.username, tipo='adulto')
@@ -129,8 +199,14 @@ def perfil_view(request):
     perfil_form = PerfilUpdateForm(instance=perfil)
     contenidos = None
     favoritos = None
+    
     if seccion == 'gestion' and user.is_staff: # solo admin.
-        contenidos = Contenido.objects.all()
+        from django.db.models import Avg
+        contenidos = Contenido.objects.annotate(
+            total_likes=Count('calificacion', filter=Q(calificacion__calificacion__gte=4)),
+            total_dislikes=Count('calificacion', filter=Q(calificacion__calificacion__lte=2)),
+            rating_promedio=Avg('calificacion__calificacion')
+        ).all()
     if seccion == 'favoritos':
         favoritos = Favorito.objects.filter(perfil=perfil).select_related('contenido').order_by('-fecha_agregado')
 
@@ -237,7 +313,15 @@ def logout_view(request):
 
 @staff_member_required
 def contenido_list(request):
-    contenidos = Contenido.objects.all()
+    from django.db.models import Avg
+    
+    # Obtener contenidos con estadísticas de calificaciones
+    contenidos = Contenido.objects.annotate(
+        total_likes=Count('calificacion', filter=Q(calificacion__calificacion__gte=4)),
+        total_dislikes=Count('calificacion', filter=Q(calificacion__calificacion__lte=2)),
+        rating_promedio=Avg('calificacion__calificacion')
+    ).all()
+    
     return render(request, 'myapp/contenido_list.html', {'contenidos': contenidos})
 
 @staff_member_required
@@ -358,11 +442,35 @@ def password_reset_confirm(request, uidb64, token):
 def anime_details(request, contenido_id):
     contenido = Contenido.objects.get(pk=contenido_id)
     es_favorito = False
+    contenido_similar = []
+    
     if request.user.is_authenticated:
         perfil = request.user.perfiles.first()
         if perfil:
             es_favorito = Favorito.objects.filter(perfil=perfil, contenido=contenido).exists()
-    return render(request, 'myapp/anime-details.html', {'contenido': contenido, 'es_favorito': es_favorito})
+            # Obtener contenido similar basado en el sistema de recomendaciones
+            contenido_similar = obtener_contenido_similar(perfil, contenido, limite=6)
+    
+    # Si no hay usuario autenticado o no tiene recomendaciones personalizadas,
+    # mostrar contenido similar basado solo en categorías
+    if not contenido_similar:
+        categorias_contenido = contenido.categorias.all()
+        contenido_similar = Contenido.objects.filter(
+            categorias__in=categorias_contenido
+        ).exclude(
+            id=contenido.id
+        ).annotate(
+            categorias_compartidas=Count('categorias', filter=Q(categorias__in=categorias_contenido))
+        ).order_by('-categorias_compartidas', '?')[:6]
+        contenido_similar = list(contenido_similar)
+    
+    context = {
+        'contenido': contenido, 
+        'es_favorito': es_favorito,
+        'contenido_similar': contenido_similar
+    }
+    
+    return render(request, 'myapp/anime-details.html', context)
 
 @login_required
 def contenido_gestion_episodios(request, contenido_id):
@@ -417,6 +525,25 @@ def anime_watching(request, episodio_id):
     user = request.user
     perfil = user.perfiles.first()  # Se asume un perfil por usuario
     
+    # Registrar reproducción en logs de auditoría
+    AuditLog.log_action(
+        accion='PLAY',
+        descripcion=f"Reproducción de {contenido.titulo} - {episodio.titulo} (T{episodio.temporada}E{episodio.numero_episodio})",
+        usuario=user,
+        perfil=perfil,
+        tabla_afectada='Episodio',
+        objeto_id=episodio_id,
+        ip_address=get_client_ip(request),
+        user_agent=request.META.get('HTTP_USER_AGENT', ''),
+        datos_adicionales={
+            'contenido_id': contenido.id,
+            'episodio_id': episodio.id,
+            'temporada': episodio.temporada,
+            'numero_episodio': episodio.numero_episodio,
+            'duracion_minutos': episodio.duracion
+        }
+    )
+    
     if perfil:
         # Marcar como visto (si no existe ya un registro para este episodio y perfil)
         HistorialReproduccion.objects.get_or_create(
@@ -461,16 +588,42 @@ def toggle_favorito(request):
     perfil = user.perfiles.first()
     if not perfil or not contenido_id:
         return JsonResponse({'success': False, 'error': 'Perfil o contenido no encontrado'})
+    
     contenido = get_object_or_404(Contenido, pk=contenido_id)
     favorito, created = Favorito.objects.get_or_create(perfil=perfil, contenido=contenido)
+    
     if not created:
         favorito.delete()
-        return JsonResponse({'success': True, 'favorito': False})
-    return JsonResponse({'success': True, 'favorito': True})
+        accion = 'UNFAVORITE'
+        descripcion = f"Contenido removido de favoritos: {contenido.titulo}"
+        is_favorito = False
+    else:
+        accion = 'FAVORITE'
+        descripcion = f"Contenido agregado a favoritos: {contenido.titulo}"
+        is_favorito = True
+    
+    # Registrar acción en logs de auditoría
+    AuditLog.log_action(
+        accion=accion,
+        descripcion=descripcion,
+        usuario=user,
+        perfil=perfil,
+        tabla_afectada='Favorito',
+        objeto_id=contenido_id,
+        ip_address=get_client_ip(request),
+        user_agent=request.META.get('HTTP_USER_AGENT', ''),        datos_adicionales={
+            'contenido_id': contenido_id,
+            'contenido_titulo': contenido.titulo,
+            'contenido_tipo': contenido.tipo
+        }
+    )
+    
+    return JsonResponse({'success': True, 'favorito': is_favorito})
 
 def busqueda(request):
     query = request.GET.get('q', '').strip()
     resultados = []
+    
     if query:
         # Búsqueda optimizada con índices
         tipo = None
@@ -490,13 +643,96 @@ def busqueda(request):
         # Limitar resultados para mejor rendimiento
         resultados = resultados[:50]  # Máximo 50 resultados
         
+        # Registrar búsqueda en historial y logs de auditoría
+        if request.user.is_authenticated:
+            perfil = request.user.perfiles.first()
+            
+            # Registrar en historial de búsqueda
+            from .models import HistorialBusqueda
+            HistorialBusqueda.registrar_busqueda(
+                termino=query,
+                usuario=request.user,
+                perfil=perfil,
+                resultados_count=len(resultados),
+                ip_address=get_client_ip(request),
+                user_agent=request.META.get('HTTP_USER_AGENT', '')
+            )
+            
+            # Registrar en logs de auditoría
+            AuditLog.log_action(
+                accion='SEARCH',
+                descripcion=f"Búsqueda realizada: '{query}' - {len(resultados)} resultados",
+                usuario=request.user,
+                perfil=perfil,
+                ip_address=get_client_ip(request),
+                user_agent=request.META.get('HTTP_USER_AGENT', ''),
+                datos_adicionales={
+                    'query': query,
+                    'query_length': len(query),
+                    'results_count': len(resultados),
+                    'has_results': len(resultados) > 0
+                }
+            )
+    
     return render(request, 'myapp/busqueda.html', {'query': query, 'resultados': resultados})
+
+# VISTA DE ESTADÍSTICAS DEL SISTEMA DE RECOMENDACIONES
+@staff_member_required
+def estadisticas_recomendaciones(request):
+    """Vista para mostrar estadísticas del sistema de recomendaciones"""
+    # Estadísticas generales
+    total_usuarios = User.objects.count()
+    total_perfiles = Perfil.objects.count()
+    total_contenido = Contenido.objects.count()
+    total_reproducciones = HistorialReproduccion.objects.count()
+    total_calificaciones = Calificacion.objects.count()
+    total_favoritos = Favorito.objects.count()
+    # Usuarios más activos
+    usuarios_activos = Perfil.objects.annotate(
+        total_actividad=Count('historialreproduccion') + 
+                        Count('calificacion') + 
+                        Count('favorito')
+    ).filter(total_actividad__gt=0).order_by('-total_actividad')[:10]
+    # Contenido más popular
+    contenido_popular = Contenido.objects.annotate(
+        total_interacciones=Count('historialreproduccion') + 
+                            Count('calificacion') + 
+                            Count('favorito')
+    ).filter(total_interacciones__gt=0).order_by('-total_interacciones')[:10]
+    # Categorías más populares
+    categorias_populares = Categoria.objects.annotate(
+        total_interacciones=Count('contenidos__historialreproduccion') + 
+                            Count('contenidos__calificacion') + 
+                            Count('contenidos__favorito')
+    ).filter(total_interacciones__gt=0).order_by('-total_interacciones')[:10]
+    # Calificaciones promedio
+    likes = Calificacion.objects.filter(calificacion__gte=4).count()
+    dislikes = Calificacion.objects.filter(calificacion__lte=2).count()
+    neutrales = Calificacion.objects.filter(calificacion=3).count()
+    
+    context = {
+        'total_usuarios': total_usuarios,
+        'total_perfiles': total_perfiles,
+        'total_contenido': total_contenido,
+        'total_reproducciones': total_reproducciones,
+        'total_calificaciones': total_calificaciones,
+        'total_favoritos': total_favoritos,
+        'usuarios_activos': usuarios_activos,
+        'contenido_popular': contenido_popular,
+        'categorias_populares': categorias_populares,
+        'likes': likes,
+        'dislikes': dislikes,
+        'neutrales': neutrales,
+        'total_interacciones': total_reproducciones + total_calificaciones + total_favoritos
+    }
+    
+    return render(request, 'myapp/estadisticas_recomendaciones.html', context)
 
 # SISTEMA DE RATING/LIKE-DISLIKE
 @login_required
 @require_POST
 def toggle_like(request):
-    """Función para dar like a un contenido usando el modelo Comentario con calificación 4-5"""
+    """Función para dar like a un contenido usando el modelo Calificacion con calificación 4-5"""
     contenido_id = request.POST.get('contenido_id')
     user = request.user
     perfil = user.perfiles.first()
@@ -507,7 +743,7 @@ def toggle_like(request):
     contenido = get_object_or_404(Contenido, pk=contenido_id)
     
     # Buscar si ya existe un comentario/rating de este usuario para este contenido
-    comentario_existente = Comentario.objects.filter(perfil=perfil, contenido=contenido).first()
+    comentario_existente = Calificacion.objects.filter(perfil=perfil, contenido=contenido).first()
     
     if comentario_existente:
         # Si ya existe y es un like (calificación 4-5), lo removemos (toggle off)
@@ -517,15 +753,13 @@ def toggle_like(request):
         else:
             # Si era un dislike, lo cambiamos a like
             comentario_existente.calificacion = 4
-            comentario_existente.comentario = "Like"
             comentario_existente.save()
             return JsonResponse({'success': True, 'liked': True, 'disliked': False})
     else:
         # Crear nuevo like
-        Comentario.objects.create(
+        Calificacion.objects.create(
             perfil=perfil,
             contenido=contenido,
-            comentario="Like",
             calificacion=4
         )
         return JsonResponse({'success': True, 'liked': True, 'disliked': False})
@@ -533,7 +767,7 @@ def toggle_like(request):
 @login_required
 @require_POST
 def toggle_dislike(request):
-    """Función para dar dislike a un contenido usando el modelo Comentario con calificación 1-2"""
+    """Función para dar dislike a un contenido usando el modelo Calificacion con calificación 1-2"""
     contenido_id = request.POST.get('contenido_id')
     user = request.user
     perfil = user.perfiles.first()
@@ -544,7 +778,7 @@ def toggle_dislike(request):
     contenido = get_object_or_404(Contenido, pk=contenido_id)
     
     # Buscar si ya existe un comentario/rating de este usuario para este contenido
-    comentario_existente = Comentario.objects.filter(perfil=perfil, contenido=contenido).first()
+    comentario_existente = Calificacion.objects.filter(perfil=perfil, contenido=contenido).first()
     
     if comentario_existente:
         # Si ya existe y es un dislike (calificación 1-2), lo removemos (toggle off)
@@ -554,15 +788,13 @@ def toggle_dislike(request):
         else:
             # Si era un like, lo cambiamos a dislike
             comentario_existente.calificacion = 2
-            comentario_existente.comentario = "Dislike"
             comentario_existente.save()
             return JsonResponse({'success': True, 'liked': False, 'disliked': True})
     else:
         # Crear nuevo dislike
-        Comentario.objects.create(
+        Calificacion.objects.create(
             perfil=perfil,
             contenido=contenido,
-            comentario="Dislike",
             calificacion=2
         )
         return JsonResponse({'success': True, 'liked': False, 'disliked': True})
@@ -577,7 +809,7 @@ def get_user_rating(request, contenido_id):
         return JsonResponse({'success': False, 'error': 'Perfil no encontrado'})
     
     contenido = get_object_or_404(Contenido, pk=contenido_id)
-    comentario = Comentario.objects.filter(perfil=perfil, contenido=contenido).first()
+    comentario = Calificacion.objects.filter(perfil=perfil, contenido=contenido).first()
     
     if comentario:
         if comentario.calificacion >= 4:
@@ -592,14 +824,120 @@ def get_user_rating(request, contenido_id):
 def get_content_ratings(request, contenido_id):
     """Función para obtener estadísticas de rating de un contenido"""
     contenido = get_object_or_404(Contenido, pk=contenido_id)
-    
-    # Contar likes (calificación 4-5) y dislikes (calificación 1-2)
-    likes = Comentario.objects.filter(contenido=contenido, calificacion__gte=4).count()
-    dislikes = Comentario.objects.filter(contenido=contenido, calificacion__lte=2).count()
+      # Contar likes (calificación 4-5) y dislikes (calificación 1-2)
+    likes = Calificacion.objects.filter(contenido=contenido, calificacion__gte=4).count()
+    dislikes = Calificacion.objects.filter(contenido=contenido, calificacion__lte=2).count()
     
     return JsonResponse({
         'success': True, 
         'likes': likes, 
         'dislikes': dislikes,
         'total_ratings': likes + dislikes
+    })
+
+# SISTEMA DE RECOMENDACIONES
+@login_required
+def recomendaciones_personalizadas(request):
+    """Vista principal de recomendaciones personalizadas"""
+    perfil = request.user.perfiles.first()
+    if not perfil:
+        return redirect('perfil')
+    
+    # Obtener recomendaciones personalizadas
+    recomendaciones = obtener_recomendaciones_para_perfil(perfil, limite=20)
+      # Obtener categorías favoritas del usuario
+    categorias_usuario = Categoria.objects.filter(
+        Q(contenidos__historialreproduccion__perfil=perfil) |
+        Q(contenidos__favorito__perfil=perfil) |
+        Q(contenidos__calificacion__perfil=perfil, contenidos__calificacion__calificacion__gte=4)
+    ).annotate(
+        popularidad=Count('contenidos__historialreproduccion') + 
+                   Count('contenidos__favorito') + 
+                   Count('contenidos__calificacion')
+    ).order_by('-popularidad')[:6]
+    
+    context = {
+        'recomendaciones': recomendaciones,
+        'categorias_usuario': categorias_usuario,
+        'total_recomendaciones': len(recomendaciones)
+    }
+    
+    return render(request, 'myapp/recomendaciones.html', context)
+
+@login_required
+def recomendaciones_categoria(request, categoria_id):
+    """Vista de recomendaciones por categoría específica"""
+    categoria = get_object_or_404(Categoria, pk=categoria_id)
+    perfil = request.user.perfiles.first()
+    
+    if not perfil:
+        return redirect('perfil')
+    
+    # Obtener recomendaciones de la categoría
+    recomendaciones = obtener_recomendaciones_por_categoria(perfil, categoria, limite=12)
+    
+    context = {
+        'categoria': categoria,
+        'recomendaciones': recomendaciones,
+        'total_recomendaciones': len(recomendaciones)
+    }
+    
+    return render(request, 'myapp/recomendaciones_categoria.html', context)
+
+@login_required
+def contenido_similar(request, contenido_id):
+    """Vista de contenido similar a uno específico"""
+    contenido = get_object_or_404(Contenido, pk=contenido_id)
+    perfil = request.user.perfiles.first()
+    
+    if not perfil:
+        return redirect('perfil')
+    
+    # Obtener contenido similar
+    similar = obtener_contenido_similar(perfil, contenido, limite=8)
+    
+    context = {
+        'contenido_original': contenido,
+        'contenido_similar': similar,
+        'total_similar': len(similar)
+    }
+    
+    return render(request, 'myapp/contenido_similar.html', context)
+
+@login_required
+def api_recomendaciones(request):
+    """API endpoint para obtener recomendaciones vía AJAX"""
+    perfil = request.user.perfiles.first()
+    if not perfil:
+        return JsonResponse({'success': False, 'error': 'Perfil no encontrado'})
+    
+    limite = int(request.GET.get('limite', 10))
+    categoria_id = request.GET.get('categoria_id')
+    
+    if categoria_id:
+        try:
+            categoria = Categoria.objects.get(pk=categoria_id)
+            recomendaciones = obtener_recomendaciones_por_categoria(perfil, categoria, limite)
+        except Categoria.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Categoría no encontrada'})
+    else:
+        recomendaciones = obtener_recomendaciones_para_perfil(perfil, limite)
+    
+    # Convertir a JSON
+    data = []
+    for contenido in recomendaciones:
+        data.append({
+            'id': contenido.id,
+            'titulo': contenido.titulo,
+            'tipo': contenido.get_tipo_display(),
+            'año': contenido.año,
+            'imagen_url': contenido.imagen_portada.url if contenido.imagen_portada else None,
+            'url_detalle': f'/anime/{contenido.id}/',
+            'categorias': [cat.nombre for cat in contenido.categorias.all()]
+        })
+    
+    return JsonResponse({
+        'success': True,
+        'recomendaciones': data,
+        'total': len(data)
     })

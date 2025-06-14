@@ -1,0 +1,288 @@
+{% extends 'myapp/base.html' %}
+{% load static %}
+{% block title %}Estadísticas del Sistema de Recomendaciones | Admin{% endblock %}
+{% block content %}
+<!-- Breadcrumb Begin -->
+<div class="breadcrumb-option">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="breadcrumb__links">
+                    <a href="{% url 'index' %}"><i class="fa fa-home"></i> Inicio</a>
+                    <a href="{% url 'perfil' %}?seccion=gestion">Administración</a>
+                    <span>Estadísticas de Recomendaciones</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Breadcrumb End -->
+
+<!-- Estadísticas Section Begin -->
+<section class="product spad">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="section-title">
+                    <h4>📊 Estadísticas del Sistema de Recomendaciones</h4>
+                    <p>Panel de control y métricas del sistema</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Estadísticas Generales -->
+        <div class="row mb-5">
+            <div class="col-md-3">
+                <div class="card bg-primary text-white text-center">
+                    <div class="card-body">
+                        <h3>{{ total_usuarios }}</h3>
+                        <p>Usuarios Totales</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-success text-white text-center">
+                    <div class="card-body">
+                        <h3>{{ total_contenido }}</h3>
+                        <p>Contenido Disponible</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-warning text-white text-center">
+                    <div class="card-body">
+                        <h3>{{ total_interacciones }}</h3>
+                        <p>Interacciones Totales</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-info text-white text-center">
+                    <div class="card-body">
+                        <h3>{{ total_reproducciones }}</h3>
+                        <p>Reproducciones</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Distribución de Calificaciones -->
+        <div class="row mb-5">
+            <div class="col-lg-12">
+                <div class="card bg-dark text-white">
+                    <div class="card-header">
+                        <h5>📈 Distribución de Calificaciones</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-md-4">
+                                <div class="text-success">
+                                    <h4>{{ likes }}</h4>
+                                    <p>👍 Likes (4-5 ⭐)</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="text-warning">
+                                    <h4>{{ neutrales }}</h4>
+                                    <p>😐 Neutrales (3 ⭐)</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="text-danger">
+                                    <h4>{{ dislikes }}</h4>
+                                    <p>👎 Dislikes (1-2 ⭐)</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Barra de progreso -->
+                        {% if total_calificaciones > 0 %}
+                        <div class="progress mt-3" style="height: 20px;">
+                            <div class="progress-bar bg-success" style="width: {% widthratio likes total_calificaciones 100 %}%">
+                                {% widthratio likes total_calificaciones 100 %}%
+                            </div>
+                            <div class="progress-bar bg-warning" style="width: {% widthratio neutrales total_calificaciones 100 %}%">
+                                {% widthratio neutrales total_calificaciones 100 %}%
+                            </div>
+                            <div class="progress-bar bg-danger" style="width: {% widthratio dislikes total_calificaciones 100 %}%">
+                                {% widthratio dislikes total_calificaciones 100 %}%
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Usuarios Más Activos -->
+        <div class="row mb-5">
+            <div class="col-lg-6">
+                <div class="card bg-dark text-white">
+                    <div class="card-header">
+                        <h5>👥 Usuarios Más Activos</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if usuarios_activos %}
+                        <div class="table-responsive">
+                            <table class="table table-dark table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Usuario</th>
+                                        <th>Actividad Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for perfil in usuarios_activos %}
+                                    <tr>
+                                        <td>{{ perfil.nombre }}</td>
+                                        <td>
+                                            <span class="badge bg-primary">{{ perfil.total_actividad }}</span>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <p class="text-muted">No hay datos de actividad de usuarios.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Categorías Más Populares -->
+            <div class="col-lg-6">
+                <div class="card bg-dark text-white">
+                    <div class="card-header">
+                        <h5>🏷️ Categorías Más Populares</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if categorias_populares %}
+                        <div class="table-responsive">
+                            <table class="table table-dark table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Categoría</th>
+                                        <th>Interacciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for categoria in categorias_populares %}
+                                    <tr>
+                                        <td>{{ categoria.nombre }}</td>
+                                        <td>
+                                            <span class="badge bg-warning">{{ categoria.total_interacciones }}</span>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <p class="text-muted">No hay datos de categorías populares.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Contenido Más Popular -->
+        <div class="row mb-5">
+            <div class="col-lg-12">
+                <div class="card bg-dark text-white">
+                    <div class="card-header">
+                        <h5>🎬 Contenido Más Popular</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if contenido_popular %}
+                        <div class="table-responsive">
+                            <table class="table table-dark table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Título</th>
+                                        <th>Tipo</th>
+                                        <th>Año</th>
+                                        <th>Interacciones Totales</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for contenido in contenido_popular %}
+                                    <tr>
+                                        <td>{{ contenido.titulo }}</td>
+                                        <td>
+                                            <span class="badge bg-secondary">{{ contenido.get_tipo_display }}</span>
+                                        </td>
+                                        <td>{{ contenido.año|default:"N/A" }}</td>
+                                        <td>
+                                            <span class="badge bg-success">{{ contenido.total_interacciones }}</span>
+                                        </td>
+                                        <td>
+                                            <a href="{% url 'anime_details' contenido.id %}" class="btn btn-sm btn-outline-light">
+                                                Ver Detalles
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <p class="text-muted">No hay datos de contenido popular.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Herramientas de Administración -->
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card bg-dark text-white">
+                    <div class="card-header">
+                        <h5>🛠️ Herramientas de Administración</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Generar Datos de Prueba</h6>
+                                <p class="text-muted">Crear usuarios y interacciones de prueba para el sistema de recomendaciones.</p>
+                                <button class="btn btn-warning" onclick="alert('Ejecutar: python manage.py generar_datos_prueba --users 5 --interactions 20')">
+                                    Instrucciones para Datos de Prueba
+                                </button>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Enlaces de Administración</h6>
+                                <div class="d-flex flex-column gap-2">
+                                    <a href="{% url 'contenido_list' %}" class="btn btn-outline-light btn-sm">
+                                        Gestionar Contenido
+                                    </a>
+                                    <a href="{% url 'recomendaciones_personalizadas' %}" class="btn btn-outline-light btn-sm">
+                                        Ver Recomendaciones
+                                    </a>
+                                    <a href="/admin/" class="btn btn-outline-light btn-sm" target="_blank">
+                                        Panel de Admin Django
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- Estadísticas Section End -->
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Opcional: Auto-actualizar cada 30 segundos
+    setTimeout(function() {
+        location.reload();
+    }, 30000);
+});
+</script>
+{% endblock %}

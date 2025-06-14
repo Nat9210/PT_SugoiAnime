@@ -4,12 +4,14 @@
 <div class="container mt-5">
     <h2 class="titulo-gestor">Gestión de Contenido</h2>
     <a href="{% url 'contenido_create' %}" class="btn btn-success mb-3">Crear nuevo contenido</a>
-    <table class="table table-striped table-dark">
-        <thead>
+    <table class="table table-striped table-dark">        <thead>
             <tr>
                 <th>Portada</th>
                 <th>Título</th>
                 <th>Tipo</th>
+                <th>Likes</th>
+                <th>Dislikes</th>
+                <th>Rating Promedio</th>
                 <th>Acciones</th>
             </tr>
         </thead>
@@ -22,9 +24,27 @@
                     {% else %}
                         <span class="text-muted">Sin portada</span>
                     {% endif %}
-                </td>
-                <td>{{ contenido.titulo }}</td>
+                </td>                <td>{{ contenido.titulo }}</td>
                 <td>{{ contenido.get_tipo_display }}</td>
+                <td>
+                    <span class="badge bg-success">
+                        <i class="fa fa-thumbs-up"></i> {{ contenido.total_likes|default:0 }}
+                    </span>
+                </td>
+                <td>
+                    <span class="badge bg-danger">
+                        <i class="fa fa-thumbs-down"></i> {{ contenido.total_dislikes|default:0 }}
+                    </span>
+                </td>
+                <td>
+                    {% if contenido.rating_promedio %}
+                        <span class="badge bg-warning text-dark">
+                            <i class="fa fa-star"></i> {{ contenido.rating_promedio|floatformat:1 }}
+                        </span>
+                    {% else %}
+                        <span class="text-muted">Sin calificar</span>
+                    {% endif %}
+                </td>
                 <td>
                     <a href="{% url 'contenido_update' contenido.pk %}" class="btn btn-primary btn-sm">Editar</a>
                     <a href="{% url 'contenido_delete' contenido.pk %}" class="btn btn-danger btn-sm">Eliminar</a>
@@ -32,9 +52,8 @@
                         <a href="{% url 'contenido_gestion_episodios' contenido.pk %}" class="btn btn-info btn-sm">Episodios</a>
                     {% endif %}
                 </td>
-            </tr>
-            {% empty %}
-            <tr><td colspan="4">No hay contenido registrado.</td></tr>
+            </tr>            {% empty %}
+            <tr><td colspan="7">No hay contenido registrado.</td></tr>
             {% endfor %}
         </tbody>
     </table>
