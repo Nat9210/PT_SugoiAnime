@@ -488,18 +488,22 @@ def password_reset_request(request):
             user = User.objects.get(username=username, email=email)
         except User.DoesNotExist:
             return render(request, 'myapp/password_reset_request.html', {'error': 'Usuario o email incorrecto'})
+        
         current_site = get_current_site(request)
         subject = 'Recupera tu contraseña en SugoiAnime'
         # token de restablecimiento de contraseña
         token = default_token_generator.make_token(user)
         uid = urlsafe_base64_encode(force_bytes(user.pk))
-        reset_link = f"http://{current_site.domain}{reverse('password_reset_confirm', kwargs={'uidb64': uid, 'token': token})}" # URL de restablecimiento de contraseña
+        reset_link = f"http://{current_site.domain}{reverse('password_reset_confirm', kwargs={'uidb64': uid, 'token': token})}"
+        
         message = render_to_string('myapp/password_reset_email.html', {
             'user': user,
             'reset_link': reset_link,
         })
+        
         send_mail(subject, message, 'noreply@sugoianime.com', [user.email], fail_silently=False)
-        return render(request, 'myapp/password_reset_request.html', {'success': 'Revisa tu correo para restablecer tu contraseña.'})
+        return redirect('password_reset_done')
+    
     return render(request, 'myapp/password_reset_request.html')
 
 # Confirmación de restablecimiento de contraseña
@@ -1051,3 +1055,11 @@ def api_recomendaciones(request):
         'recomendaciones': data,
         'total': len(data)
     })
+
+# Vista que muestra confirmación de que se envió el email
+def password_reset_done(request):
+    return render(request, 'myapp/password_reset_done.html')
+
+# Vista que muestra confirmación de que la contraseña fue cambiada exitosamente
+def password_reset_complete(request):
+    return render(request, 'myapp/password_reset_complete.html')

@@ -28,9 +28,11 @@ urlpatterns = [
     # Perfil
     path('perfil/', views.perfil_view, name='perfil'),
     # Activación de cuenta
-    path('activar/<uidb64>/<token>/', views.activate_account, name='activate_account'),
-    # Recuperación de contraseña
+    path('activar/<uidb64>/<token>/', views.activate_account, name='activate_account'),    # Recuperación de contraseña - Sistema completo
     path('password_reset/', views.password_reset_request, name='password_reset'),
+    path('password_reset/done/', views.password_reset_done, name='password_reset_done'),
+    path('reset/<uidb64>/<token>/', views.password_reset_confirm, name='password_reset_confirm'),
+    path('reset/done/', views.password_reset_complete, name='password_reset_complete'),
     path('toggle-favorito/', views.toggle_favorito, name='toggle_favorito'),
     # Sistema de Rating/Like-Dislike
     path('toggle-like/', views.toggle_like, name='toggle_like'),
