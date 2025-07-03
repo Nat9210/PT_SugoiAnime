@@ -37,6 +37,21 @@
 	--main-purple: #8c52ff;
 }
 
+/* Button Outline Style */
+.site-btn.btn-outline {
+    background: transparent;
+    border: 2px solid #8c52ff;
+    color: #8c52ff;
+    transition: all 0.3s ease;
+}
+
+.site-btn.btn-outline:hover {
+    background: #8c52ff;
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(140, 82, 255, 0.4);
+}
+
 html,
 body {
 	height: 100%;
@@ -199,6 +214,21 @@ ol {
 	text-transform: uppercase;
 	display: inline-block;
 	padding: 12px 30px;
+}
+
+/* Botón outline personalizado */
+.site-btn.btn-outline {
+    background: transparent;
+    border: 2px solid #8c52ff;
+    color: #8c52ff;
+    transition: all 0.3s ease;
+}
+
+.site-btn.btn-outline:hover {
+    background: #8c52ff;
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(140, 82, 255, 0.4);
 }
 
 /* Danger buttons */
@@ -3016,21 +3046,6 @@ select:focus, select:active {
 }
 .mini-player-outer {
     aspect-ratio: 16/9;
-    width: 100%;
-    max-width: 220px;
-    min-width: 180px;
-    margin-left: auto;
-    margin-right: auto;
-    border-radius: 12px;
-    overflow: hidden;
-    background: #181828;
-    display: flex;
-    align-items: stretch;
-    justify-content: stretch;
-    position: relative;
-}
-.mini-player-wrapper {
-    width: 100%;
     height: 100%;
     position: relative;
     z-index: 2;

@@ -43,6 +43,17 @@ class SistemaRecomendaciones:
         # Eliminar duplicados y contenido ya visto/calificado
         recomendaciones_unicas = self._filtrar_contenido_ya_visto(recomendaciones)
         
+        # Si no hay suficientes recomendaciones, añadir contenido aleatorio
+        if len(recomendaciones_unicas) < limite:
+            contenido_restante = limite - len(recomendaciones_unicas)
+            contenido_aleatorio = Contenido.objects.exclude(
+                id__in=self._obtener_contenido_ya_visto()
+            ).exclude(
+                id__in=[r.id for r in recomendaciones_unicas]
+            ).order_by('?')[:contenido_restante]
+            
+            recomendaciones_unicas.extend(list(contenido_aleatorio))
+        
         # Mezclar y limitar
         random.shuffle(recomendaciones_unicas)
         return recomendaciones_unicas[:limite]
@@ -56,8 +67,14 @@ class SistemaRecomendaciones:
             contenidos__historialreproduccion__perfil=self.perfil
         ).annotate(
             veces_visto=Count('contenidos__historialreproduccion')
-        ).order_by('-veces_visto')[:5]
+        ).order_by('-veces_visto')[:8]  # Aumentado de 5 a 8
         
+        if not categorias_vistas:
+            # Fallback: usar categorías de contenido favorito
+            categorias_vistas = Categoria.objects.filter(
+                contenidos__favorito__perfil=self.perfil
+            ).distinct()[:8]
+            
         if not categorias_vistas:
             return []
             
@@ -73,28 +90,36 @@ class SistemaRecomendaciones:
     def _recomendaciones_por_rating(self, limite):
         """
         Recomienda contenido basado en las calificaciones positivas del usuario
-        """        # Obtener categorías de contenido con rating alto (4-5 estrellas)
+        """
+        # Obtener categorías de contenido con rating medio-alto (3-5 estrellas)
         categorias_gustadas = Categoria.objects.filter(
             contenidos__calificacion__perfil=self.perfil,
-            contenidos__calificacion__calificacion__gte=4
+            contenidos__calificacion__calificacion__gte=3  # Reducido de 4 a 3
         ).annotate(
             promedio_rating=Avg('contenidos__calificacion__calificacion')
-        ).order_by('-promedio_rating')[:5]
+        ).order_by('-promedio_rating')[:8]  # Aumentado de 5 a 8
+        
+        if not categorias_gustadas:
+            # Fallback: obtener categorías de cualquier contenido calificado
+            categorias_gustadas = Categoria.objects.filter(
+                contenidos__calificacion__perfil=self.perfil
+            ).distinct()[:8]
         
         if not categorias_gustadas:
             return []
-              # Buscar contenido en esas categorías con buenas calificaciones globales
+            
+        # Buscar contenido en esas categorías con calificaciones globales decentes
         contenido_recomendado = Contenido.objects.filter(
             categorias__in=categorias_gustadas
         ).annotate(
             promedio_global=Avg('calificacion__calificacion'),
             total_ratings=Count('calificacion')
         ).filter(
-            promedio_global__gte=3.5,
-            total_ratings__gte=1
+            # Relajado: permitir contenido sin calificaciones O con rating >= 2.5
+            Q(promedio_global__isnull=True) | Q(promedio_global__gte=2.5)
         ).exclude(
             id__in=self._obtener_contenido_ya_visto()
-        ).distinct().order_by('-promedio_global', '-total_ratings')[:limite]
+        ).distinct().order_by('-promedio_global', '-total_ratings', '?')[:limite]
         
         return list(contenido_recomendado)
     
@@ -126,19 +151,33 @@ class SistemaRecomendaciones:
         """
         Recomienda contenido popular y reciente
         """
-        # Contenido más reproducido globalmente en los últimos 30 días
-        fecha_limite = timezone.now() - timedelta(days=30)
+        # Contenido más reproducido globalmente en los últimos 90 días (aumentado de 30)
+        fecha_limite = timezone.now() - timedelta(days=90)
         
         contenido_popular = Contenido.objects.annotate(
             reproducciones_recientes=Count(
                 'historialreproduccion',
-                filter=Q(historialreproduccion__fecha__gte=fecha_limite)            ),
+                filter=Q(historialreproduccion__fecha__gte=fecha_limite)
+            ),
+            reproducciones_totales=Count('historialreproduccion'),  # Agregado
             rating_promedio=Avg('calificacion__calificacion')
         ).filter(
-            reproducciones_recientes__gt=0
+            # Relajado: permitir contenido con reproducciones totales > 0 O recientes > 0
+            Q(reproducciones_recientes__gt=0) | Q(reproducciones_totales__gt=0)
         ).exclude(
             id__in=self._obtener_contenido_ya_visto()
-        ).order_by('-reproducciones_recientes', '-rating_promedio')[:limite]
+        ).order_by('-reproducciones_recientes', '-reproducciones_totales', '-rating_promedio', '?')[:limite]
+        
+        # Si no hay suficiente contenido popular, añadir contenido aleatorio reciente
+        if len(contenido_popular) < limite:
+            contenido_restante = limite - len(contenido_popular)
+            contenido_extra = Contenido.objects.exclude(
+                id__in=self._obtener_contenido_ya_visto()
+            ).exclude(
+                id__in=[c.id for c in contenido_popular]
+            ).order_by('-id', '?')[:contenido_restante]
+            
+            contenido_popular = list(contenido_popular) + list(contenido_extra)
         
         return list(contenido_popular)
     

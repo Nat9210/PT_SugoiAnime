@@ -1,5 +1,5 @@
 """
-Servicio para importar contenido desde AniList API
+Importar contenido desde AniList API
 """
 import requests
 from typing import Dict, List, Optional
@@ -69,7 +69,7 @@ class AniListImporter:
         # Remover HTML tags básicos
         import re
         descripcion = re.sub(r'<[^>]+>', '', descripcion)
-          # Limitar longitud
+        # Limitar longitud
         if len(descripcion) > 1000:
             descripcion = descripcion[:997] + "..."
         

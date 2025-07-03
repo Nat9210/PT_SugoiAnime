@@ -11,8 +11,7 @@
 <!-- Hero Section Begin -->
 <section class="hero">
     <div class="container">
-        <div class="hero__slider owl-carousel">
-            <!-- Versión ESTÁTICA (actual) -->
+        <div class="hero__slider owl-carousel">            
             <div class="hero__items set-bg" data-setbg="{% static 'myapp/img/hero/hero-4.jpg' %}">
                 <div class="row">
                     <div class="col-lg-6">
@@ -32,7 +31,7 @@
                             <h2>My Hero Academia</h2>
                             <div class="label">Superhéroes</div> <div class="label">Acción</div>
                             <p>En un mundo donde la mayoría de las personas tienen superpoderes, sigue la historia de un joven héroe.</p>
-                            <a href="{% url 'anime_details' 239 %}"><span>Ver Ahora</span> <i class="fa fa-angle-right"></i></a>
+                            <a href="{% url 'anime_details' 9 %}"><span>Ver Ahora</span> <i class="fa fa-angle-right"></i></a>
                         </div>
                     </div>
                 </div>
@@ -41,7 +40,7 @@
                 <div class="row">
                     <div class="col-lg-6">
                         <div class="hero__text">
-                            <h2>Oshi No Ko</h2>
+                            <h2>Suzume</h2>
                             <div class="label">Drama</div> <div class="label">Sobrenatural</div>
                             <p>Una historia fascinante sobre la industria del entretenimiento con elementos misteriosos.</p>
                             <a href="{% url 'anime_details' 215 %}"><span>Ver Ahora</span> <i class="fa fa-angle-right"></i></a>
@@ -57,32 +56,11 @@
                             <!--<h2>Jujutsu Kaisen</h2>-->
                             <div class="label">Sobrenatural</div> <div class="label">Shounen</div>
                             <p>Una emocionante aventura sobrenatural llena de batallas épicas y personajes memorables.</p>
-                            <a href="{% url 'anime_details' 213 %}"><span>Ver Ahora</span> <i class="fa fa-angle-right"></i></a>
+                            <a href="{% url 'anime_details' 206 %}"><span>Ver Ahora</span> <i class="fa fa-angle-right"></i></a>
                         </div>
                     </div>
                 </div>
-            </div>
-            
-            <!-- 
-            VERSIÓN DINÁMICA ALTERNATIVA (descomenta para usar):
-            
-            {% for contenido in contenido_destacado|slice:":4" %}
-            <div class="hero__items set-bg" data-setbg="{% if contenido.imagen_portada %}{{ contenido.imagen_portada.url }}{% else %}{% static 'myapp/img/default-cover.jpg' %}{% endif %}">
-                <div class="row">
-                    <div class="col-lg-6">
-                        <div class="hero__text">
-                            <h2>{{ contenido.titulo }}</h2>
-                            {% for categoria in contenido.categorias.all|slice:":3" %}
-                                <div class="label">{{ categoria.nombre }}</div>
-                            {% endfor %}
-                            <p>{{ contenido.descripcion|truncatewords:20 }}</p>
-                            <a href="{% url 'anime_details' contenido.id %}"><span>Ver Ahora</span> <i class="fa fa-angle-right"></i></a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
-            -->
+            </div>           
         </div>
     </div>
 </section>
@@ -139,10 +117,10 @@
                         <div class="col-lg-8 col-md-8 col-sm-8">
                             <div class="section-title">
                                 {% if tiene_perfil and recomendaciones_personalizadas %}
-                                    <h4><i class="fa fa-magic text-primary"></i> Especialmente para Ti</h4>
+                                    <h4><i class="text-primary"></i> Especialmente para Ti</h4>
                                     <p class="text-muted">Recomendaciones basadas en tus gustos</p>
                                 {% else %}
-                                    <h4><i class="fa fa-fire text-danger"></i> Recomendaciones del Editor</h4>
+                                    <h4><i class="text-danger"></i> Recomendaciones del Editor</h4>
                                     <p class="text-muted">Lo mejor que tenemos para ofrecerte</p>
                                 {% endif %}
                             </div>
