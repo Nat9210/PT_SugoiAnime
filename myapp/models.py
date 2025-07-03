@@ -46,6 +46,7 @@ class Contenido(models.Model):
     idioma = models.CharField(max_length=50, blank=True)
     imagen_portada = models.ImageField(upload_to='portadas/', null=True, blank=True)
     video_url = models.URLField(max_length=1000, null=True, blank=True)
+    video_file = models.FileField(upload_to='videos/', blank=True, null=True)
     categorias = models.ManyToManyField(Categoria, through='ContenidoCategoria', related_name='contenidos')
     
     # Campos de AniList
@@ -65,6 +66,15 @@ class Contenido(models.Model):
 
     def __str__(self):
         return self.titulo
+    
+    @property
+    def video_source(self):
+        """Devuelve la fuente de video prioritaria"""
+        if self.video_file and self.video_file.name:
+            return self.video_file.url
+        elif self.video_url:
+            return self.video_url
+        return ""
 
 # Relación entre contenido y categorías
 class ContenidoCategoria(models.Model):

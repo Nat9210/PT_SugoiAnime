@@ -1,7 +1,7 @@
 {% extends 'myapp/base.html' %}
 {% load static %}
 {% load youtube_extras %}
-{% block title %}Ver {{ episodio.titulo }} | {{ contenido.titulo }}{% endblock %}
+{% block title %}{% if episodio %}Ver {{ episodio.titulo }} | {{ contenido.titulo }}{% else %}Ver {{ contenido.titulo }}{% endif %}{% endblock %}
 {% block content %}
 <!-- Breadcrumb Begin -->
 <div class="breadcrumb-option">
@@ -12,7 +12,11 @@
                     <a href="{% url 'index' %}"><i class="fa fa-home"></i> Inicio</a>
                     <a href="{% url 'categories' %}">Categorías</a>
                     <a href="{% url 'anime_details' contenido.id %}">{{ contenido.titulo }}</a>
-                    <span>{{ episodio.titulo }}</span>
+                    {% if episodio %}
+                        <span>{{ episodio.titulo }}</span>
+                    {% else %}
+                        <span>Ver película</span>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -26,43 +30,85 @@
         <div class="row justify-content-center">
             <div class="col-lg-10 col-xl-9">
                 <div class="anime__video__player mb-4 rounded shadow overflow-hidden plyr__video-outer">
-                    {% if 'youtube.com' in episodio.video_url or 'youtu.be' in episodio.video_url %}
-                        <div class="ratio ratio-16x9">
-                            <iframe id="player" width="100%" height="500" src="https://www.youtube.com/embed/{{ episodio.video_url|youtube_id }}" frameborder="0" allowfullscreen allow="fullscreen picture-in-picture"></iframe>
-                        </div>
+                    {% if episodio %}
+                        {% if 'youtube.com' in episodio.video_url or 'youtu.be' in episodio.video_url %}
+                            <div class="ratio ratio-16x9">
+                                <iframe id="player" width="100%" height="500" src="https://www.youtube.com/embed/{{ episodio.video_url|youtube_id }}" frameborder="0" allowfullscreen allow="fullscreen picture-in-picture"></iframe>
+                            </div>
+                        {% else %}
+                            <video id="player" class="w-100 rounded" playsinline controls poster="{% if contenido.imagen_portada %}{{ contenido.imagen_portada.url }}{% else %}{% static 'myapp/img/default-cover.jpg' %}{% endif %}" style="background: #181828;" webkit-playsinline allow="picture-in-picture">
+                                <source src="{{ episodio.video_url }}" type="video/mp4" />
+                                Tu navegador no soporta la reproducción de video.
+                            </video>
+                        {% endif %}
                     {% else %}
-                        <video id="player" class="w-100 rounded" playsinline controls poster="{% if contenido.imagen_portada %}{{ contenido.imagen_portada.url }}{% else %}{% static 'myapp/img/default-cover.jpg' %}{% endif %}" style="background: #181828;" webkit-playsinline allow="picture-in-picture">
-                            <source src="{{ episodio.video_url }}" type="video/mp4" />
-                            Tu navegador no soporta la reproducción de video.
-                        </video>
+                        {% comment %}Para películas{% endcomment %}
+                        {% if 'youtube.com' in contenido.video_url or 'youtu.be' in contenido.video_url %}
+                            <div class="ratio ratio-16x9">
+                                <iframe id="player" width="100%" height="500" src="https://www.youtube.com/embed/{{ contenido.video_url|youtube_id }}" frameborder="0" allowfullscreen allow="fullscreen picture-in-picture"></iframe>
+                            </div>
+                        {% else %}
+                            <video id="player" class="w-100 rounded" playsinline controls poster="{% if contenido.imagen_portada %}{{ contenido.imagen_portada.url }}{% else %}{% static 'myapp/img/default-cover.jpg' %}{% endif %}" style="background: #181828;" webkit-playsinline allow="picture-in-picture">
+                                <source src="{{ contenido.video_url }}" type="video/mp4" />
+                                Tu navegador no soporta la reproducción de video.
+                            </video>
+                        {% endif %}
                     {% endif %}
                 </div>
                 <div class="row g-4">
                     <div class="col-md-8">
                         <div class="anime__episode__desc bg-dark p-4 rounded mb-3">
-                            <h4 class="text-purple mb-2">{{ episodio.titulo }}</h4>
-                            <p class="mb-2"><strong>Descripción:</strong> {{ episodio.descripcion|default:'Sin descripción.' }}</p>
-                            <div class="d-flex flex-wrap gap-3 mb-2">
-                                <span class="badge bg-purple">Temporada: {{ episodio.temporada }}</span>
-                                <span class="badge bg-purple">N° Episodio: {{ episodio.numero_episodio }}</span>
-                                <span class="badge bg-purple">Duración: {{ episodio.duracion }} min</span>
-                            </div>
+                            {% if episodio %}
+                                <h4 class="text-purple mb-2">{{ episodio.titulo }}</h4>
+                                <p class="mb-2"><strong>Descripción:</strong> {{ episodio.descripcion|default:'Sin descripción.' }}</p>
+                                <div class="d-flex flex-wrap gap-3 mb-2">
+                                    <span class="badge bg-purple">Temporada: {{ episodio.temporada }}</span>
+                                    <span class="badge bg-purple">N° Episodio: {{ episodio.numero_episodio }}</span>
+                                    <span class="badge bg-purple">Duración: {{ episodio.duracion }} min</span>
+                                </div>
+                            {% else %}
+                                <h4 class="text-purple mb-2">{{ contenido.titulo }}</h4>
+                                <p class="mb-2"><strong>Descripción:</strong> {{ contenido.descripcion|default:'Sin descripción.' }}</p>
+                                <div class="d-flex flex-wrap gap-3 mb-2">
+                                    <span class="badge bg-purple">Película</span>
+                                    {% if contenido.año %}<span class="badge bg-purple">Año: {{ contenido.año }}</span>{% endif %}
+                                    {% if contenido.duracion %}<span class="badge bg-purple">Duración: {{ contenido.duracion }} min</span>{% endif %}
+                                </div>
+                            {% endif %}
                         </div>
                     </div>
                     <div class="col-md-4">
-                        <div class="anime__details__episodes bg-dark p-3 rounded mb-4">
-                            <div class="section-title mb-2">
-                                <h5 class="text-purple">Episodios</h5>
+                        {% if episodio %}
+                            <div class="anime__details__episodes bg-dark p-3 rounded mb-4">
+                                <div class="section-title mb-2">
+                                    <h5 class="text-purple">Episodios</h5>
+                                </div>
+                                <div class="list-group">
+                                    {% for ep in contenido.episodio_set.all %}
+                                        <a href="{% url 'anime_watching' ep.id %}" class="list-group-item list-group-item-action {% if ep.id == episodio.id %}active{% endif %} {% if ep.id in episodios_vistos %}visto{% endif %}">
+                                            Ep {{ ep.numero_episodio }} - {{ ep.titulo }}
+                                            {% if ep.id in episodios_vistos %}<span class="badge bg-success ms-2">Visto</span>{% endif %}
+                                        </a>
+                                    {% endfor %}
+                                </div>
                             </div>
-                            <div class="list-group">
-                                {% for ep in contenido.episodio_set.all %}
-                                    <a href="{% url 'anime_watching' ep.id %}" class="list-group-item list-group-item-action {% if ep.id == episodio.id %}active{% endif %} {% if ep.id in episodios_vistos %}visto{% endif %}">
-                                        Ep {{ ep.numero_episodio }} - {{ ep.titulo }}
-                                        {% if ep.id in episodios_vistos %}<span class="badge bg-success ms-2">Visto</span>{% endif %}
-                                    </a>
-                                {% endfor %}
+                        {% else %}
+                            <div class="anime__details__info bg-dark p-3 rounded mb-4">
+                                <div class="section-title mb-2">
+                                    <h5 class="text-purple">Información</h5>
+                                </div>
+                                <div class="anime__details__text">
+                                    <p><strong>Tipo:</strong> {{ contenido.get_tipo_display }}</p>
+                                    {% if contenido.año %}<p><strong>Año:</strong> {{ contenido.año }}</p>{% endif %}
+                                    {% if contenido.idioma %}<p><strong>Idioma:</strong> {{ contenido.idioma }}</p>{% endif %}
+                                    <p><strong>Categorías:</strong> 
+                                        {% for categoria in contenido.categorias.all %}
+                                            <span class="badge bg-secondary me-1">{{ categoria.nombre }}</span>
+                                        {% endfor %}
+                                    </p>
+                                </div>
                             </div>
-                        </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>

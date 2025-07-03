@@ -70,7 +70,22 @@
                         </div>
                         <div class="d-flex flex-wrap gap-2 justify-content-start mb-3 anime-action-buttons">
                             {% if contenido.video_url %}
-                                <a href="{{ contenido.video_url }}" target="_blank" class="btn btn-action btn-primary" title="Ver ahora"><i class="fa fa-play"></i> Ver ahora</a>
+                                {% if contenido.tipo == 'pelicula' %}
+                                    <a href="{% url 'movie_watching' contenido.id %}" class="btn btn-lg btn-primary d-flex align-items-center gap-2 shadow-lg" style="background: linear-gradient(45deg, #7c4dff, #651fff); border: none; border-radius: 25px; padding: 12px 24px;" title="Ver película">
+                                        <i class="fa fa-play"></i> 
+                                        <span>Ver Película</span>
+                                    </a>
+                                {% else %}
+                                    {% comment %}Para series, ir al primer episodio{% endcomment %}
+                                    {% with primer_episodio=contenido.episodio_set.first %}
+                                        {% if primer_episodio %}
+                                            <a href="{% url 'anime_watching' primer_episodio.id %}" class="btn btn-lg btn-primary d-flex align-items-center gap-2 shadow-lg" style="background: linear-gradient(45deg, #7c4dff, #651fff); border: none; border-radius: 25px; padding: 12px 24px;" title="Ver primer episodio">
+                                                <i class="fa fa-play"></i> 
+                                                <span>Ver Primer Episodio</span>
+                                            </a>
+                                        {% endif %}
+                                    {% endwith %}
+                                {% endif %}
                             {% endif %}
                         </div>
                         <script>
@@ -178,32 +193,24 @@
                             .catch(error => console.error('Error:', error));
                         });
                         </script>
-                        {% if contenido.video_url %}
-                        <div class="anime__details__video mt-4">
-                            <iframe width="100%" height="300" src="{{ contenido.video_url }}" frameborder="0" allowfullscreen></iframe>
-                        </div>
-                        {% endif %}
                     </div>
                 </div>
                 <!-- Lista de episodios a la derecha -->
                 <div class="col-lg-3">
                     {% if contenido.tipo == 'serie' and contenido.episodio_set.exists %}
                     <div class="anime__details__episodes bg-dark p-3 rounded mt-2">
-                        <h5 class="text-purple">Episodios</h5>
-                        <div class="d-flex flex-column gap-3">
+                        <h5 class="text-purple mb-3">Episodios</h5>
+                        <div class="list-group">
                             {% for episodio in contenido.episodio_set.all %}
-                            <div class="text-center">
-                                <a href="{% url 'anime_watching' episodio.id %}" class="mini-player-link" style="display:block;position:relative;z-index:2;">
-                                    <div class="mini-player-outer mb-1">
-                                        <div class="mini-player-wrapper">
-                                            <video id="mini-player-{{ episodio.id }}" class="mini-player rounded shadow-sm" poster="{% if contenido.imagen_portada %}{{ contenido.imagen_portada.url }}{% else %}{% static 'myapp/img/default-cover.jpg' %}{% endif %}" preload="none">
-                                                <source src="{{ episodio.video_url }}" type="video/mp4">
-                                            </video>
-                                        </div>
+                            <a href="{% url 'anime_watching' episodio.id %}" class="list-group-item list-group-item-action bg-dark text-white border-secondary mb-2 rounded">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="fw-bold">Episodio {{ episodio.numero_episodio }}</div>
+                                        <small class="text-muted">{{ episodio.titulo }}</small>
                                     </div>
-                                </a>
-                                <div class="fw-bold small text-white">Ep {{ episodio.numero_episodio }} - {{ episodio.titulo }}</div>
-                            </div>
+                                    <i class="fa fa-play text-purple"></i>
+                                </div>
+                            </a>
                             {% endfor %}
                         </div>
                     </div>
@@ -267,29 +274,6 @@
 {% block extra_js %}
 <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Inicializar todos los mini reproductores Plyr
-        document.querySelectorAll('.mini-player').forEach(function(video) {
-            new Plyr(video, {
-                controls: ['play', 'progress', 'current-time', 'mute', 'pip'],
-                seekTime: 10,
-                ratio: '16:9',
-                i18n: {
-                    play: 'Reproducir',
-                    pause: 'Pausar',
-                    mute: 'Silenciar',
-                    unmute: 'Activar sonido',
-                    pip: 'Imagen en imagen',
-                },
-                tooltips: { controls: true, seek: false },
-                hideControls: false,
-                resetOnEnd: false,
-                disableContextMenu: true,
-            });
-        });
-    });
-</script>
-<script>
 function toggleFavorito(btn) {
     const contenidoId = btn.getAttribute('data-contenido-id');
     const csrftoken = getCookie('csrftoken');
@@ -309,5 +293,32 @@ function toggleFavorito(btn) {
     });
 }
 </script>
+
+<style>
+/* Estilos para el botón de reproducir mejorado */
+.anime-action-buttons .btn:hover {
+    background: linear-gradient(45deg, #651fff, #3f51b5) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(124, 77, 255, 0.4) !important;
+    transition: all 0.3s ease;
+}
+
+.anime-action-buttons .btn {
+    transition: all 0.3s ease;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.anime-action-buttons .btn i {
+    font-size: 1.1em;
+}
+
+/* Efecto de pulsación */
+.anime-action-buttons .btn:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 10px rgba(124, 77, 255, 0.3) !important;
+}
+</style>
 
 {% endblock %}

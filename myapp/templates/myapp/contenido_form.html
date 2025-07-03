@@ -2,8 +2,10 @@
 {% block title %}{{ accion }} Contenido{% endblock %}
 {% block content %}
 <div class="container mt-5">
-    <h2 class="titulo-gestor">{{ accion }} Contenido</h2>
-    <form method="post" enctype="multipart/form-data" class="bg-dark p-4 rounded shadow form-max-600">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <h3 class="titulo-gestor-mb text-center">{{ accion }} Contenido</h3>
+            <form method="post" enctype="multipart/form-data" class="bg-dark p-4 rounded shadow">
         {% csrf_token %}
         {% for field in form %}
             <div class="form-group mb-3 form-flex-col">
@@ -19,8 +21,16 @@
                 {% endfor %}
             </div>
         {% endfor %}
-        <button type="submit" class="btn btn-success">Guardar</button>
-        <a href="{% url 'contenido_list' %}" class="btn btn-secondary">Cancelar</a>
+        <div class="d-flex gap-2 mt-4 justify-content-center">
+            <button type="submit" class="btn btn-success">
+                <i class="fa fa-save"></i> Guardar
+            </button>
+            <a href="{% url 'perfil' %}?seccion=gestion" class="btn btn-secondary">
+                <i class="fa fa-arrow-left"></i> Volver a Gestión
+            </a>
+        </div>
     </form>
+        </div>
+    </div>
 </div>
 {% endblock %}

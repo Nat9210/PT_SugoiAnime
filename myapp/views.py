@@ -299,13 +299,43 @@ def perfil_view(request):
     contenidos = None
     favoritos = None
     
+    # Estadísticas para la sección admin
+    total_usuarios = None
+    total_contenido = None
+    total_reproducciones = None
+    total_logs = None
+    
     if seccion == 'gestion' and user.is_staff: # solo admin.
         from django.db.models import Avg
         contenidos = Contenido.objects.annotate(
             total_likes=Count('calificacion', filter=Q(calificacion__calificacion=5)),
             total_dislikes=Count('calificacion', filter=Q(calificacion__calificacion=1)),
             rating_promedio=Avg('calificacion__calificacion')
-        ).all()
+        )
+        
+        # Funcionalidad de búsqueda simple
+        search_query = request.GET.get('search', '')
+        if search_query:
+            contenidos = contenidos.filter(
+                Q(titulo__icontains=search_query) |
+                Q(descripcion__icontains=search_query)
+            )
+        
+        # Filtro por tipo
+        tipo_filter = request.GET.get('tipo', '')
+        if tipo_filter:
+            contenidos = contenidos.filter(tipo=tipo_filter)
+        
+        contenidos = contenidos.order_by('-fecha_importacion')
+    
+    elif seccion == 'admin' and user.is_staff:
+        # Obtener estadísticas del sistema para la sección admin
+        from django.contrib.auth.models import User
+        total_usuarios = User.objects.count()
+        total_contenido = Contenido.objects.count()
+        total_reproducciones = HistorialReproduccion.objects.count()
+        total_logs = AuditLog.objects.count()
+    
     if seccion == 'favoritos':
         favoritos = Favorito.objects.filter(perfil=perfil).select_related('contenido').order_by('-fecha_agregado')
 
@@ -324,6 +354,12 @@ def perfil_view(request):
         'seccion': seccion,
         'contenidos': contenidos,
         'favoritos': favoritos,
+        'search_query': request.GET.get('search', ''),
+        'tipo_filter': request.GET.get('tipo', ''),
+        'total_usuarios': total_usuarios,
+        'total_contenido': total_contenido,
+        'total_reproducciones': total_reproducciones,
+        'total_logs': total_logs,
     })
 
 # Función para manejar la vista de inicio de sesión
@@ -648,12 +684,21 @@ def anime_watching(request, episodio_id):
     
     if perfil:
         # Marcar como visto (si no existe ya un registro para este episodio y perfil)
-        HistorialReproduccion.objects.get_or_create(
+        # Usar filter().first() para evitar MultipleObjectsReturned
+        historial = HistorialReproduccion.objects.filter(
             perfil=perfil,
             contenido=contenido,
-            episodio=episodio,
-            defaults={'tiempo_reproducido': 0}
-        )
+            episodio=episodio
+        ).first()
+        
+        if not historial:
+            # Solo crear si no existe ningún registro
+            HistorialReproduccion.objects.create(
+                perfil=perfil,
+                contenido=contenido,
+                episodio=episodio,
+                tiempo_reproducido=0
+            )
         # OPTIMIZACIÓN: Obtener todos los episodios vistos de una vez
         episodios_vistos = list(
             HistorialReproduccion.objects.filter(perfil=perfil, contenido=contenido)
@@ -679,6 +724,60 @@ def anime_watching(request, episodio_id):
     ).first()
     if next_episode:
         response['Link'] = f'</static/myapp/css/video-optimizations.css>; rel=preload; as=style'
+    
+    return response
+
+@login_required
+def movie_watching(request, contenido_id):
+    """Vista para reproducir películas"""
+    # Obtener la película y verificar que sea del tipo correcto
+    contenido = get_object_or_404(Contenido, pk=contenido_id, tipo='pelicula')
+    user = request.user
+    perfil = user.perfiles.first()  # Se asume un perfil por usuario
+    
+    # Registrar reproducción en logs de auditoría
+    AuditLog.log_action(
+        accion='PLAY',
+        descripcion=f"Reproducción de película: {contenido.titulo}",
+        usuario=user,
+        perfil=perfil,
+        tabla_afectada='Contenido',
+        objeto_id=contenido_id,
+        ip_address=get_client_ip(request),
+        user_agent=request.META.get('HTTP_USER_AGENT', ''),
+        datos_adicionales={
+            'contenido_id': contenido.id,
+            'tipo': 'pelicula',
+            'duracion_minutos': contenido.duracion
+        }
+    )
+    
+    if perfil:
+        # Marcar como visto (película completa, sin episodio)
+        # Usar filter().first() para evitar MultipleObjectsReturned
+        historial = HistorialReproduccion.objects.filter(
+            perfil=perfil,
+            contenido=contenido,
+            episodio=None  # Las películas no tienen episodios
+        ).first()
+        
+        if not historial:
+            # Solo crear si no existe ningún registro
+            HistorialReproduccion.objects.create(
+                perfil=perfil,
+                contenido=contenido,
+                episodio=None,
+                tiempo_reproducido=0
+            )
+    
+    # Renderizar el template unificado (mismo que para episodios)
+    response = render(request, 'myapp/anime-watching.html', {
+        'contenido': contenido,
+        'episodio': None,  # Para películas no hay episodio
+    })
+    
+    # Cache de página por 5 minutos
+    response['Cache-Control'] = 'max-age=300, must-revalidate'
     
     return response
 

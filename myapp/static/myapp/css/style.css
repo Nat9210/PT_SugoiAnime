@@ -3476,14 +3476,6 @@ select:focus, select:active {
     gap: 8px !important;
 }
 
-.btn-limpiar:hover {
-    background: rgba(255, 255, 255, 0.2) !important;
-    border-color: rgba(255, 255, 255, 0.5) !important;
-    color: #ffffff !important;
-    text-decoration: none !important;
-    transform: translateY(-2px) !important;
-}
-
 /* Responsive para filtros */
 @media (max-width: 768px) {
     .filter-row {
@@ -3885,10 +3877,8 @@ select:focus, select:active {
 }
 
 .product__sidebar__search:hover {
-    background: rgba(255, 255, 255, 0.08);
-    border-color: rgba(140, 82, 255, 0.4);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(140, 82, 255, 0.15);
+    border-color: rgba(140, 82, 255, 0.6);
+    box-shadow: 0 6px 25px rgba(140, 82, 255, 0.2);
 }
 
 /* Título de la sección */
@@ -4007,84 +3997,17 @@ select:focus, select:active {
 
 /* Responsive */
 @media (max-width: 768px) {
-    .product__sidebar__search {
-        margin-bottom: 30px;
-        padding: 20px 15px;
+    .content-search-card .col-md-6,
+    .content-search-card .col-md-3 {
+        margin-bottom: 15px;
     }
     
-    .search-trend-link {
-        padding: 10px 12px;
+    .table-dark {
+        font-size: 14px;
     }
     
-    .trend-term {
-        font-size: 13px;
-    }
-    
-    .trend-count {
+    .table-dark .btn-sm {
+        padding: 4px 8px;
         font-size: 11px;
-        padding: 3px 6px;
     }
-}
-
-/* Animación de aparición para los elementos */
-.search-trend-item {
-    animation: fadeInUp 0.5s ease forwards;
-    opacity: 0;
-    transform: translateY(20px);
-}
-
-.search-trend-item:nth-child(1) { animation-delay: 0.1s; }
-.search-trend-item:nth-child(2) { animation-delay: 0.2s; }
-.search-trend-item:nth-child(3) { animation-delay: 0.3s; }
-.search-trend-item:nth-child(4) { animation-delay: 0.4s; }
-.search-trend-item:nth-child(5) { animation-delay: 0.5s; }
-.search-trend-item:nth-child(6) { animation-delay: 0.6s; }
-
-@keyframes fadeInUp {
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Efecto de pulso sutil para destacar la sección */
-.product__sidebar__search {
-    position: relative;
-}
-
-.product__sidebar__search::before {
-    content: '';
-    position: absolute;
-    top: -2px;
-    left: -2px;
-    right: -2px;
-    bottom: -2px;
-    background: linear-gradient(45deg, 
-        rgba(140, 82, 255, 0.3), 
-        rgba(179, 102, 255, 0.3), 
-        rgba(140, 82, 255, 0.3)
-    );
-    border-radius: 10px;
-    z-index: -1;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-.product__sidebar__search:hover::before {
-    opacity: 1;
-}
-
-/* Estado vacío (cuando no hay búsquedas) */
-.search-trends-empty {
-    text-align: center;
-    padding: 30px 15px;
-    color: #888888;
-    font-style: italic;
-}
-
-.search-trends-empty i {
-    font-size: 24px;
-    color: #666666;
-    margin-bottom: 10px;
-    display: block;
 }

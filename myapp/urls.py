@@ -9,6 +9,7 @@ urlpatterns = [
     path('anime-details/', views.render_anime_details, name='anime_details'),
     path('anime-details/<int:contenido_id>/', views.anime_details, name='anime_details'),
     path('anime-watching/<int:episodio_id>/', views.anime_watching, name='anime_watching'),
+    path('movie-watching/<int:contenido_id>/', views.movie_watching, name='movie_watching'),
     path('blog-details/', views.render_blog_details, name='blog_details'), #sin función
     path('blog/', views.render_blog, name='blog'), #sin función
     path('login/', views.login_view, name='login'),

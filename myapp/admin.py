@@ -1,7 +1,8 @@
 from django.contrib import admin
+from django.contrib.auth.models import User, Group
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin, GroupAdmin as BaseGroupAdmin
 from .models import (Contenido, Categoria, Episodio, ContenidoCategoria, Perfil, 
-                     HistorialReproduccion, Favorito, Calificacion, AuditLog, 
-                     SesionUsuario, AccesoFallido, HistorialBusqueda)
+                     HistorialReproduccion, Favorito, Calificacion, AuditLog)
 from django.utils.html import format_html
 from django.urls import reverse, path
 from django.utils.safestring import mark_safe
@@ -93,7 +94,7 @@ class ContenidoAdmin(admin.ModelAdmin):
             return format_html('<span style="color: green;">✓ Sí</span>')
         return format_html('<span style="color: red;">✗ No</span>')
     tiene_video.short_description = "Tiene Video"
-    tiene_video.boolean = True
+    # tiene_video.boolean = True  # Comentado para permitir HTML personalizado
     
     def estadisticas_content(self, obj):
         try:
@@ -120,7 +121,7 @@ class ContenidoAdmin(admin.ModelAdmin):
         except:
             return "Estadísticas no disponibles"
     estadisticas_content.short_description = "Estadísticas de uso"
-
+    
 class EpisodioAdmin(admin.ModelAdmin):
     list_display = ('titulo', 'serie', 'temporada', 'numero_episodio', 'duracion', 'video_status', 'reproductions_count')
     list_filter = ('serie', 'temporada', 'serie__tipo')
@@ -255,7 +256,7 @@ class PerfilAdmin(admin.ModelAdmin):
             reproducciones = obj.historialreproduccion_set.count()
             calificaciones = obj.calificacion_set.count()
             favoritos = obj.favorito_set.count()
-            busquedas = obj.historialbusqueda_set.count()
+            # busquedas = obj.historialbusqueda_set.count()  # Modelo eliminado
             
             # Contenido más visto
             top_content = obj.historialreproduccion_set.values('contenido__titulo').annotate(
@@ -283,14 +284,14 @@ class PerfilAdmin(admin.ModelAdmin):
                     </div>
                     
                     <div style="margin-top: 15px;">
-                        <strong>🏆 Contenido más visto:</strong><br>
+                        <strong> Contenido más visto:</strong><br>
                         <div style="margin-left: 10px; color: #666;">
                             {}
                         </div>
                     </div>
                 </div>
                 ''',
-                reproducciones, calificaciones, favoritos, busquedas,
+                reproducciones, calificaciones, favoritos, 0,  # busquedas reemplazado por 0
                 top_content_html if top_content_html else "No hay actividad registrada"
             )
         except:
@@ -310,7 +311,7 @@ class PerfilAdmin(admin.ModelAdmin):
                 return format_html(
                     '''
                     <div style="background: #e8f4fd; padding: 15px; border-radius: 8px; border-left: 4px solid #007cba;">
-                        <strong>🎯 Recomendaciones Actuales:</strong><br>
+                        <strong> Recomendaciones Actuales:</strong><br>
                         <div style="margin-left: 10px; margin-top: 10px; color: #333;">
                             {}
                         </div>
@@ -362,76 +363,6 @@ class AuditLogAdmin(admin.ModelAdmin):
     def has_delete_permission(self, request, obj=None):
         return request.user.is_superuser  # Solo superusuarios pueden eliminar
 
-@admin.register(SesionUsuario)
-class SesionUsuarioAdmin(admin.ModelAdmin):
-    list_display = ('usuario', 'perfil', 'fecha_inicio', 'fecha_fin', 'activa', 'duracion_sesion', 'ip_address')
-    list_filter = ('activa', 'fecha_inicio', 'fecha_fin')
-    search_fields = ('usuario__username', 'perfil__nombre', 'ip_address')
-    readonly_fields = ('usuario', 'perfil', 'session_key', 'ip_address', 'user_agent', 
-                      'fecha_inicio', 'fecha_fin', 'duracion_sesion')
-    date_hierarchy = 'fecha_inicio'
-    ordering = ('-fecha_inicio',)
-    
-    def duracion_sesion(self, obj):
-        if obj.fecha_fin:
-            duracion = obj.fecha_fin - obj.fecha_inicio
-            total_seconds = int(duracion.total_seconds())
-            hours = total_seconds // 3600
-            minutes = (total_seconds % 3600) // 60
-            seconds = total_seconds % 60
-            return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
-        elif obj.activa:
-            return "Sesión activa"
-        return "No finalizada"
-    duracion_sesion.short_description = 'Duración'
-    
-    def has_add_permission(self, request):
-        return False
-    
-    def has_change_permission(self, request, obj=None):
-        return False
-    
-    def has_delete_permission(self, request, obj=None):
-        return request.user.is_superuser
-
-@admin.register(AccesoFallido)
-class AccesoFallidoAdmin(admin.ModelAdmin):
-    list_display = ('username', 'ip_address', 'timestamp', 'motivo')
-    list_filter = ('timestamp', 'motivo')
-    search_fields = ('username', 'ip_address')
-    readonly_fields = ('username', 'ip_address', 'user_agent', 'timestamp', 'motivo')
-    date_hierarchy = 'timestamp'
-    ordering = ('-timestamp',)
-    
-    def has_add_permission(self, request):
-        return False
-    
-    def has_change_permission(self, request, obj=None):
-        return False
-    
-    def has_delete_permission(self, request, obj=None):
-        return request.user.is_superuser
-
-# Administración de Historial de Búsqueda
-@admin.register(HistorialBusqueda)
-class HistorialBusquedaAdmin(admin.ModelAdmin):
-    list_display = ('timestamp', 'usuario', 'termino_busqueda', 'resultados_encontrados', 'ip_address')
-    list_filter = ('timestamp', 'resultados_encontrados')
-    search_fields = ('termino_busqueda', 'termino_normalizado', 'usuario__username')
-    readonly_fields = ('timestamp', 'usuario', 'perfil', 'termino_busqueda', 'termino_normalizado', 
-                      'resultados_encontrados', 'ip_address', 'user_agent')
-    ordering = ('-timestamp',)
-    list_per_page = 50
-    
-    def has_add_permission(self, request):
-        return False
-    
-    def has_change_permission(self, request, obj=None):
-        return False
-    
-    def has_delete_permission(self, request, obj=None):
-        return request.user.is_superuser
-
 # Personalizar el título del sitio de administración
 admin.site.site_header = "SugoiAnime - Panel de Administración"
 admin.site.site_title = "SugoiAnime Admin"
@@ -447,7 +378,7 @@ def estadisticas_recomendaciones(request):
     total_usuarios = Perfil.objects.count()
     total_reproducciones = HistorialReproduccion.objects.count()
     total_calificaciones = Calificacion.objects.count()
-    total_busquedas = HistorialBusqueda.objects.count()
+    # total_busquedas = HistorialBusqueda.objects.count()  # Modelo eliminado
     
     # Contenido más popular (por reproducciones)
     contenido_mas_visto = Contenido.objects.annotate(
@@ -477,7 +408,7 @@ def estadisticas_recomendaciones(request):
     ).order_by('-total_likes', '-rating_promedio')[:10]
     
     # Términos más buscados
-    terminos_mas_buscados = HistorialBusqueda.obtener_mas_buscados(limite=10, dias=30)
+    # terminos_mas_buscados = HistorialBusqueda.obtener_mas_buscados(limite=10, dias=30)  # Modelo eliminado
     
     # Categorías más populares
     categorias_populares = Categoria.objects.annotate(
@@ -494,12 +425,12 @@ def estadisticas_recomendaciones(request):
             'total_usuarios': total_usuarios,
             'total_reproducciones': total_reproducciones,
             'total_calificaciones': total_calificaciones,
-            'total_busquedas': total_busquedas,
+            # 'total_busquedas': total_busquedas,  # Modelo eliminado
         },
         'contenido_mas_visto': contenido_mas_visto,
         'contenido_mejor_valorado': contenido_mejor_valorado,
         'contenido_mas_gustado': contenido_mas_gustado,
-        'terminos_mas_buscados': terminos_mas_buscados,
+        # 'terminos_mas_buscados': terminos_mas_buscados,  # Modelo eliminado
         'categorias_populares': categorias_populares,
     }
     
@@ -537,7 +468,7 @@ class CustomAdminSite(admin.AdminSite):
             total_usuarios = Perfil.objects.count()
             total_reproducciones = HistorialReproduccion.objects.count()
             total_calificaciones = Calificacion.objects.count()
-            total_busquedas = HistorialBusqueda.objects.count()
+            total_busquedas = 0  # Modelo eliminado, valor por defecto
         except:
             # En caso de error (ej: base de datos no inicializada)
             total_contenidos = 0
@@ -570,11 +501,86 @@ admin_site.register(HistorialReproduccion)
 admin_site.register(Favorito)
 admin_site.register(Calificacion)
 admin_site.register(AuditLog, AuditLogAdmin)
-admin_site.register(SesionUsuario, SesionUsuarioAdmin)
-admin_site.register(AccesoFallido, AccesoFallidoAdmin)
-admin_site.register(HistorialBusqueda, HistorialBusquedaAdmin)
 
 # Configurar títulos del sitio personalizado
 admin_site.site_header = "SugoiAnime - Panel de Administración"
 admin_site.site_title = "SugoiAnime Admin"
 admin_site.index_title = "Panel de Control - Sistema de Auditoría Incluido"
+
+# Registro de modelos de Django auth
+class UserAdmin(BaseUserAdmin):
+    list_display = ('username', 'email', 'first_name', 'last_name', 'is_active', 'is_staff')
+    search_fields = ('username', 'email', 'first_name', 'last_name')
+    list_filter = ('is_active', 'is_staff', 'groups')
+    ordering = ('username',)
+    readonly_fields = ('last_login',)
+    
+    fieldsets = (
+        (None, {
+            'fields': ('username', 'password')
+        }),
+        ('Información Personal', {
+            'fields': ('first_name', 'last_name', 'email', 'avatar')
+        }),
+        ('Permisos', {
+            'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')
+        }),
+        ('Fechas Importantes', {
+            'fields': ('last_login', 'date_joined')
+        }),
+    )
+    
+    def has_add_permission(self, request):
+        return False  # No permitir agregar usuarios manualmente
+    
+    def has_change_permission(self, request, obj=None):
+        return True  # Permitir editar usuarios
+
+admin.site.unregister(User)
+admin.site.register(User, UserAdmin)
+
+class GroupAdmin(BaseGroupAdmin):
+    list_display = ('name', 'permissions_list')
+    search_fields = ('name',)
+    
+    def permissions_list(self, obj):
+        return ", ".join([perm.codename for perm in obj.permissions.all()])
+    permissions_list.short_description = 'Permisos'
+    
+admin.site.unregister(Group)
+admin.site.register(Group, GroupAdmin)
+
+# ===== CONFIGURACIÓN DEL SITIO PERSONALIZADO =====
+
+# Definir clases admin para User y Group en el sitio personalizado
+class CustomUserAdmin(BaseUserAdmin):
+    list_display = ('username', 'email', 'first_name', 'last_name', 'is_staff', 'is_active', 'date_joined')
+    list_filter = ('is_staff', 'is_superuser', 'is_active', 'date_joined')
+    search_fields = ('username', 'first_name', 'last_name', 'email')
+    ordering = ('username',)
+    
+    fieldsets = (
+        (None, {'fields': ('username', 'password')}),
+        ('Información Personal', {'fields': ('first_name', 'last_name', 'email')}),
+        ('Permisos', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
+        ('Fechas Importantes', {'fields': ('last_login', 'date_joined')}),
+    )
+    
+    add_fieldsets = (
+        (None, {
+            'classes': ('wide',),
+            'fields': ('username', 'password1', 'password2'),
+        }),
+    )
+
+class CustomGroupAdmin(BaseGroupAdmin):
+    list_display = ('name', 'permissions_count')
+    search_fields = ('name',)
+    
+    def permissions_count(self, obj):
+        return obj.permissions.count()
+    permissions_count.short_description = 'Cantidad de Permisos'
+
+# Registrar User y Group en el sitio personalizado
+admin_site.register(User, CustomUserAdmin)
+admin_site.register(Group, CustomGroupAdmin)

@@ -2,25 +2,45 @@
 {% block title %}{{ accion }} Episodio{% endblock %}
 {% block content %}
 <div class="container mt-5">
-    <h2>{{ accion }} Episodio para {{ contenido.titulo }}</h2>
-    <form method="post" class="bg-dark p-4 rounded shadow form-max-600">
-        {% csrf_token %}
-        {% for field in form %}
-            <div class="form-group mb-3 form-flex-col">
-                <label for="{{ field.id_for_label }}" class="form-label label-bold-white">{{ field.label }}</label>
-                <div class="full-width">
-                    {{ field }}
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <h3 class="titulo-gestor-mb text-center">{{ accion }} Episodio</h3>
+            
+            <div class="bg-dark p-4 rounded shadow">
+                <div class="text-center mb-3">
+                    <small class="text-muted">
+                        <i class="fa fa-tv"></i> Serie: <strong class="text-white">{{ contenido.titulo }}</strong>
+                    </small>
                 </div>
-                {% if field.help_text %}
-                    <small class="form-text text-muted">{{ field.help_text }}</small>
-                {% endif %}
-                {% for error in field.errors %}
-                    <div class="text-danger">{{ error }}</div>
-                {% endfor %}
+                
+                <form method="post">
+                    {% csrf_token %}
+                    {% for field in form %}
+                        <div class="form-group mb-3 form-flex-col">
+                            <label for="{{ field.id_for_label }}" class="form-label label-bold-white">{{ field.label }}</label>
+                            <div class="full-width">
+                                {{ field }}
+                            </div>
+                            {% if field.help_text %}
+                                <small class="form-text text-muted">{{ field.help_text }}</small>
+                            {% endif %}
+                            {% for error in field.errors %}
+                                <div class="text-danger">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+                    
+                    <div class="d-flex gap-2 mt-4 justify-content-center">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fa fa-save"></i> Guardar Episodio
+                        </button>
+                        <a href="{% url 'contenido_gestion_episodios' contenido.id %}" class="btn btn-secondary">
+                            <i class="fa fa-arrow-left"></i> Volver a Episodios
+                        </a>
+                    </div>
+                </form>
             </div>
-        {% endfor %}
-        <button type="submit" class="btn btn-success">Guardar</button>
-        <a href="{% url 'contenido_gestion_episodios' contenido.id %}" class="btn btn-secondary">Cancelar</a>
-    </form>
+        </div>
+    </div>
 </div>
 {% endblock %}
