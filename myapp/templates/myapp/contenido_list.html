@@ -1,5 +1,9 @@
 {% extends 'myapp/base.html' %}
+{% load static %}
 {% block title %}Gestión de Contenido{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'myapp/css/forms.css' %}">
+{% endblock %}
 {% block content %}
 <div class="container mt-5">
     <h2 class="titulo-gestor">Gestión de Contenido</h2>
@@ -20,7 +24,7 @@
             <tr>
                 <td>
                     {% if contenido.imagen_portada %}
-                        <img src="{{ contenido.imagen_portada.url }}" alt="Portada" class="img-max-200" style="max-height:80px;">
+                        <img src="{{ contenido.imagen_portada.url }}" alt="Portada" class="img-max-200 img-small">
                     {% else %}
                         <span class="text-muted">Sin portada</span>
                     {% endif %}

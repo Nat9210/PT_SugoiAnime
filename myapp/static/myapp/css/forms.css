@@ -1,0 +1,286 @@
+/* Estilos para emails y formularios */
+
+/* Estilos para emails */
+.mail-body { 
+    font-family: 'Oswald', Arial, sans-serif; 
+    background: #181824; 
+    color: #fff; 
+    margin: 0; 
+    padding: 0; 
+}
+
+.mail-container { 
+    max-width: 480px; 
+    margin: 40px auto; 
+    background: #23233a; 
+    border-radius: 10px; 
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2); 
+    padding: 32px 24px; 
+    text-align: center; 
+}
+
+.mail-logo { 
+    margin-bottom: 18px; 
+}
+
+.mail-logo img { 
+    max-width: 120px; 
+}
+
+.mail-title { 
+    color: #8c52ff; 
+    font-size: 1.5em; 
+    margin-bottom: 10px; 
+}
+
+.mail-btn { 
+    display: inline-block; 
+    margin: 24px 0 0 0; 
+    background: #8c52ff; 
+    color: #fff; 
+    padding: 12px 32px; 
+    border-radius: 4px; 
+    text-decoration: none; 
+    font-weight: bold; 
+}
+
+.mail-btn:hover { 
+    background: #6a3fd8; 
+}
+
+.mail-footer { 
+    color: #b7b7b7; 
+    font-size: 0.95em; 
+    margin-top: 32px; 
+}
+
+/* Estilos adicionales para formularios */
+.form-container {
+    max-width: 500px;
+    margin: 40px auto;
+    background: #23233a;
+    border-radius: 10px;
+    padding: 30px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+}
+
+.form-title {
+    color: #8c52ff;
+    font-size: 1.8em;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-label {
+    display: block;
+    color: #fff;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+.form-input {
+    width: 100%;
+    padding: 12px;
+    background: #181824;
+    border: 1px solid #444;
+    border-radius: 6px;
+    color: #fff;
+    font-size: 1em;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: #8c52ff;
+    box-shadow: 0 0 0 2px rgba(140, 82, 255, 0.2);
+}
+
+.form-button {
+    width: 100%;
+    padding: 12px;
+    background: #8c52ff;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 1em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.form-button:hover {
+    background: #6a3fd8;
+}
+
+.form-message {
+    text-align: center;
+    margin-top: 15px;
+}
+
+.form-message a {
+    color: #8c52ff;
+    text-decoration: none;
+}
+
+.form-message a:hover {
+    text-decoration: underline;
+}
+
+/* Mensajes de error y éxito */
+.alert {
+    padding: 12px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+}
+
+.alert-success {
+    background-color: rgba(40, 167, 69, 0.1);
+    border: 1px solid #28a745;
+    color: #28a745;
+}
+
+.alert-error {
+    background-color: rgba(220, 53, 69, 0.1);
+    border: 1px solid #dc3545;
+    color: #dc3545;
+}
+
+.alert-warning {
+    background-color: rgba(255, 193, 7, 0.1);
+    border: 1px solid #ffc107;
+    color: #ffc107;
+}
+
+/* Estilos para password reset templates */
+.reset-success-icon {
+    font-size: 3rem;
+    color: #28a745;
+}
+
+.reset-complete-icon {
+    font-size: 4rem;
+    color: #28a745;
+}
+
+.reset-title {
+    color: #fff;
+    margin-bottom: 20px;
+}
+
+.reset-text {
+    color: #b7b7b7;
+    font-size: 16px;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.reset-info-box {
+    background: rgba(255,255,255,0.1);
+    padding: 20px;
+    border-radius: 10px;
+    border-left: 4px solid #8c52ff;
+}
+
+.reset-info-text {
+    color: #fff;
+    margin-bottom: 10px;
+}
+
+.reset-email-icon {
+    margin-right: 8px;
+}
+
+.reset-small-text {
+    color: #b7b7b7;
+    font-size: 14px;
+    margin-bottom: 15px;
+}
+
+.reset-timer-box {
+    background: rgba(140, 82, 255, 0.2);
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.reset-timer-icon {
+    color: #8c52ff;
+    margin-right: 5px;
+}
+
+.reset-timer-text {
+    color: #fff;
+}
+
+.reset-home-icon {
+    margin-right: 5px;
+}
+
+.reset-help-box {
+    background: rgba(255,255,255,0.05);
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.reset-help-title {
+    color: #8c52ff;
+    margin-bottom: 15px;
+}
+
+.reset-help-icon {
+    margin-right: 5px;
+}
+
+.reset-help-list {
+    color: #b7b7b7;
+    font-size: 14px;
+    margin-bottom: 0;
+    list-style: none;
+    padding: 0;
+}
+
+.reset-help-item {
+    margin-bottom: 5px;
+}
+
+.reset-link {
+    color: #8c52ff;
+}
+
+/* Password Reset Error Icon */
+.reset-error-icon {
+    font-size: 4rem !important;
+    color: #dc3545 !important;
+}
+
+/* Password Requirements List */
+.password-requirements {
+    font-size: 0.95em !important;
+    padding-left: 18px !important;
+}
+
+/* Estilos para contenido list */
+.img-small {
+    max-height: 80px;
+}
+
+/* Estilos para index - categorías ocultas */
+.hidden-categories {
+    display: none;
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+    .mail-container,
+    .form-container {
+        margin: 20px;
+        padding: 20px;
+    }
+    
+    .mail-title,
+    .form-title {
+        font-size: 1.3em;
+    }
+}

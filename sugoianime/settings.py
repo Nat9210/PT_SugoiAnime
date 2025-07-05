@@ -164,7 +164,12 @@ CSRF_COOKIE_SECURE = False     # ← Para desarrollo local
 # Eliminar o comentar la siguiente línea para usar el modelo User estándar de Django
 # AUTH_USER_MODEL = 'myapp.User'
 
-# Configuración de Logging
+# Configuración de Logging optimizada para Windows
+import platform
+
+# Detectar si estamos en Windows
+IS_WINDOWS = platform.system() == 'Windows'
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -187,33 +192,33 @@ LOGGING = {
             'level': 'INFO',
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': os.path.join(BASE_DIR, 'logs', 'django_general.log'),
-            'maxBytes': 1024*1024*5,  # 5 MB
-            'backupCount': 5,
             'formatter': 'verbose',
+            'maxBytes': 10*1024*1024,  # 10 MB
+            'backupCount': 7,
         },
         'file_error': {
             'level': 'ERROR',
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': os.path.join(BASE_DIR, 'logs', 'django_errors.log'),
-            'maxBytes': 1024*1024*5,  # 5 MB
-            'backupCount': 5,
             'formatter': 'verbose',
+            'maxBytes': 10*1024*1024,  # 10 MB
+            'backupCount': 7,
         },
         'file_audit': {
             'level': 'INFO',
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': os.path.join(BASE_DIR, 'logs', 'audit.log'),
-            'maxBytes': 1024*1024*10,  # 10 MB
-            'backupCount': 10,
             'formatter': 'audit',
+            'maxBytes': 10*1024*1024,  # 10 MB
+            'backupCount': 14,
         },
         'file_security': {
             'level': 'WARNING',
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': os.path.join(BASE_DIR, 'logs', 'security.log'),
-            'maxBytes': 1024*1024*5,  # 5 MB
-            'backupCount': 5,
             'formatter': 'verbose',
+            'maxBytes': 10*1024*1024,  # 10 MB
+            'backupCount': 30,
         },
         'console': {
             'level': 'DEBUG',

@@ -43,7 +43,8 @@ urlpatterns = [
     path('busqueda/', views.busqueda, name='busqueda'),
     # Sistema de Recomendaciones
     path('recomendaciones/', views.recomendaciones_personalizadas, name='recomendaciones_personalizadas'),
-    path('recomendaciones/categoria/<int:categoria_id>/', views.recomendaciones_categoria, name='recomendaciones_categoria'),    path('contenido/<int:contenido_id>/similar/', views.contenido_similar, name='contenido_similar'),
+    path('recomendaciones/categoria/<int:categoria_id>/', views.recomendaciones_categoria, name='recomendaciones_categoria'),
+    path('contenido/<int:contenido_id>/similar/', views.contenido_similar, name='contenido_similar'),
     path('api/recomendaciones/', views.api_recomendaciones, name='api_recomendaciones'),
     path('admin/estadisticas-recomendaciones/', views.estadisticas_recomendaciones, name='estadisticas_recomendaciones'),
     # Sistema de Auditoría y Logs

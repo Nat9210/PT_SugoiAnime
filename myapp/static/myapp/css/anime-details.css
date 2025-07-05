@@ -1,0 +1,89 @@
+/* Estilos para anime-details.html */
+
+/* Estilos para el botón de reproducir mejorado */
+.anime-action-buttons .btn:hover {
+    background: linear-gradient(45deg, #651fff, #3f51b5) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(124, 77, 255, 0.4) !important;
+    transition: all 0.3s ease;
+}
+
+.anime-action-buttons .btn {
+    transition: all 0.3s ease;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.anime-action-buttons .btn i {
+    font-size: 1.1em;
+}
+
+/* Efecto de pulsación */
+.anime-action-buttons .btn:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 10px rgba(124, 77, 255, 0.3) !important;
+}
+
+/* Estilos para episodios */
+.anime__details__episodes {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.anime__details__episodes::-webkit-scrollbar {
+    width: 6px;
+}
+
+.anime__details__episodes::-webkit-scrollbar-track {
+    background: #2c2c2c;
+}
+
+.anime__details__episodes::-webkit-scrollbar-thumb {
+    background: #7c4dff;
+    border-radius: 3px;
+}
+
+.anime__details__episodes::-webkit-scrollbar-thumb:hover {
+    background: #651fff;
+}
+
+/* Video Player Styles */
+.video-player {
+    background: #181828 !important;
+}
+
+/* Anime Details Styles */
+.anime-details-pic {
+    min-height: 320px !important;
+    background: transparent !important;
+    border-radius: 12px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.anime-details-img {
+    object-fit: contain !important;
+    object-position: center center !important;
+    width: 100% !important;
+    height: 350px !important;
+    max-height: 350px !important;
+    min-height: 320px !important;
+    background: transparent !important;
+    border-radius: 12px !important;
+    display: block !important;
+}
+
+.anime-details-overlay {
+    position: absolute !important;
+    bottom: 0 !important;
+    left: 0 !important;
+}
+
+.anime-watch-btn {
+    background: linear-gradient(45deg, #7c4dff, #651fff) !important;
+    border: none !important;
+    border-radius: 25px !important;
+    padding: 12px 24px !important;
+}

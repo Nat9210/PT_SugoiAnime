@@ -72,7 +72,7 @@
                     <tr>
                         <td>
                             {% if contenido.imagen_portada %}
-                                <img src="{{ contenido.imagen_portada.url }}" alt="Portada" class="img-max-200" style="max-height:80px;">
+                                <img src="{{ contenido.imagen_portada.url }}" alt="Portada" class="img-max-200 profile-img-small">
                             {% else %}
                                 <span class="text-muted">Sin portada</span>
                             {% endif %}
@@ -133,7 +133,7 @@
                         <div class="card-body">
                             <p class="card-text">Acceso completo al panel de administración de Django para gestionar usuarios y toda la base de datos.</p>
                             <div class="d-grid gap-2">
-                                <a href="/admin/" target="_blank" class="btn btn-primary btn-lg shadow-lg" style="background: linear-gradient(45deg, #007bff, #0056b3); border: none;">
+                                <a href="/admin/" target="_blank" class="btn btn-primary btn-lg shadow-lg profile-admin-btn">
                                     <i class="fa fa-external-link me-2"></i> Abrir Panel Admin                               
                                 </a>
                             </div>
@@ -206,12 +206,12 @@
                         <div class="card bg-dark text-white h-100 shadow-sm">
                             <a href="{% url 'anime_details' fav.contenido.id %}" class="text-decoration-none text-white">
                                 {% if fav.contenido.imagen_portada %}
-                                    <img src="{{ fav.contenido.imagen_portada.url }}" class="card-img-top img-max-200" alt="Portada de {{ fav.contenido.titulo }}" style="object-fit:contain;max-height:180px;background:#222;">
+                                    <img src="{{ fav.contenido.imagen_portada.url }}" class="card-img-top img-max-200 profile-card-img" alt="Portada de {{ fav.contenido.titulo }}">
                                 {% else %}
-                                    <img src="{% static 'myapp/img/default-cover.jpg' %}" class="card-img-top img-max-200" alt="Sin portada" style="object-fit:contain;max-height:180px;background:#222;">
+                                    <img src="{% static 'myapp/img/default-cover.jpg' %}" class="card-img-top img-max-200 profile-card-img" alt="Sin portada">
                                 {% endif %}
                                 <div class="card-body p-2">
-                                    <h5 class="card-title mb-1" style="font-size:1.1em;">{{ fav.contenido.titulo }}</h5>
+                                    <h5 class="card-title mb-1 profile-card-title">{{ fav.contenido.titulo }}</h5>
                                     <span class="badge bg-purple">{{ fav.contenido.get_tipo_display }}</span>
                                 </div>
                             </a>

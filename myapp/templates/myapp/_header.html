@@ -11,14 +11,14 @@
                             <img src="{% static 'myapp/img/4.png' %}" alt="Logo SugoiAnime">
                         </a>
                     </div>
-                    <button id="menu-toggle" class="navbar-toggler d-lg-none" type="button" aria-label="Toggle navigation" style="background:none;border:none;color:#fff;font-size:2rem;">
+                    <button id="menu-toggle" class="navbar-toggler d-lg-none menu-toggle-btn" type="button" aria-label="Toggle navigation">
                         ☰
                     </button>
                 </div>
             </div><div class="col-lg-7">
                 <nav class="header__menu" id="mainMenu"> 
                     <!-- Buscador y perfil en móvil -->
-                    <div class="d-lg-none mt-3" id="mobile-extras" style="display:none;">
+                    <div class="d-lg-none mt-3 mobile-extras-hidden" id="mobile-extras">
                         <!-- Buscador móvil inline -->
                         <form method="get" action="{% url 'busqueda' %}" class="mobile-search-form mb-3">
                             <div class="mobile-search-container">
@@ -85,7 +85,7 @@
                             {% if request.user.is_authenticated %}
                                 <li><a href="{% url 'perfil' %}">Perfil</a></li>
                                 {% if request.user.is_staff %}
-                                <li><a href="{% url 'contenido_list' %}">Gestión de Contenido</a></li>
+                                <!--<li><a href="{% url 'contenido_list' %}">Gestión de Contenido</a></li>-->
                                 {% endif %}
                                 <li><a href="{% url 'logout' %}">Cerrar sesión</a></li>
                             {% else %}
@@ -99,14 +99,14 @@
         </div>
     </div>
     <!-- Modal de búsqueda global -->
-    <div class="search-model" id="search-model" style="display:none;">
+    <div class="search-model search-modal" id="search-model">
         <div class="d-flex justify-content-center align-items-center h-100">
             <form method="get" action="{% url 'busqueda' %}" class="header-search-form d-inline-block me-2">
                         <div class="header-search-container">
                             <input type="text" name="q" placeholder="Buscar..." class="header-search-input" autocomplete="off">
                         </div>
                     </form>
-            <span class="search-close-switch" style="position:absolute;top:30px;right:30px;cursor:pointer;font-size:2.5rem;" onclick="$('.search-model').fadeOut(400);">&times;</span>
+            <span class="search-close-switch search-close-btn" onclick="$('.search-model').fadeOut(400);">&times;</span>
         </div>
     </div>
     <script>

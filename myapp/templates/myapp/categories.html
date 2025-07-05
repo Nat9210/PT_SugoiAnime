@@ -44,15 +44,8 @@
                                         <option value="">Ordenar por nombre</option>
                                         <option value="asc" {% if orden_titulo == 'asc' %}selected{% endif %}>A-Z</option>
                                         <option value="desc" {% if orden_titulo == 'desc' %}selected{% endif %}>Z-A</option>
-                                    </select>
-                                    
-                                    <!-- Filtro por año -->
-                                    <select name="orden_año" class="filter-select-inline" onchange="this.form.submit()">
-                                        <option value="">Ordenar por año</option>
-                                        <option value="desc" {% if orden_año == 'desc' %}selected{% endif %}>Más recientes</option>
-                                        <option value="asc" {% if orden_año == 'asc' %}selected{% endif %}>Más antiguos</option>
-                                    </select>
-                                    
+                                    </select>                                  
+
                                     <!-- Botón limpiar -->
                                     <a href="{% url 'categories' %}" class="btn-clear-inline">
                                         <i class="fa fa-refresh"></i>
@@ -68,7 +61,7 @@
                         <div class="col-lg-3 col-md-4 col-sm-6">
                             <div class="product__item">
                                 <div class="product__item__pic set-bg" data-setbg="{% if contenido.imagen_portada %}{{ contenido.imagen_portada.url }}{% else %}{% static 'myapp/img/default-cover.jpg' %}{% endif %}">
-                                    <div class="ep">{{ contenido.duracion|default_if_none:'?' }} min</div>
+                                    <!--<div class="ep">{{ contenido.duracion|default_if_none:'?' }} min</div>-->
                                 </div>
                                 <div class="product__item__text">                                    
                                     <h5><a href="{% url 'anime_details' contenido.id %}">{{ contenido.titulo }}</a></h5>

@@ -38,12 +38,11 @@
             <div class="row">
                 <!-- Miniatura a la izquierda -->
                 <div class="col-lg-3 d-flex flex-column align-items-center">
-                    <div class="anime__details__pic set-bg mb-3 w-100 position-relative" style="min-height: 320px; background: transparent; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                    <div class="anime__details__pic set-bg mb-3 w-100 position-relative anime-details-pic">
                         <img src="{% if contenido.imagen_portada %}{{ contenido.imagen_portada.url }}{% else %}{% static 'myapp/img/default-cover.jpg' %}{% endif %}"
                             alt="Portada"
-                            class="img-fluid rounded w-100"
-                            style="object-fit: contain; object-position: center center; width: 100%; height: 350px; max-height: 350px; min-height: 320px; background: transparent; border-radius: 12px; display: block;" />
-                        <div class="d-flex flex-column align-items-center w-100" style="position: absolute; bottom: 0; left: 0;">
+                            class="img-fluid rounded w-100 anime-details-img" />
+                        <div class="d-flex flex-column align-items-center w-100 anime-details-overlay">
                             <div class="d-flex justify-content-center gap-3 mb-2 anime-action-buttons">
                                 <button id="btn-like" class="btn btn-action btn-success" title="Me gusta" onclick="toggleLike(this)" data-contenido-id="{{ contenido.id }}"><i class="fa fa-thumbs-up"></i></button>
                                 <button id="btn-dislike" class="btn btn-action btn-danger" title="No me gusta" onclick="toggleDislike(this)" data-contenido-id="{{ contenido.id }}"><i class="fa fa-thumbs-down"></i></button>
@@ -71,7 +70,7 @@
                         <div class="d-flex flex-wrap gap-2 justify-content-start mb-3 anime-action-buttons">
                             {% if contenido.video_url %}
                                 {% if contenido.tipo == 'pelicula' %}
-                                    <a href="{% url 'movie_watching' contenido.id %}" class="btn btn-lg btn-primary d-flex align-items-center gap-2 shadow-lg" style="background: linear-gradient(45deg, #7c4dff, #651fff); border: none; border-radius: 25px; padding: 12px 24px;" title="Ver película">
+                                    <a href="{% url 'movie_watching' contenido.id %}" class="btn btn-lg btn-primary d-flex align-items-center gap-2 shadow-lg anime-watch-btn" title="Ver película">
                                         <i class="fa fa-play"></i> 
                                         <span>Ver Película</span>
                                     </a>
@@ -79,7 +78,7 @@
                                     {% comment %}Para series, ir al primer episodio{% endcomment %}
                                     {% with primer_episodio=contenido.episodio_set.first %}
                                         {% if primer_episodio %}
-                                            <a href="{% url 'anime_watching' primer_episodio.id %}" class="btn btn-lg btn-primary d-flex align-items-center gap-2 shadow-lg" style="background: linear-gradient(45deg, #7c4dff, #651fff); border: none; border-radius: 25px; padding: 12px 24px;" title="Ver primer episodio">
+                                            <a href="{% url 'anime_watching' primer_episodio.id %}" class="btn btn-lg btn-primary d-flex align-items-center gap-2 shadow-lg anime-watch-btn" title="Ver primer episodio">
                                                 <i class="fa fa-play"></i> 
                                                 <span>Ver Primer Episodio</span>
                                             </a>
@@ -259,9 +258,9 @@
         </div>
         <div class="row mt-3">
             <div class="col-12 text-center">
-                <a href="{% url 'contenido_similar' contenido.id %}" class="btn btn-outline-light">
+                <!--<a href="{% url 'contenido_similar' contenido.id %}" class="btn btn-outline-light">
                     Ver Más Contenido Similar
-                </a>
+                </a>-->
             </div>
         </div>
     </div>
@@ -294,31 +293,8 @@ function toggleFavorito(btn) {
 }
 </script>
 
-<style>
-/* Estilos para el botón de reproducir mejorado */
-.anime-action-buttons .btn:hover {
-    background: linear-gradient(45deg, #651fff, #3f51b5) !important;
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(124, 77, 255, 0.4) !important;
-    transition: all 0.3s ease;
-}
-
-.anime-action-buttons .btn {
-    transition: all 0.3s ease;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.anime-action-buttons .btn i {
-    font-size: 1.1em;
-}
-
-/* Efecto de pulsación */
-.anime-action-buttons .btn:active {
-    transform: translateY(0);
-    box-shadow: 0 4px 10px rgba(124, 77, 255, 0.3) !important;
-}
-</style>
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'myapp/css/anime-details.css' %}">
+{% endblock %}
 
 {% endblock %}

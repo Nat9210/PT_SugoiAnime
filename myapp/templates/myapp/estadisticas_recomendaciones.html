@@ -97,14 +97,14 @@
                         
                         <!-- Barra de progreso -->
                         {% if total_calificaciones > 0 %}
-                        <div class="progress mt-3" style="height: 20px;">
-                            <div class="progress-bar bg-success" style="width: {% widthratio likes total_calificaciones 100 %}%">
+                        <div class="progress mt-3 stats-progress" style="--likes-width: {% widthratio likes total_calificaciones 100 %}%; --neutrals-width: {% widthratio neutrales total_calificaciones 100 %}%; --dislikes-width: {% widthratio dislikes total_calificaciones 100 %}%;">
+                            <div class="progress-bar bg-success progress-bar-likes">
                                 {% widthratio likes total_calificaciones 100 %}%
                             </div>
-                            <div class="progress-bar bg-warning" style="width: {% widthratio neutrales total_calificaciones 100 %}%">
+                            <div class="progress-bar bg-warning progress-bar-neutrals">
                                 {% widthratio neutrales total_calificaciones 100 %}%
                             </div>
-                            <div class="progress-bar bg-danger" style="width: {% widthratio dislikes total_calificaciones 100 %}%">
+                            <div class="progress-bar bg-danger progress-bar-dislikes">
                                 {% widthratio dislikes total_calificaciones 100 %}%
                             </div>
                         </div>
