@@ -1,6 +1,6 @@
 import requests
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
@@ -446,17 +446,9 @@ def logout_view(request):
     logout(request)
     return redirect('login')
 
-@staff_member_required
-def contenido_list(request):
-    from django.db.models import Avg
-      # Obtener contenidos con estadísticas de calificaciones
-    contenidos = Contenido.objects.annotate(
-        total_likes=Count('calificacion', filter=Q(calificacion__calificacion=5)),
-        total_dislikes=Count('calificacion', filter=Q(calificacion__calificacion=1)),
-        rating_promedio=Avg('calificacion__calificacion')
-    ).all()
-    
-    return render(request, 'myapp/contenido_list.html', {'contenidos': contenidos})
+# FUNCIÓN ELIMINADA: contenido_list - Ver FUNCIONES_DEPRECADAS.md para detalles
+# Reemplazada por: /perfil/?seccion=gestion
+# Fecha de eliminación: 6 de julio de 2025
 
 @staff_member_required
 def contenido_create(request):
@@ -467,7 +459,7 @@ def contenido_create(request):
             if contenido.tipo == 'serie':
                 # Redirigir a una vista para agregar episodios
                 return redirect('agregar_episodios', contenido_id=contenido.id)
-            return redirect('contenido_list')
+            return HttpResponseRedirect('/perfil/?seccion=gestion')
     else:
         form = ContenidoForm()
     return render(request, 'myapp/contenido_form.html', {'form': form, 'accion': 'Crear'})
@@ -501,7 +493,8 @@ def contenido_update(request, pk):
         form = ContenidoForm(request.POST, request.FILES, instance=contenido)
         if form.is_valid():
             form.save()
-            return redirect('contenido_list')
+            # Redirigir siempre al perfil con la sección de gestión
+            return HttpResponseRedirect('/perfil/?seccion=gestion')
     else:
         form = ContenidoForm(instance=contenido)
     return render(request, 'myapp/contenido_form.html', {'form': form, 'accion': 'Editar'})
@@ -511,7 +504,7 @@ def contenido_delete(request, pk):
     contenido = Contenido.objects.get(pk=pk)
     if request.method == 'POST':
         contenido.delete()
-        return redirect('contenido_list')
+        return HttpResponseRedirect('/perfil/?seccion=gestion')
     return render(request, 'myapp/contenido_confirm_delete.html', {'contenido': contenido})
 
 # Función de solicitud el restablecimiento de contraseña
@@ -658,47 +651,37 @@ def episodio_delete(request, episodio_id):
 @login_required
 def anime_watching(request, episodio_id):
     # OPTIMIZACIÓN: Usar select_related para evitar consultas adicionales
-    episodio = Episodio.objects.select_related('serie').get(pk=episodio_id)
+    episodio = Episodio.objects.select_related('serie').prefetch_related('serie__categorias').get(pk=episodio_id)
     contenido = episodio.serie
     user = request.user
     perfil = user.perfiles.first()  # Se asume un perfil por usuario
     
-    # Registrar reproducción en logs de auditoría
+    # Registrar reproducción en logs de auditoría (optimizado)
     AuditLog.log_action(
         accion='PLAY',
-        descripcion=f"Reproducción de {contenido.titulo} - {episodio.titulo} (T{episodio.temporada}E{episodio.numero_episodio})",
+        descripcion=f"Episodio: {contenido.titulo} - {episodio.titulo}",
         usuario=user,
         perfil=perfil,
         tabla_afectada='Episodio',
         objeto_id=episodio_id,
         ip_address=get_client_ip(request),
-        user_agent=request.META.get('HTTP_USER_AGENT', ''),
+        user_agent=request.META.get('HTTP_USER_AGENT', '')[:200],  # Limitar tamaño
         datos_adicionales={
-            'contenido_id': contenido.id,
-            'episodio_id': episodio.id,
+            'tipo': 'episodio',
             'temporada': episodio.temporada,
-            'numero_episodio': episodio.numero_episodio,
-            'duracion_minutos': episodio.duracion
+            'numero': episodio.numero_episodio
         }
     )
     
     if perfil:
-        # Marcar como visto (si no existe ya un registro para este episodio y perfil)
-        # Usar filter().first() para evitar MultipleObjectsReturned
-        historial = HistorialReproduccion.objects.filter(
+        # OPTIMIZACIÓN: Usar get_or_create para evitar consultas adicionales
+        HistorialReproduccion.objects.get_or_create(
             perfil=perfil,
             contenido=contenido,
-            episodio=episodio
-        ).first()
+            episodio=episodio,
+            defaults={'tiempo_reproducido': 0}
+        )
         
-        if not historial:
-            # Solo crear si no existe ningún registro
-            HistorialReproduccion.objects.create(
-                perfil=perfil,
-                contenido=contenido,
-                episodio=episodio,
-                tiempo_reproducido=0
-            )
         # OPTIMIZACIÓN: Obtener todos los episodios vistos de una vez
         episodios_vistos = list(
             HistorialReproduccion.objects.filter(perfil=perfil, contenido=contenido)
@@ -708,7 +691,7 @@ def anime_watching(request, episodio_id):
     else:
         episodios_vistos = []
     
-    # OPTIMIZACIÓN GRATUITA: Headers de cache para recursos estáticos
+    # OPTIMIZACIÓN: Headers de cache para recursos estáticos
     response = render(request, 'myapp/anime-watching.html', {
         'episodio': episodio,
         'contenido': contenido,
@@ -717,6 +700,8 @@ def anime_watching(request, episodio_id):
     
     # Cache de página por 5 minutos (solo para contenido que no cambia frecuentemente)
     response['Cache-Control'] = 'max-age=300, must-revalidate'
+    response['ETag'] = f'"episode-{episodio.id}-{episodio.video_url}"'
+    
     # Hint para precargar el próximo episodio
     next_episode = Episodio.objects.filter(
         serie=contenido, 
@@ -729,46 +714,40 @@ def anime_watching(request, episodio_id):
 
 @login_required
 def movie_watching(request, contenido_id):
-    """Vista para reproducir películas"""
-    # Obtener la película y verificar que sea del tipo correcto
-    contenido = get_object_or_404(Contenido, pk=contenido_id, tipo='pelicula')
+    """Vista para reproducir películas - OPTIMIZADA"""
+    # OPTIMIZACIÓN: Usar select_related y prefetch_related
+    contenido = get_object_or_404(
+        Contenido.objects.select_related().prefetch_related('categorias'), 
+        pk=contenido_id, 
+        tipo='pelicula'
+    )
     user = request.user
     perfil = user.perfiles.first()  # Se asume un perfil por usuario
     
-    # Registrar reproducción en logs de auditoría
+    # Registrar reproducción en logs de auditoría (optimizado)
     AuditLog.log_action(
         accion='PLAY',
-        descripcion=f"Reproducción de película: {contenido.titulo}",
+        descripcion=f"Película: {contenido.titulo}",
         usuario=user,
         perfil=perfil,
         tabla_afectada='Contenido',
         objeto_id=contenido_id,
         ip_address=get_client_ip(request),
-        user_agent=request.META.get('HTTP_USER_AGENT', ''),
+        user_agent=request.META.get('HTTP_USER_AGENT', '')[:200],  # Limitar tamaño
         datos_adicionales={
-            'contenido_id': contenido.id,
             'tipo': 'pelicula',
-            'duracion_minutos': contenido.duracion
+            'duracion': contenido.duracion
         }
     )
     
     if perfil:
-        # Marcar como visto (película completa, sin episodio)
-        # Usar filter().first() para evitar MultipleObjectsReturned
-        historial = HistorialReproduccion.objects.filter(
+        # OPTIMIZACIÓN: Usar get_or_create para evitar consultas adicionales
+        HistorialReproduccion.objects.get_or_create(
             perfil=perfil,
             contenido=contenido,
-            episodio=None  # Las películas no tienen episodios
-        ).first()
-        
-        if not historial:
-            # Solo crear si no existe ningún registro
-            HistorialReproduccion.objects.create(
-                perfil=perfil,
-                contenido=contenido,
-                episodio=None,
-                tiempo_reproducido=0
-            )
+            episodio=None,  # Las películas no tienen episodios
+            defaults={'tiempo_reproducido': 0}
+        )
     
     # Renderizar el template unificado (mismo que para episodios)
     response = render(request, 'myapp/anime-watching.html', {
@@ -776,8 +755,9 @@ def movie_watching(request, contenido_id):
         'episodio': None,  # Para películas no hay episodio
     })
     
-    # Cache de página por 5 minutos
-    response['Cache-Control'] = 'max-age=300, must-revalidate'
+    # OPTIMIZACIÓN: Cache más agresivo para películas (no cambian frecuentemente)
+    response['Cache-Control'] = 'max-age=600, public'  # 10 minutos
+    response['ETag'] = f'"movie-{contenido.id}-{contenido.video_url}"'
     
     return response
 

@@ -14,17 +14,18 @@
     <!-- CSS Styles -->
     <link rel="stylesheet" href="{% static 'myapp/css/bootstrap.min.css' %}" type="text/css">
     <link rel="stylesheet" href="{% static 'myapp/css/elegant-icons.css' %}" type="text/css">
-    <link rel="stylesheet" href="{% static 'myapp/css/plyr.css' %}" type="text/css">
+    <!-- TEMPORAL: Comentado para probar solo CDN de Plyr -->
+    <!-- <link rel="stylesheet" href="{% static 'myapp/css/plyr.css' %}" type="text/css"> -->
     <link rel="stylesheet" href="{% static 'myapp/css/nice-select.css' %}" type="text/css">
     <link rel="stylesheet" href="{% static 'myapp/css/owl.carousel.min.css' %}" type="text/css">
     <link rel="stylesheet" href="{% static 'myapp/css/slicknav.min.css' %}" type="text/css">
     <link rel="stylesheet" href="{% static 'myapp/css/style.css' %}" type="text/css">
     <link rel="stylesheet" href="{% static 'myapp/css/admin.css' %}" type="text/css">
     <link rel="stylesheet" href="{% static 'myapp/css/forms.css' %}" type="text/css">
-    <link rel="stylesheet" href="{% static 'myapp/css/anime-details.css' %}" type="text/css">
+    <link rel="stylesheet" href="{% static 'myapp/css/anime-details.css' %}?v=20250706-010" type="text/css">
     {% block extra_head %}{% endblock %}
 </head>
-<body>
+<body class="{% block extra_body_class %}{% endblock %}">
     <!-- Header Section Begin -->
     {% block header %}
     {% include 'myapp/_header.html' %}

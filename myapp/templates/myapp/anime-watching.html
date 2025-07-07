@@ -1,6 +1,16 @@
 {% extends 'myapp/base.html' %}
 {% load static %}
+
+{% block extra_body_class %}anime-watching-page{% endblock %}
 {% block title %}{% if episodio %}Ver {{ episodio.titulo }} | {{ contenido.titulo }}{% else %}Ver {{ contenido.titulo }}{% endif %}{% endblock %}
+
+{% block extra_head %}
+<!-- Plyr CDN para el reproductor de video - ANTES de nuestros estilos -->
+<link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
+<!-- Forzar recarga del CSS del reproductor -->
+<link rel="stylesheet" href="{% static 'myapp/css/anime-details.css' %}?v=20250706-010" />
+{% endblock %}
+
 {% block content %}
 <!-- Breadcrumb Begin -->
 <div class="breadcrumb-option">
@@ -28,15 +38,16 @@
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-lg-10 col-xl-9">
-                <div class="anime__video__player mb-4 rounded shadow overflow-hidden plyr__video-outer">
+                <div class="anime__video__player">
                     {% if episodio %}
-                        <video id="player" class="w-100 rounded video-player" playsinline controls poster="{% if contenido.imagen_portada %}{{ contenido.imagen_portada.url }}{% else %}{% static 'myapp/img/default-cover.jpg' %}{% endif %}" webkit-playsinline allow="picture-in-picture">
+                        <!-- Video para episodios -->
+                        <video id="player" playsinline controls poster="{% if contenido.imagen_portada %}{{ contenido.imagen_portada.url }}{% else %}{% static 'myapp/img/default-cover.jpg' %}{% endif %}" webkit-playsinline allow="picture-in-picture" preload="metadata">
                             <source src="{{ episodio.video_url }}" type="video/mp4" />
                             Tu navegador no soporta la reproducción de video.
                         </video>
                     {% else %}
-                        {% comment %}Para películas{% endcomment %}
-                        <video id="player" class="w-100 rounded video-player" playsinline controls poster="{% if contenido.imagen_portada %}{{ contenido.imagen_portada.url }}{% else %}{% static 'myapp/img/default-cover.jpg' %}{% endif %}" webkit-playsinline allow="picture-in-picture">
+                        <!-- Video para películas -->
+                        <video id="player" playsinline controls poster="{% if contenido.imagen_portada %}{{ contenido.imagen_portada.url }}{% else %}{% static 'myapp/img/default-cover.jpg' %}{% endif %}" webkit-playsinline allow="picture-in-picture" preload="metadata">
                             <source src="{{ contenido.video_url }}" type="video/mp4" />
                             Tu navegador no soporta la reproducción de video.
                         </video>
@@ -60,6 +71,11 @@
                                     <span class="badge bg-purple">Película</span>
                                     {% if contenido.año %}<span class="badge bg-purple">Año: {{ contenido.año }}</span>{% endif %}
                                     {% if contenido.duracion %}<span class="badge bg-purple">Duración: {{ contenido.duracion }} min</span>{% endif %}
+                                    <p><strong>Categorías:</strong> 
+                                        {% for categoria in contenido.categorias.all %}
+                                            <span class="badge bg-secondary me-1">{{ categoria.nombre }}</span>
+                                        {% endfor %}
+                                    </p>
                                 </div>
                             {% endif %}
                         </div>
@@ -104,386 +120,72 @@
 </section>
 <!-- Anime Section End -->
 
-<!-- Los estilos han sido migrados a static/myapp/css/style.css -->
-
 {% endblock %}
 
 {% block extra_js %}
-<!-- CSS de optimización para video -->
-<link rel="stylesheet" href="{% static 'myapp/css/video-optimizations.css' %}">
-
+<!-- Plyr CDN -->
 <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        if (document.getElementById('player') && typeof Plyr !== 'undefined') {
-            const player = new Plyr('#player', {
-                controls: [
-                    'play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'settings', 'pip', 'airplay', 'fullscreen'
-                ],
-                settings: ['quality', 'speed'],
-                seekTime: 10,
-                ratio: '16:9',
-                // OPTIMIZACIONES GRATUITAS DE VELOCIDAD
-                autoplay: false,
-                preload: 'metadata', // Solo carga metadatos, no el video completo
-                // Configuración de buffer optimizada
-                storage: { enabled: true, key: 'sugoianime_plyr' },
-                // Configuración inteligente de calidad REAL
-                quality: {
-                    default: 720,
-                    options: [1080, 720, 480, 360],
-                    forced: true, // Forzar la lógica de calidad personalizada
-                    onChange: function(quality) {
-                        console.log(`Cambiando calidad a: ${quality}p`);
-                        applyQualitySettings(quality);
-                        // Marcar que el usuario seleccionó manualmente
-                        localStorage.setItem('sugoianime_manual_quality', 'true');
-                        localStorage.setItem('sugoianime_preferred_quality', quality);
-                    }
-                },
-                speed: {
-                    selected: 1,
-                    options: [0.5, 0.75, 1, 1.25, 1.5, 2]
-                },
-                i18n: {
-                    play: 'Reproducir',
-                    pause: 'Pausar',
-                    mute: 'Silenciar',
-                    unmute: 'Activar sonido',
-                    fullscreen: 'Pantalla completa',
-                    settings: 'Ajustes',
-                    pip: 'Imagen en imagen',
-                    airplay: 'AirPlay',
-                    speed: 'Velocidad',
-                    quality: 'Calidad',
-                },
-                tooltips: { controls: true, seek: true },
-                hideControls: false,
-                resetOnEnd: false,
-                disableContextMenu: true,
-            });
-            
-            // OPTIMIZACIONES GRATUITAS DE RENDIMIENTO
-            
-            // Función para aplicar configuraciones de calidad REALES
-            function applyQualitySettings(quality) {
-                const video = document.querySelector('#player video') || document.querySelector('#player');
-                if (!video) return;
-                
-                const currentTime = video.currentTime;
-                const wasPlaying = !video.paused;
-                
-                // Configuraciones de calidad basadas en resolución y bitrate
-                const qualitySettings = {
-                    1080: {
-                        width: 1920,
-                        height: 1080,
-                        bitrate: '8000k',
-                        bufferSize: 30,
-                        preload: 'metadata'
-                    },
-                    720: {
-                        width: 1280,
-                        height: 720,
-                        bitrate: '4000k', 
-                        bufferSize: 25,
-                        preload: 'metadata'
-                    },
-                    480: {
-                        width: 854,
-                        height: 480,
-                        bitrate: '2000k',
-                        bufferSize: 20,
-                        preload: 'auto'
-                    },
-                    360: {
-                        width: 640,
-                        height: 360,
-                        bitrate: '1000k',
-                        bufferSize: 15,
-                        preload: 'auto'
-                    }
-                };
-                
-                const settings = qualitySettings[quality];
-                if (!settings) return;
-                
-                // Aplicar configuraciones al video
-                video.style.maxWidth = settings.width + 'px';
-                video.style.maxHeight = settings.height + 'px';
-                video.preload = settings.preload;
-                
-                // Configurar el contenedor del video
-                const videoContainer = video.closest('.plyr__video-wrapper') || video.parentElement;
-                if (videoContainer) {
-                    videoContainer.style.maxWidth = settings.width + 'px';
-                    videoContainer.style.aspectRatio = `${settings.width}/${settings.height}`;
-                }
-                
-                // Simular cambio de calidad recreando la fuente con parámetros
-                const currentSrc = video.querySelector('source')?.src || video.src;
-                if (currentSrc) {
-                    const newSrc = `${currentSrc}${currentSrc.includes('?') ? '&' : '?'}quality=${quality}p&t=${Date.now()}`;
-                    
-                    // Pausar y guardar posición
-                    video.pause();
-                    
-                    // Cambiar la fuente
-                    const source = video.querySelector('source');
-                    if (source) {
-                        source.src = newSrc;
-                    } else {
-                        video.src = newSrc;
-                    }
-                    
-                    // Recargar el video
-                    video.load();
-                    
-                    // Restaurar posición y reproducción
-                    video.addEventListener('loadedmetadata', function onLoaded() {
-                        video.currentTime = currentTime;
-                        if (wasPlaying) {
-                            video.play().catch(e => console.log('Error al reanudar:', e));
-                        }
-                        video.removeEventListener('loadedmetadata', onLoaded);
-                    }, { once: true });
-                }
-                
-                // Actualizar indicador visual
-                updateQualityDisplay(quality);
-                
-                console.log(`Calidad aplicada: ${quality}p (${settings.width}x${settings.height})`);
-            }
-            
-            // Función para actualizar la visualización de calidad actual
-            function updateQualityDisplay(quality, showNotification = true) {
-                // Mostrar indicador de carga
-                const videoContainer = document.querySelector('.plyr__video-outer');
-                if (videoContainer) {
-                    videoContainer.classList.add('plyr--quality-changing');
-                    setTimeout(() => {
-                        videoContainer.classList.remove('plyr--quality-changing');
-                    }, 2000);
-                }
-                
-                // Actualizar badge del botón de configuración
-                const settingsButton = document.querySelector('.plyr__control--settings');
-                if (settingsButton) {
-                    settingsButton.setAttribute('data-quality', quality + 'p');
-                    
-                    // Efecto visual de actualización
-                    settingsButton.style.transform = 'scale(1.2)';
-                    setTimeout(() => {
-                        settingsButton.style.transform = 'scale(1)';
-                    }, 300);
-                }
-                
-                // Mostrar notificación solo si se solicita
-                if (showNotification) {
-                    showQualityNotification(quality, 'Manual');
-                }
-                
-                // Actualizar el reproductor Plyr interno
-                if (player && player.quality !== quality) {
-                    player.quality = quality;
-                }
-            }
-            
-            // 1. Detección de velocidad de conexión (solo para logging)
-            function detectConnectionSpeed() {
-                if (navigator.connection && navigator.connection.effectiveType) {
-                    const connectionSpeed = navigator.connection.effectiveType;
-                    const qualityMap = {
-                        'slow-2g': 360,
-                        '2g': 360,
-                        '3g': 480,
-                        '4g': 720
-                    };
-                    
-                    const suggestedQuality = qualityMap[connectionSpeed] || 720;
-                    console.log(`Conexión detectada: ${connectionSpeed}, calidad sugerida: ${suggestedQuality}p (solo informativo)`);
-                    
-                    // NO aplicar automáticamente - solo detección para logs
-                    // El usuario debe seleccionar manualmente la calidad
-                }
-            }
-
-            // 2. Preloading inteligente del próximo episodio
-            function intelligentPreload() {
-                player.on('timeupdate', function() {
-                    const progress = player.currentTime / player.duration;
-                    
-                    // Solo si el usuario está al 80% del video actual
-                    if (progress > 0.8 && !window.nextEpisodePreloaded) {
-                        const nextEpisodeButton = document.querySelector('a[href*="episodio"]:last-of-type');
-                        if (nextEpisodeButton && nextEpisodeButton.href !== window.location.href) {
-                            // Precargar página del próximo episodio
-                            const link = document.createElement('link');
-                            link.rel = 'prefetch';
-                            link.href = nextEpisodeButton.href;
-                            document.head.appendChild(link);
-                            window.nextEpisodePreloaded = true;
-                            console.log('Precargando próximo episodio:', nextEpisodeButton.href);
-                        }
-                    }
-                });
-            }
-
-            // 3. Cache inteligente de configuración y notificaciones de calidad
-            player.on('qualitychange', function(e) {
-                localStorage.setItem('sugoianime_manual_quality', 'true');
-                localStorage.setItem('sugoianime_preferred_quality', e.detail.quality);
-                
-                // Mostrar notificación visual de cambio de calidad
-                showQualityNotification(e.detail.quality, 'Manual');
-            });
-
-            // Función para mostrar notificaciones de calidad (mejorada)
-            function showQualityNotification(quality, type = 'Manual') {
-                // Remover notificación anterior si existe
-                const existingNotification = document.querySelector('.quality-notification');
-                if (existingNotification) {
-                    existingNotification.remove();
-                }
-                
-                // Crear nueva notificación
-                const notification = document.createElement('div');
-                notification.className = 'quality-notification';
-                
-                const icon = type === 'Auto-detectada' ? 'fa-magic' : 'fa-video';
-                const bgColor = type === 'Auto-detectada' ? 'rgba(52, 152, 219, 0.9)' : 'rgba(139, 69, 255, 0.9)';
-                
-                notification.innerHTML = `
-                    <i class="fa ${icon}"></i>
-                    <span>Calidad: ${quality}p</span>
-                    <small>(${type})</small>
-                `;
-                
-                // Estilos inline para la notificación
-                notification.style.cssText = `
-                    position: absolute;
-                    top: 20px;
-                    right: 20px;
-                    background: ${bgColor};
-                    color: white;
-                    padding: 12px 18px;
-                    border-radius: 8px;
-                    font-size: 14px;
-                    font-weight: bold;
-                    z-index: 1000;
-                    animation: slideInRight 0.3s ease-out, fadeOut 0.3s ease-out 3s forwards;
-                    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-                    backdrop-filter: blur(10px);
-                    border: 1px solid rgba(255,255,255,0.2);
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                    min-width: 150px;
-                `;
-                
-                // Agregar al contenedor del reproductor
-                const playerContainer = document.querySelector('.plyr__video-outer');
-                if (playerContainer) {
-                    playerContainer.style.position = 'relative';
-                    playerContainer.appendChild(notification);
-                }
-                
-                // Remover después de 3.5 segundos
-                setTimeout(() => {
-                    if (notification && notification.parentNode) {
-                        notification.remove();
-                    }
-                }, 3500);
-            }
-
-            // 4. Optimización de buffer automático
-            player.on('progress', function() {
-                const buffered = player.buffered;
-                const currentTime = player.currentTime;
-                
-                // Si el buffer está muy por delante, pausar la descarga temporalmente
-                if (buffered > currentTime + 30) {
-                    // Esto ayuda a no sobrecargar conexiones lentas
-                    console.log('Buffer optimizado: suficiente contenido descargado');
-                }
-            });
-
-            // Inicializar optimizaciones
-            detectConnectionSpeed();
-            intelligentPreload();
-
-            // Aplicar calidad preferida del usuario si existe
-            const preferredQuality = localStorage.getItem('sugoianime_preferred_quality');
-            if (preferredQuality) {
-                setTimeout(() => {
-                    applyQualitySettings(parseInt(preferredQuality));
-                }, 1500);
-            }
-
-            // Actualizar indicador de calidad en el botón de configuración
-            function updateQualityIndicator() {
-                const settingsButton = document.querySelector('.plyr__control--settings');
-                if (settingsButton) {
-                    const currentQuality = player.quality || 720;
-                    settingsButton.setAttribute('data-quality', currentQuality + 'p');
-                }
-            }
-
-            // Función para mejorar la visibilidad del menú
-            function enhanceMenuVisibility() {
-                // Observar cuando se abre el menú de configuración
-                const observer = new MutationObserver(function(mutations) {
-                    mutations.forEach(function(mutation) {
-                        if (mutation.type === 'childList') {
-                            const menu = document.querySelector('.plyr__menu');
-                            if (menu && menu.offsetParent !== null) {
-                                // Aplicar estilos dinámicos al menú cuando se abre
-                                setTimeout(() => {
-                                    const menuItems = menu.querySelectorAll('button, [role="menuitem"], [role="menuitemradio"]');
-                                    menuItems.forEach(item => {
-                                        item.style.setProperty('color', 'white', 'important');
-                                        item.style.setProperty('background', 'transparent', 'important');
-                                        
-                                        // Agregar eventos hover
-                                        item.addEventListener('mouseenter', function() {
-                                            this.style.setProperty('background', 'rgba(139, 69, 255, 0.4)', 'important');
-                                            this.style.setProperty('color', 'white', 'important');
-                                        });
-                                        
-                                        item.addEventListener('mouseleave', function() {
-                                            if (!this.getAttribute('aria-checked') === 'true') {
-                                                this.style.setProperty('background', 'transparent', 'important');
-                                            }
-                                        });
-                                    });
-                                }, 50);
-                            }
-                        }
-                    });
-                });
-
-                // Observar cambios en el DOM
-                observer.observe(document.body, {
-                    childList: true,
-                    subtree: true
-                });
-            }
-
-            // Actualizar indicador cuando cambie la calidad
-            player.on('qualitychange', updateQualityIndicator);
-            player.on('ready', updateQualityIndicator);
-            
-            // Mejorar visibilidad del menú
-            enhanceMenuVisibility();
-            
-            // Microinteracción: fade al entrar/salir de fullscreen
-            player.on('enterfullscreen', () => {
-                document.querySelector('.plyr__video-outer').classList.add('plyr-fadein');
-            });
-            player.on('exitfullscreen', () => {
-                document.querySelector('.plyr__video-outer').classList.remove('plyr-fadein');
-            });
+document.addEventListener('DOMContentLoaded', function() {
+    // Inicializar Plyr solo si existe el elemento
+    const videoElement = document.getElementById('player');
+    if (!videoElement) return;
+    
+    // Configuración del reproductor original (sin CC)
+    const player = new Plyr('#player', {
+        controls: [
+            'play-large', 
+            'play', 
+            'progress', 
+            'current-time', 
+            'mute', 
+            'volume', 
+            'settings', 
+            'pip', 
+            'fullscreen'
+        ],
+        settings: ['quality', 'speed'],
+        seekTime: 10,
+        i18n: {
+            play: 'Reproducir',
+            pause: 'Pausar',
+            mute: 'Silenciar',
+            unmute: 'Activar sonido',
+            fullscreen: 'Pantalla completa',
+            exitFullscreen: 'Salir de pantalla completa',
+            settings: 'Ajustes',
+            speed: 'Velocidad',
+            quality: 'Calidad',
+            pip: 'Imagen en imagen'
+        },
+        tooltips: { controls: true, seek: true },
+        hideControls: false,
+        resetOnEnd: false,
+        disableContextMenu: true
+    });
+    
+    // Asegurar que la clase del body esté aplicada
+    document.body.classList.add('anime-watching-page');
+    
+    // Eventos básicos del reproductor
+    player.on('ready', function() {
+        console.log('Reproductor Plyr inicializado correctamente');
+    });
+    
+    // Microinteracción: fade al entrar/salir de fullscreen
+    player.on('enterfullscreen', function() {
+        const videoOuter = document.querySelector('.plyr__video-outer');
+        if (videoOuter) {
+            videoOuter.classList.add('plyr-fadein');
         }
     });
+    
+    player.on('exitfullscreen', function() {
+        const videoOuter = document.querySelector('.plyr__video-outer');
+        if (videoOuter) {
+            videoOuter.classList.remove('plyr-fadein');
+        }
+    });
+});
 </script>
 {% endblock %}

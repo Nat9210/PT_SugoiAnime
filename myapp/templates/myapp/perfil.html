@@ -23,7 +23,7 @@
         {% if seccion == 'gestion' and request.user.is_staff %}
             <h3 class="titulo-gestor-mb">Gestión de Contenido</h3>
             <div class="mb-3">
-                <a href="{% url 'contenido_create' %}" class="btn btn-success me-2">Crear nuevo contenido</a>
+                <a href="{% url 'contenido_create' %}?from_perfil=1" class="btn btn-success me-2">Crear nuevo contenido</a>
                 <!--<a href="{% url 'estadisticas_recomendaciones' %}" class="btn btn-info">Ver Estadísticas de Recomendaciones</a>-->
             </div>
             
@@ -98,8 +98,8 @@
                             {% endif %}
                         </td>
                         <td>
-                            <a href="{% url 'contenido_update' contenido.pk %}" class="btn btn-primary btn-sm">Editar</a>
-                            <a href="{% url 'contenido_delete' contenido.pk %}" class="btn btn-danger btn-sm">Eliminar</a>
+                            <a href="{% url 'contenido_update' contenido.pk %}?from_perfil=1" class="btn btn-primary btn-sm">Editar</a>
+                            <a href="{% url 'contenido_delete' contenido.pk %}?from_perfil=1" class="btn btn-danger btn-sm">Eliminar</a>
                             {% if contenido.tipo == 'serie' %}
                                 <a href="{% url 'contenido_gestion_episodios' contenido.pk %}" class="btn btn-info btn-sm">Episodios</a>
                             {% endif %}
@@ -112,7 +112,7 @@
                                 <a href="?seccion=gestion" class="btn btn-sm btn-outline-primary ms-2">Ver todos</a>
                             {% else %}
                                 <span class="text-muted">No hay contenido registrado.</span>
-                                <a href="{% url 'contenido_create' %}" class="btn btn-sm btn-success ms-2">Crear contenido</a>
+                                <a href="{% url 'contenido_create' %}?from_perfil=1" class="btn btn-sm btn-success ms-2">Crear contenido</a>
                             {% endif %}
                         </td>
                     </tr>

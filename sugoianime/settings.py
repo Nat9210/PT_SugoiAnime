@@ -262,3 +262,11 @@ LOGGING = {
 # Crear directorio de logs si no existe
 LOGS_DIR = os.path.join(BASE_DIR, 'logs')
 os.makedirs(LOGS_DIR, exist_ok=True)
+
+# Configuración para proxy SSL (nginx HTTPS)
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+USE_TZ = True
+
+# Permitir que Django confíe en headers de proxy para HTTPS
+SECURE_SSL_REDIRECT = False  # nginx maneja la redirección
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')

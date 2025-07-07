@@ -38,7 +38,7 @@
                                 {% if request.user.is_authenticated %}
                                     <li><a href="{% url 'perfil' %}">Perfil</a></li>
                                     {% if request.user.is_staff %}
-                                    <li><a href="{% url 'contenido_list' %}">Gestión de Contenido</a></li>
+                                    <li><a href="{% url 'perfil' %}?seccion=gestion">Gestión de Contenido</a></li>
                                     {% endif %}
                                     <li><a href="{% url 'logout' %}">Cerrar sesión</a></li>
                                 {% else %}
@@ -85,7 +85,7 @@
                             {% if request.user.is_authenticated %}
                                 <li><a href="{% url 'perfil' %}">Perfil</a></li>
                                 {% if request.user.is_staff %}
-                                <!--<li><a href="{% url 'contenido_list' %}">Gestión de Contenido</a></li>-->
+                                    <li><a href="{% url 'perfil' %}?seccion=gestion">Gestión de Contenido</a></li>
                                 {% endif %}
                                 <li><a href="{% url 'logout' %}">Cerrar sesión</a></li>
                             {% else %}

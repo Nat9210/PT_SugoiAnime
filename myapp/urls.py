@@ -16,8 +16,7 @@ urlpatterns = [
     path('signup/', views.signup_view, name='signup'),
     path('logout/', views.logout_view, name='logout'),
     path('categories/', views.render_categories, name='categories'),
-    # CRUD Contenido
-    path('contenido/', views.contenido_list, name='contenido_list'),
+    # CRUD Contenido - Gestionado desde /perfil/?seccion=gestion
     path('contenido/crear/', views.contenido_create, name='contenido_create'),
     path('contenido/<int:pk>/editar/', views.contenido_update, name='contenido_update'),
     path('contenido/<int:pk>/eliminar/', views.contenido_delete, name='contenido_delete'),

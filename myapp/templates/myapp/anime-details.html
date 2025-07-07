@@ -1,6 +1,7 @@
 {% extends 'myapp/base.html' %}
 {% load static %}
 {% block title %}{{ contenido.titulo }} | Anime{% endblock %}
+{% block extra_body_class %}anime-details-page{% endblock %}
 {% block content %}
 <!-- Breadcrumb Begin -->
 <div class="breadcrumb-option">
@@ -35,15 +36,19 @@
 <section class="anime-details spad">
     <div class="container">
         <div class="anime__details__content">
-            <div class="row">
+            <div class="row g-4">
                 <!-- Miniatura a la izquierda -->
-                <div class="col-lg-3 d-flex flex-column align-items-center">
-                    <div class="anime__details__pic set-bg mb-3 w-100 position-relative anime-details-pic">
-                        <img src="{% if contenido.imagen_portada %}{{ contenido.imagen_portada.url }}{% else %}{% static 'myapp/img/default-cover.jpg' %}{% endif %}"
-                            alt="Portada"
-                            class="img-fluid rounded w-100 anime-details-img" />
-                        <div class="d-flex flex-column align-items-center w-100 anime-details-overlay">
-                            <div class="d-flex justify-content-center gap-3 mb-2 anime-action-buttons">
+                <div class="col-lg-3 col-md-12 text-center">
+                    <!-- Contenedor que agrupa portada y botones juntos -->
+                    <div class="anime-cover-container">
+                        <div class="anime__details__pic set-bg mb-3 w-100 anime-details-pic">
+                            <img src="{% if contenido.imagen_portada %}{{ contenido.imagen_portada.url }}{% else %}{% static 'myapp/img/default-cover.jpg' %}{% endif %}"
+                                alt="Portada"
+                                class="img-fluid rounded w-100 anime-details-img" />
+                        </div>
+                        <!-- Botones directamente debajo de la imagen -->
+                        <div class="anime-action-buttons-container">
+                            <div class="anime-action-buttons">
                                 <button id="btn-like" class="btn btn-action btn-success" title="Me gusta" onclick="toggleLike(this)" data-contenido-id="{{ contenido.id }}"><i class="fa fa-thumbs-up"></i></button>
                                 <button id="btn-dislike" class="btn btn-action btn-danger" title="No me gusta" onclick="toggleDislike(this)" data-contenido-id="{{ contenido.id }}"><i class="fa fa-thumbs-down"></i></button>
                                 <button id="btn-favorito" class="btn btn-action btn-warning text-white{% if es_favorito %} active{% endif %}" title="Favorito" onclick="toggleFavorito(this)" data-contenido-id="{{ contenido.id }}"><i class="fa fa-star"></i></button>
@@ -52,13 +57,13 @@
                     </div>
                 </div>
                 <!-- Descripción y detalles en el centro -->
-                <div class="col-lg-6">
+                <div class="col-lg-6 col-md-12">
                     <div class="anime__details__text">
-                        <div class="anime__details__title mb-2 d-flex align-items-center gap-2">
+                        <div class="anime__details__title mb-3 d-flex align-items-center gap-2">
                             <h3 class="mb-0">{{ contenido.titulo }}</h3>
                         </div>
-                        <p class="mb-3">{{ contenido.descripcion }}</p>
-                        <div class="anime__details__widget mb-1">
+                        <p class="mb-4">{{ contenido.descripcion }}</p>
+                        <div class="anime__details__widget mb-4">
                             <ul class="list-unstyled">
                                 <li><span>Tipo:</span> {{ contenido.get_tipo_display }}</li>
                                 <li><span>Año:</span> {{ contenido.año }}</li>
@@ -67,7 +72,7 @@
                                 <li><span>Categorías:</span> {% for cat in contenido.categorias.all %}{{ cat.nombre }}{% if not forloop.last %}, {% endif %}{% endfor %}</li>
                             </ul>
                         </div>
-                        <div class="d-flex flex-wrap gap-2 justify-content-start mb-3 anime-action-buttons">
+                        <div class="d-flex flex-wrap gap-3 justify-content-start mb-4 anime-action-buttons">
                             {% if contenido.video_url %}
                                 {% if contenido.tipo == 'pelicula' %}
                                     <a href="{% url 'movie_watching' contenido.id %}" class="btn btn-lg btn-primary d-flex align-items-center gap-2 shadow-lg anime-watch-btn" title="Ver película">
@@ -194,10 +199,10 @@
                         </script>
                     </div>
                 </div>
-                <!-- Lista de episodios a la derecha -->
-                <div class="col-lg-3">
+                <!-- Lista de episodios -->
+                <div class="col-lg-3 col-md-12">
                     {% if contenido.tipo == 'serie' and contenido.episodio_set.exists %}
-                    <div class="anime__details__episodes bg-dark p-3 rounded mt-2">
+                    <div class="anime__details__episodes bg-dark p-3 rounded">
                         <h5 class="text-purple mb-3">Episodios</h5>
                         <div class="list-group">
                             {% for episodio in contenido.episodio_set.all %}
@@ -226,15 +231,15 @@
 <section class="product spad">
     <div class="container">
         <div class="row">
-            <div class="col-lg-12">
+            <div class="col-12">
                 <div class="section-title">
-                    <h4> Contenido Similar</h4>
+                    <h4>Contenido Similar</h4>
                 </div>
             </div>
         </div>
-        <div class="row">
+        <div class="row g-4">
             {% for similar in contenido_similar %}
-            <div class="col-lg-4 col-md-6 col-sm-6">
+            <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12">
                 <div class="product__item">
                     <div class="product__item__pic set-bg" data-setbg="{% if similar.imagen_portada %}{{ similar.imagen_portada.url }}{% else %}{% static 'myapp/img/anime/details-pic.jpg' %}{% endif %}">
                         <div class="ep">{{ similar.get_tipo_display }}</div>
@@ -256,7 +261,7 @@
             </div>
             {% endfor %}
         </div>
-        <div class="row mt-3">
+        <div class="row mt-4 mb-5">
             <div class="col-12 text-center">
                 <!--<a href="{% url 'contenido_similar' contenido.id %}" class="btn btn-outline-light">
                     Ver Más Contenido Similar
@@ -268,6 +273,13 @@
 {% endif %}
 <!-- Contenido Similar Section End -->
 
+<!-- Espaciador adicional para mejor separación con footer -->
+<div class="pb-4 d-block d-md-none"></div>
+
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'myapp/css/anime-details.css' %}?v=20250706-011">
 {% endblock %}
 
 {% block extra_js %}
@@ -292,9 +304,4 @@ function toggleFavorito(btn) {
     });
 }
 </script>
-
-{% block extra_css %}
-<link rel="stylesheet" href="{% static 'myapp/css/anime-details.css' %}">
-{% endblock %}
-
 {% endblock %}
